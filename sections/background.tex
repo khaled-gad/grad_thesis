@@ -1,0 +1,176 @@
+\section{Background \& Related Work}
+
+\subsection{RISC-V Architecture Overview}
+
+RISC-V (pronounced ``risk-five'') is an open-source instruction set architecture (ISA) that has revolutionized processor design by providing a free, extensible alternative to proprietary architectures. Developed at the University of California, Berkeley, beginning in 2010, RISC-V was created to address fundamental limitations in the processor industry, particularly the dominance of proprietary ISAs that created barriers to innovation and increased costs for processor development.
+
+The development of RISC-V was motivated by several critical issues in the computing industry that had become increasingly problematic for AI and DSP applications. Traditional proprietary ISAs, such as x86 and ARM, require expensive licensing agreements that can be prohibitive for companies developing specialized processors for AI and DSP workloads. These licensing costs are particularly burdensome for startups and research institutions that want to experiment with novel architectural approaches.
+
+RISC-V addresses these challenges through several fundamental design principles that make it particularly well-suited for AI and DSP applications:
+
+\textbf{Open Source Philosophy:} RISC-V specifications are freely available under Creative Commons licenses, and anyone can implement, modify, or extend RISC-V processors without paying royalties or obtaining permission. This openness eliminates one of the major barriers to innovation in processor design and enables a diverse ecosystem of implementations tailored for specific applications.
+
+\textbf{Modular Architecture:} RISC-V follows a modular design philosophy where a minimal base integer instruction set is supplemented by optional standard extensions. This modularity is particularly valuable for AI and DSP processors, which can include only the extensions needed for their specific applications, reducing implementation complexity and cost.
+
+
+\textbf{Scalability Across Application Domains:} RISC-V supports multiple data widths (32-bit, 64-bit, and 128-bit) and can scale from microcontrollers to high-performance processors. This scalability is crucial for AI and DSP applications, which span a wide range of computing environments from embedded edge devices to high-performance computing clusters.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/growth.png}
+    \caption{RISC-V ecosystem growth. Source: RISC-V International}
+    \label{ RISC-V ecosystem growth. Source: RISC-V International}
+\end{figure}    
+
+
+\subsection{RISC-V Extensions for Machine Learning}
+
+The extensible nature of RISC-V is fundamental to its success in AI and DSP applications, allowing specialized functionality to be added to the base instruction set through a well-defined extension mechanism. This extensibility enables processors to be tailored for specific application domains while maintaining compatibility with the broader RISC-V ecosystem.
+
+\subsubsection{Standard Extensions}
+
+\textbf{M Extension (Integer Multiplication and Division):} The M extension adds integer multiplication, division, and remainder operations that are fundamental for many AI and DSP algorithms. In AI applications, integer multiplication is crucial for quantized neural networks that use integer arithmetic instead of floating-point operations to reduce power consumption and increase performance.
+
+\textbf{F Extension (Single-Precision Floating-Point):} The F extension provides IEEE 754 single-precision (32-bit) floating-point arithmetic, which is the most commonly used precision for AI training and many DSP applications. The extension includes fused multiply-add (FMA) instructions that are particularly important for AI and DSP workloads, as convolution operations in neural networks consist primarily of multiply-accumulate patterns that can be efficiently implemented using FMA instructions.
+
+\textbf{D Extension (Double-Precision Floating-Point):} The D extension adds IEEE 754 double-precision (64-bit) floating-point arithmetic, which is important for AI training applications that require higher numerical precision and certain DSP applications that need extended dynamic range.
+
+\textbf{V Extension (Vector Operations):} The V extension is the most significant addition to RISC-V for AI and DSP applications, providing comprehensive support for data-parallel vector operations. This extension represents a fundamental advancement in vector processing architecture and is the primary focus of this work.
+
+\subsection{The RISC-V Vector Extension}
+
+The RISC-V Vector (RVV) Extension stands out as one of the most consequential developments for modern computing workloads. Unlike traditional Single Instruction, Multiple Data (SIMD) architectures that operate on fixed-size registers, RVV was designed with a philosophy of flexibility, scalability, and efficiency achieved through novel architectural concepts.
+
+\subsubsection{Architectural Principles}
+
+\textbf{Vector Registers and Configuration:} The V extension introduces 32 vector registers (\texttt{v0}--\texttt{v31}). The core architectural parameter is VLEN (Vector Length), which specifies the length of these registers in bits. VLEN is an implementation-defined choice, not fixed by the specification, and can range from small values (e.g., 128 bits) for embedded systems to very large values (e.g., 4096 bits or more) for supercomputers. Another key parameter is ELEN (Element Length), which is the maximum size of a single data element that can be processed.
+
+\textbf{Vector Control and Status Registers (CSRs):} The power and flexibility of the V extension are managed through key Control and Status Registers:
+
+\begin{itemize}
+    \item \texttt{vtype}: Configures the vector unit for subsequent operations by setting the selected element width (\texttt{vsew}), vector length multiplier (\texttt{vlmul}) for register grouping, and behavior controls for tail and masked-out elements (\texttt{vta}/\texttt{vma}).
+    \item \texttt{vl}: Set by the programmer to specify the number of elements to process in upcoming vector instructions, ranging from 0 to a hardware-dependent maximum.
+    \item \texttt{vlenb}: A read-only register that reports the hardware's vector register length (VLEN) in bytes.
+\end{itemize}
+
+\textbf{Vector-Length Agnostic (VLA) Execution:} The combination of the \texttt{vsetvli} instruction and the \texttt{vl} register enables RVV's most powerful feature: Vector-Length Agnosticism. Unlike fixed-length SIMD (e.g., Intel's AVX or ARM's NEON), where code is written for a specific vector width, VLA code is portable across any hardware implementation, regardless of its VLEN.
+
+The typical execution flow follows a ``strip-mining'' pattern:
+\begin{enumerate}
+    \item A programmer has a large array of N elements to process
+    \item The code enters a loop and calls \texttt{vsetvli}, passing the remaining number of elements
+    \item The hardware automatically sets \texttt{vl} to the minimum of the requested number and the maximum it can physically handle (VMAX), configuring \texttt{vtype} appropriately
+    \item Subsequent vector instructions operate on \texttt{vl} elements
+    \item The loop continues, processing chunks of data until all N elements are complete
+\end{enumerate}
+
+This approach means a single compiled binary can run with optimal efficiency on both a low-power microcontroller with VLEN=128 and a high-performance compute node with VLEN=4096, without requiring recompilation or code modification.
+
+\textbf{Rich and Orthogonal Instruction Set:} The V extension provides a comprehensive set of instructions orthogonal to data types, allowing the same opcodes to work on integers and floats of different widths as configured by \texttt{vtype}. Key instruction categories include:
+
+\begin{itemize}
+    \item \textbf{Vector Arithmetic:} Integer, fixed-point, and floating-point operations
+    \item \textbf{Vector Memory Access:} Unit-stride (contiguous), strided (every Nth element), and indexed scatter/gather operations
+    \item \textbf{Vector Permutation:} Instructions for shuffling data within and between vector registers
+    \item \textbf{Masking and Predication:} Most vector instructions can be masked, performing operations only on elements where a corresponding bit in mask register \texttt{v0} is set
+    \item \textbf{Reduction Operations:} Built-in support for combining all vector elements into a scalar result (sum, min, max, logical reductions)
+\end{itemize}
+
+\subsubsection{Programming with RISC-V Vector Intrinsics}
+
+While assembly language provides direct control over vector instructions, RISC-V vector intrinsics offer a more maintainable and portable approach to vectorized programming. Intrinsics are C/C++ functions that map directly to vector instructions, providing the performance benefits of assembly with the readability and toolchain integration of high-level languages.
+
+\textbf{Advantages of Intrinsics:}
+\begin{itemize}
+    \item \textbf{Compiler Integration:} Intrinsics work seamlessly with standard C/C++ compilers, enabling better optimization, register allocation, and instruction scheduling
+    \item \textbf{Type Safety:} Unlike inline assembly, intrinsics are type-checked by the compiler, catching errors at compile time
+    \item \textbf{Portability:} Code using intrinsics can be more easily ported across different RISC-V implementations
+    \item \textbf{Maintainability:} Intrinsic-based code is more readable and easier to debug than raw assembly
+\end{itemize}
+
+\textbf{Common Intrinsic Patterns:}
+
+\textit{Setting Vector Length:}
+\begin{lstlisting}[language=C++]
+size_t vl = __riscv_vsetvl_e32m1(n);
+\end{lstlisting}
+
+\textit{Vector Load/Store:}
+\begin{lstlisting}[language=C++]
+vfloat32m1_t v = __riscv_vle32_v_f32m1(ptr, vl);
+__riscv_vse32_v_f32m1(ptr, v, vl);
+\end{lstlisting}
+
+\textit{Arithmetic Operations:}
+\begin{lstlisting}[language=C++]
+v_result = __riscv_vfadd_vv_f32m1(v1, v2, vl);
+v_result = __riscv_vfmul_vf_f32m1(v, scalar, vl);
+\end{lstlisting}
+
+\textit{Fused Multiply-Accumulate:}
+\begin{lstlisting}[language=C++]
+v_acc = __riscv_vfmacc_vv_f32m1(v_acc, v1, v2, vl);
+\end{lstlisting}
+
+\textit{Reduction Operations:}
+\begin{lstlisting}[language=C++]
+vfloat32m1_t v_sum = __riscv_vfredsum_vs_f32m1_f32m1(v, v_zero, vl);
+float sum = __riscv_vfmv_f_s_f32m1_f32(v_sum);
+\end{lstlisting}
+
+\subsection{Ara RISC-V Vector Coprocessor}
+
+Ara is a scalable vector coprocessor developed at ETH Zurich that works alongside the CVA6 (formerly Ariane) scalar core to accelerate RISC-V vector operations. It supports 2--16 parallel lanes and implements the RV64GCV instruction set. The processor uses a lane-based design where each lane handles 64-bit wide operations. Vector length (VLEN) can be configured from 128 to 1024 bits depending on application needs. It achieves up to 97\% FPU utilization when running a $256 \times 256$ double-precision matrix multiplication on sixteen lanes.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/ara.jpg}
+    \caption{Top-level architecture diagram of the Ara RISC-V Vector Coprocessor}
+    \label{fig:ara_architecture}
+\end{figure}
+\subsubsection{Architecture Components}
+
+\textbf{Lane Design:} Each lane operates as an independent vector processing unit with its own ALU and FPU. The lanes process different parts of vector data in parallel, with each lane handling vector elements based on its position. For example, in a 4-lane configuration, lane 0 processes elements 0, 4, 8, 12, while lane 1 handles elements 1, 5, 9, 13.
+
+\textbf{Sequencer:} The sequencer acts as the control center for instruction dispatch and execution tracking, maintaining a global view of all vector instructions across lanes. It can track up to 8 parallel vector instructions and ensures correct execution order while interfacing with the CVA6 scalar core to coordinate vector and scalar instruction execution.
+
+\textbf{Vector Register File (VRF):} The VRF features eight 64-bit wide banks per lane, providing 512 bits of total bandwidth per lane. Banks are accessed in parallel to supply operands to multiple units simultaneously. When multiple functional units need to access the same bank, conflicts are resolved dynamically with a weighted round-robin arbiter. The initial bank of each vector register is shifted in a ``barber's pole'' fashion to avoid banking conflicts when functional units fetch the first element of different vector registers.
+
+\textbf{Slide Unit (SLDU):} The SLDU handles vector element rearrangement operations essential for many algorithms, performing vector slides, element insertion and extraction, and vector shuffles. It must access all VRF banks simultaneously for some operations.
+
+\textbf{Vector Load/Store Unit (VLSU):} The VLSU is responsible for all vector memory operations and includes sophisticated address generation capabilities. It handles multiple outstanding memory requests and includes logic for address calculation for different stride patterns, memory request coalescing for unit-stride operations, and memory ordering constraint handling.
+
+\textbf{Queue Management:} The multi-banked organization of the VRF can lead to banking conflicts when several functional units try to access operands in the same bank. Each lane has a set of operand queues between the VRF and the functional units to absorb such banking conflicts.
+
+\subsubsection{Ara as a Performance Reference}
+
+Ara serves as the hardware reference platform for this project, providing cycle-accurate performance measurements of our vectorized kernels. By compiling and running our implementations on Ara's synthesizable RTL model, we can obtain realistic performance metrics including:
+
+\begin{itemize}
+    \item \textbf{Cycle Counts:} Precise measurement of execution cycles for both vectorized and scalar implementations
+    \item \textbf{Speedup Analysis:} Quantitative comparison showing the performance benefits of vectorization
+    \item \textbf{Hardware Utilization:} Insights into how effectively our code uses the vector processing resources
+    \item \textbf{Energy Efficiency:} Understanding of the power-performance trade-offs in our implementations
+\end{itemize}
+
+\subsection{Foundational Research on RVV for Machine Learning}
+
+Several academic research projects have validated the theoretical benefits of RVV and explored microarchitectural techniques to further accelerate specific workloads, particularly Deep Neural Networks (DNNs) and machine learning algorithms.
+
+\subsubsection{SPEED: Scalable Multi-Precision DNN Processor}
+
+Wang et al.\ addressed the gap between general-purpose vector processors and specialized DNN inference demands in their work on SPEED. They identified that standard RVV processors struggle with modern DNNs due to limited support for low-precision data types (e.g., 4-bit), constrained computational throughput for massive MAC operations, and inefficient dataflows that underutilize hardware.
+
+SPEED integrates a highly parameterized Systolic Array Unit (SAU) within each vector lane, acting as a dedicated matrix multiplication engine working in concert with the standard RVV ALU. The architecture is enhanced with custom instructions (VSACFG, VSALD, VSAM) to manage the SAU and a specialized dataflow strategy to maximize data reuse and computational efficiency. When synthesized for 28nm technology and compared to the Ara processor, SPEED demonstrates significant improvement in area efficiency (2.04x for 16-bit and 1.63x for 8-bit operations).
+
+\subsubsection{RVV Efficiency for ANN Algorithms}
+
+Rumyantsev et al.\ presented a practical and theoretical analysis of applying RVV to accelerate Approximate Nearest Neighbor (ANN) search algorithms. Their work aimed to quantify performance gains from using RVV to optimize common ANN libraries like Faiss, Annoy, and NMSLIB, where distance computation is the primary bottleneck.
+
+They implemented and optimized key algorithms (IVFFlat, IVFPQ, HNSW) using RVV intrinsics and benchmarked their performance against scalar code on a Lichee Pi 4A board. Experimental results showed that RVV-optimized code achieved speedups of up to 2.58x over scalar versions. The paper also presents a theoretical model of a parameterized vector unit used to determine optimal hardware configuration (register length, number of functional units) for this class of algorithms, providing both real-world performance data and theoretical hardware design insights.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/performance.png}
+    \caption{Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets}
+    \label{fig:Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and
+GloVe datasets}
+\end{figure}

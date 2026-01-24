@@ -1,0 +1,146 @@
+% !TEX root = ../Thesis.tex
+\subsection{Development Toolchain}
+
+\subsection{RISC-V GNU Toolchain}
+
+The RISC-V GNU Toolchain provides the foundational components necessary to build, compile, link, and debug code for the RISC-V ISA. This toolchain was selected for its active community support, regular updates, and comprehensive support for both native and emulated environments, including full support for the vector extension.
+
+\subsubsection{Toolchain Components}
+
+\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-gcc}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
+\begin{itemize}
+    \item \texttt{-march=rv64gcv}: Enables the full RV64GCV ISA including vector extensions
+    \item \texttt{-O2}, \texttt{-O3}: Optimization levels that leverage vector instructions
+    \item \texttt{-mabi=lp64d}: Specifies the 64-bit ABI with double-precision floating-point
+\end{itemize}
+
+\textbf{Assembler (\texttt{riscv64-unknown-linux-gnu-as}):} Converts assembly code into object files, supporting both standard RISC-V instructions and vector extension opcodes.
+
+\textbf{Linker (\texttt{riscv64-unknown-linux-gnu-ld}):} Links multiple object files and resolves external references to produce final executable binaries.
+
+\textbf{Debugger (\texttt{riscv64-unknown-linux-gnu-gdb}):} Enables source-level debugging and inspection of RISC-V binaries running under emulation, with support for examining vector register contents.
+
+\textbf{Binary Utilities:} Tools like \texttt{objdump}, \texttt{readelf}, and \texttt{nm} for inspecting compiled binaries, verifying instruction encoding, and analyzing symbol tables.
+
+\textbf{Runtime Libraries:} Standard runtime support including newlib and glibc, providing C standard library functionality for both bare-metal and Linux environments.
+
+\subsection{QEMU Emulator}
+
+QEMU (Quick Emulator) serves as our primary execution environment for RISC-V code. As a full system emulator, QEMU provides comprehensive support for user-mode and full-system emulation, including the RISC-V vector extension in recent versions.
+
+\subsubsection{Why QEMU Over Spike}
+
+While Spike is the official RISC-V ISA simulator from the RISC-V Foundation, we chose QEMU for several key advantages:
+
+\textbf{System Completeness:} QEMU emulates entire Linux-based systems, not just the ISA, enabling realistic testing of our implementations including system calls, memory management, and I/O operations.
+
+\textbf{Debugging Integration:} QEMU integrates seamlessly with GDB, allowing source-level debugging with breakpoints, watchpoints, and inspection of both scalar and vector registers.
+
+\textbf{Performance:} QEMU uses dynamic binary translation, providing faster execution than Spike's interpretive approach, which is crucial when running complex neural network workloads.
+
+\textbf{Vector Extension Support:} Modern QEMU versions include comprehensive RVV support, accurately emulating vector instructions including the latest intrinsics.
+
+\textbf{Community and Documentation:} QEMU benefits from wider usage, more extensive documentation, and more active development than Spike, with a large community providing support and bug fixes.
+
+\subsubsection{QEMU User Mode Execution}
+
+Our typical workflow uses QEMU in user-mode emulation, where RISC-V Linux binaries are executed directly on the host system:
+
+\begin{lstlisting}[language=bash]
+qemu-riscv64 -cpu rv64,v=true,vlen=256 ./my_program
+\end{lstlisting}
+
+This approach provides:
+\begin{itemize}
+    \item Fast startup times
+    \item Direct access to host file system
+    \item Straightforward integration with development tools
+    \item Configurable vector length (VLEN) for testing portability
+\end{itemize}
+
+\subsection{Ara RTL Compilation and Simulation}
+
+Ara provides a cycle-accurate hardware model written in SystemVerilog, enabling precise performance measurement of our vectorized kernels. The Ara repository includes the complete RTL description of the vector coprocessor, testbench infrastructure, and build scripts.
+
+\subsubsection{Ara Simulation Environment}
+
+\textbf{Hardware Description:} Ara's RTL is synthesizable and can be simulated using industry-standard tools like Verilator. The repository includes:
+\begin{itemize}
+    \item Complete processor core with configurable lane count
+    \item Memory system models
+    \item Instruction trace generation
+    \item Performance counter interfaces
+\end{itemize}
+
+\textbf{Software Integration:} Ara supports standard RISC-V toolchains and can execute the same binaries produced by our compilation flow. Programs are loaded into simulated memory and executed cycle-by-cycle, with detailed logging of:
+\begin{itemize}
+    \item Instruction execution sequences
+    \item Vector register states
+    \item Memory access patterns
+    \item Pipeline utilization
+    \item Cycle-accurate timing
+\end{itemize}
+
+\textbf{Performance Measurement:} Ara's simulation environment provides precise metrics for evaluating our kernels:
+\begin{itemize}
+    \item Total cycle count for kernel execution
+    \item Vector unit utilization percentages
+    \item Memory bandwidth consumption
+    \item Instruction-level parallelism achieved
+\end{itemize}
+
+\textbf{Compilation and Execution Flow:}
+\begin{enumerate}
+    \item Compile C++ code with RVV intrinsics using RISC-V GCC
+    \item Generate ELF binary with embedded test data
+    \item Load binary into Ara simulation environment
+    \item Execute simulation and collect performance traces
+    \item Extract cycle counts and utilization metrics
+    \item Compare vectorized vs. scalar implementations
+\end{enumerate}
+
+This cycle-accurate measurement is essential for quantifying the real-world performance benefits of our vectorization efforts, as it accounts for all microarchitectural effects including banking conflicts, memory latency, and pipeline stalls that are not visible in pure ISA-level simulation.
+
+\subsection{Docker Development Environment}
+
+To ensure consistency across team members' development environments and simplify onboarding, we created a comprehensive Docker image containing all necessary tools: the RISC-V GNU toolchain, QEMU with vector support, and associated utilities.
+
+\subsubsection{Docker Advantages}
+
+\textbf{Reproducibility:} Every team member works in an identical environment, eliminating ``works on my machine'' issues and ensuring consistent build outputs.
+
+\textbf{Portability:} The development environment can be deployed on any system supporting Docker, regardless of host OS (Linux, macOS, Windows).
+
+\textbf{Isolation:} Tool installations and configurations are isolated from the host system, preventing conflicts with other software and allowing easy rollback to known-good states.
+
+\textbf{Version Control:} The Dockerfile serves as documentation of the exact tool versions and configurations used, enabling future reproducibility and facilitating environment updates.
+
+\subsubsection{Docker Workflow}
+
+Our Docker image includes:
+\begin{itemize}
+    \item RISC-V GNU Toolchain (complete build from source)
+    \item QEMU 8.2+ with RVV support
+    \item Development utilities (make, cmake, git)
+    \item Text editors and debugging tools
+    \item Pre-configured environment variables
+\end{itemize}
+
+Team members mount their local source code directory into the container, enabling:
+\begin{itemize}
+    \item Code editing with familiar host-side tools
+    \item Compilation and execution inside the container
+    \item Direct access to build artifacts on the host
+    \item Persistent storage of development files
+\end{itemize}
+
+\subsection{ONNX Framework Integration}
+
+ONNX Runtime provides our functional verification framework, enabling validation of kernel correctness against reference implementations. The ONNX ecosystem includes:
+
+\textbf{Model Conversion Tools:} Utilities for converting models from PyTorch, TensorFlow, and other frameworks to ONNX format.
+
+\textbf{Reference Runtime:} A highly optimized C++ inference engine that serves as our ground truth for correctness validation.
+
+
+\textbf{Operator Testing:} ONNX's operator test suite provides standardized test cases for individual operations, which we use to validate each kernel implementation.

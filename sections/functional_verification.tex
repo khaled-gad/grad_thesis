@@ -1,0 +1,71 @@
+% !TEX root = ../Thesis.tex
+\subsection{Functional Verification Results}
+
+After designing and implementing vectorized kernels, the verification phase ensures functional correctness by comparing kernel outputs against trusted reference implementations. This phase ensures that vectorized implementations produce mathematically correct results, accounting for minor numerical variations inherent in floating-point arithmetic.
+
+\subsubsection{ONNX Golden Reference Framework}
+
+The Open Neural Network Exchange (ONNX) framework serves as the golden reference standard for functional verification. ONNX defines a hardware-agnostic computational graph representation where operations are specified as named operators and data dependencies as edges between nodes.
+
+The verification workflow follows this sequence:
+
+\begin{enumerate}
+    \item \textbf{ONNX model creation}: A reference model is constructed in ONNX format, implementing the same computation as the RVV kernel using standard ONNX operators
+    \item \textbf{Test data generation}: Identical input datasets are generated for both the RVV kernel and the ONNX model
+    \item \textbf{Parallel execution}: The RVV kernel and ONNX model execute using the same inputs
+    \item \textbf{Metric computation}: Output arrays are compared using quantitative metrics to account for numerical precision differences
+    \item \textbf{Correctness verification}: Metrics are evaluated against predefined thresholds to confirm functional equivalence
+\end{enumerate}
+
+This approach provides several advantages:
+
+\begin{itemize}
+    \item \textbf{Hardware-agnostic validation}: ONNX references are independent of any specific CPU or accelerator
+    \item \textbf{Industry standard}: ONNX is widely adopted in machine learning frameworks (TensorFlow, PyTorch, ONNX Runtime)
+    \item \textbf{Reproducibility}: ONNX models can be distributed and verified independently
+    \item \textbf{Compositional verification}: Complex kernels can be built from simpler verified kernels
+\end{itemize}
+
+\subsubsection{Test Data Generation Strategy}
+
+Test datasets are carefully designed to exercise different numerical and algorithmic scenarios:
+
+\begin{enumerate}
+    \item \textbf{Boundary value testing}: Inputs include zero, small positive/negative values, large values near representable limits, and special floating-point values (NaN, infinity) where applicable
+    
+    \item \textbf{Random data generation}: Pseudo-random inputs drawn from uniform or normal distributions to test general-case behavior
+    
+    \item \textbf{Structured patterns}: Regular patterns such as identity matrices, constant arrays, and linearly-increasing sequences to facilitate manual verification and debugging
+    
+    \item \textbf{Real-world data samples}: Actual data from deployed models and signal processing applications to ensure practical applicability
+\end{enumerate}
+
+\subsubsection{Numerical Verification Metrics}
+
+The framework employs two quantitative metrics to assess functional correctness:
+
+\begin{enumerate}
+    \item \textbf{Signal-to-Noise Ratio (SNR)}: Measures the ratio of the reference signal power to the error power:
+    
+    \begin{equation}
+    \text{SNR (dB)} = 10 \cdot \log_{10}\left(\frac{\sum_i \text{ref}_i^2}{\sum_i (\text{ref}_i - \text{test}_i)^2}\right)
+    \end{equation}
+    
+    SNR values greater than 100 dB indicate excellent agreement, with SNR of 40 dB or higher generally considered acceptable for signal processing applications.
+    
+    \item \textbf{Maximum Absolute Error (MaxAbs)}: Captures the largest deviation between corresponding output elements:
+    
+    \begin{equation}
+    \text{MaxAbs} = \max_i |\text{ref}_i - \text{test}_i|
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{Verification Threshold Definition}
+
+Acceptance thresholds for SNR and MaxAbs are defined based on the kernel type and numerical precision requirements:
+
+\begin{itemize}
+    \item \textbf{Element-wise operations}: SNR $>$ 100 dB, MaxAbs $<$ $10^{-6}$ for single-precision floating-point
+    \item \textbf{Reduction operations}: SNR $>$ 60 dB, MaxAbs $<$ $10^{-4}$ (allowing for accumulation of rounding errors)
+    \item \textbf{Complex multi-stage operations}: SNR $>$ 40 dB, MaxAbs $<$ $10^{-3}$ (accounting for multiple transformation stages)
+\end{itemize}

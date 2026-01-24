@@ -1,0 +1,128 @@
+% !TEX root = Thesis.tex
+\documentclass{article}
+
+% Required packages
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Configure code listings
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\geometry{margin=1in}
+
+\begin{document}
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+% Abstract
+% =============================================================================
+\input{sections/abstract.tex}
+
+% =============================================================================
+% Introduction
+% =============================================================================
+\input{sections/introduction.tex}
+
+% =============================================================================
+% Background & Related Work
+% =============================================================================
+\input{sections/background.tex}
+
+
+
+% =============================================================================
+% Methodology: Architecture & Implementations
+% =============================================================================
+\section{Methodology: Architecture \& Implementations}
+
+% Deep Learning Kernel Selection and Justification (from methodology.tex)
+\input{sections/kernel_selection.tex}
+
+% Development Toolchain (from tools.tex)
+\input{sections/development_toolchain.tex}
+
+% RISC-V Vectorization Kernels Design (from presentation)
+\input{sections/vectorization_kernels.tex}
+
+% Functional Verification Results
+\input{sections/functional_verification.tex}
+
+% Discrete Functions Correctness Results (from Omar)
+\input{sections/discrete_functions_results.tex}
+
+% Models (from presentation)
+\input{sections/models_results.tex}
+
+
+
+
+% =============================================================================
+% Methodology: Performance Validation
+% =============================================================================
+\section{Methodology: Performance Validation}
+
+% Hardware (RTL Cores) (from hardware.tex)
+\input{sections/hardware_rtl.tex}
+
+% Validation Strategy (from Omar)
+\input{sections/validation_strategy.tex}
+
+% Validation Results (from Omar)
+\input{sections/validation_results.tex}
+
+% =============================================================================
+% Open Source Library Architecture
+% =============================================================================
+\input{sections/library_architecture.tex}
+
+% =============================================================================
+% Conclusion & Future Work
+% =============================================================================
+\input{sections/conclusion_future_work.tex}
+
+% =============================================================================
+% Acknowledgment
+% =============================================================================
+\input{sections/acknowledgment.tex}
+
+% =============================================================================
+% References
+% =============================================================================
+\begin{thebibliography}{9}
+
+\bibitem{ara2}
+Perotti, M., Cavalcante, M., Andri, R., Cavigelli, L., \& Benini, L. (2024).
+Ara2: Exploring single- and multi-core vector processing with an efficient RVV 1.0 compliant open-source processor.
+\textit{IEEE Transactions on Computers}, 73(7), 1822--1836.
+\url{https://doi.org/10.1109/TC.2024.3388896}
+
+\bibitem{vicuna}
+Michael Platzer and Peter Puschner. Vicuna: A Timing-Predictable RISC-V Vector Coprocessor for Scalable Parallel Computation. In \textit{33rd Euromicro Conference on Real-Time Systems (ECRTS 2021)}. Leibniz International Proceedings in Informatics (LIPIcs), Volume 196, pp. 1:1-1:18, Schloss Dagstuhl – Leibniz-Zentrum für Informatik (2021) \url{https://doi.org/10.4230/LIPIcs.ECRTS.2021.1}
+
+\end{thebibliography}
+
+% =============================================================================
+% Code Listings (Appendix)
+% =============================================================================
+\input{sections/code_listings.tex}
+
+\end{document}

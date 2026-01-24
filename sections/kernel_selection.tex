@@ -1,0 +1,30 @@
+% !TEX root = ../Thesis.tex
+\subsection{Deep Learning Kernel Selection and Justification}
+
+The development of the RVV64\_Library begins with careful selection of computational kernels that represent fundamental building blocks for machine learning inference and digital signal processing applications. The selection process follows a systematic prioritization strategy based on several criteria.
+
+\subsubsection{Selection Criteria}
+
+Kernels are selected based on the following criteria:
+
+\begin{enumerate}
+    \item \textbf{Computational significance}: Operations that constitute performance bottlenecks in target applications. Profiling studies of neural network inference workloads indicate that matrix multiplication and convolution operations account for 80-95\% of total execution time, making them priority targets for optimization.
+    
+    \item \textbf{Data parallelism potential}: Operations exhibiting high degrees of data-level parallelism that can be efficiently mapped to RVV's vector execution model. Element-wise operations and reduction operations naturally fit this category.
+    
+    \item \textbf{Memory access patterns}: Operations with predictable memory access patterns that can leverage RVV's unit-stride, strided, and indexed memory operations without excessive overhead.
+    
+    \item \textbf{Composability}: Fundamental operations that can be composed to build more complex computational graphs. For example, matrix multiplication and activation functions are basic building blocks for fully-connected neural network layers.
+    
+    \item \textbf{Algorithmic complexity}: A mix of simple and complex kernels to demonstrate RVV's versatility. Simple element-wise operations like ReLU provide straightforward vectorization examples, while operations like Softmax requiring normalization demonstrate handling of complex multi-phase algorithms.
+\end{enumerate}
+
+\subsubsection{Prioritized Kernel Categories}
+
+Based on these criteria, kernels are organized into three priority tiers tailored to AI and computer vision workloads, targeting models such as LeNet-5 and Tiny-YOLOv2.
+
+\textbf{Tier 1 (Core Linear Algebra for DNNs)}: Matrix multiplication, matrix addition, matrix transposition, and dot product. These operations form the backbone of convolutional and fully connected layers, dominating the computation in deep neural networks used for image classification and object detection.
+
+\textbf{Tier 2 (Activation, Normalization, and Basic CV)}: ReLU, Sigmoid, Tanh, and Softmax activation functions, along with simple elementwise normalization and scaling. These operations are lighter than matrix kernels but are essential for expressing nonlinearities in CNNs like LeNet-5 and for stabilizing training and inference in models such as Tiny-YOLOv2.
+
+\textbf{Tier 3 (Specialized Vision Operations)}: Convolution and pooling operations, as well as domain-specific kernels commonly used in computer vision pipelines (e.g., feature extraction, downsampling, and simple pre/post-processing). These operations showcase RVV's ability to handle complex multi-dimensional data access patterns typical of CNN-based AI workloads.
