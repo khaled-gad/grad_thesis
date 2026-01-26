@@ -2,94 +2,211 @@
 \providecommand\hyper@newdestlabel[2]{}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Abstract}{3}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Introduction}{3}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Motivation}{3}{subsection.2.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models.}}{3}{figure.1}\protected@file@percent }
-\newlabel{fig:ai-growth}{{1}{3}{Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models}{figure.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Limitations of Current Solutions}{4}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}The RISC-V Vector Extension as a Solution}{4}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Problem Statement}{4}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Research Objectives}{5}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Research Contributions}{5}{subsection.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Thesis Organization}{6}{subsection.2.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Background \& Related Work}{7}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}RISC-V Architecture Overview}{7}{subsection.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces RISC-V ecosystem growth. Source: RISC-V International}}{7}{figure.2}\protected@file@percent }
-\newlabel{ RISC-V ecosystem growth. Source: RISC-V International}{{2}{7}{RISC-V ecosystem growth. Source: RISC-V International}{figure.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}RISC-V Extensions for Machine Learning}{7}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Standard Extensions}{8}{subsubsection.3.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}The RISC-V Vector Extension}{8}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Architectural Principles}{8}{subsubsection.3.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Programming with RISC-V Vector Intrinsics}{9}{subsubsection.3.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Ara RISC-V Vector Coprocessor}{10}{subsection.3.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Top-level architecture diagram of the Ara RISC-V Vector Coprocessor}}{10}{figure.3}\protected@file@percent }
-\newlabel{fig:ara_architecture}{{3}{10}{Top-level architecture diagram of the Ara RISC-V Vector Coprocessor}{figure.3}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.1}Architecture Components}{10}{subsubsection.3.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Ara as a Performance Reference}{11}{subsubsection.3.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Foundational Research on RVV for Machine Learning}{11}{subsection.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.1}SPEED: Scalable Multi-Precision DNN Processor}{11}{subsubsection.3.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.2}RVV Efficiency for ANN Algorithms}{11}{subsubsection.3.5.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets}}{12}{figure.4}\protected@file@percent }
-\newlabel{fig:Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets}{{4}{12}{Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets}{figure.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Methodology: Architecture \& Implementations}{12}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Deep Learning Kernel Selection and Justification}{12}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Selection Criteria}{12}{subsubsection.4.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Prioritized Kernel Categories}{12}{subsubsection.4.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Development Toolchain}{13}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}RISC-V GNU Toolchain}{13}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Toolchain Components}{13}{subsubsection.4.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}QEMU Emulator}{13}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.1}Why QEMU Over Spike}{13}{subsubsection.4.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.2}QEMU User Mode Execution}{14}{subsubsection.4.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Ara RTL Compilation and Simulation}{14}{subsection.4.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.1}Ara Simulation Environment}{14}{subsubsection.4.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Docker Development Environment}{15}{subsection.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.1}Docker Advantages}{15}{subsubsection.4.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.2}Docker Workflow}{15}{subsubsection.4.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}ONNX Framework Integration}{15}{subsection.4.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}RISC-V Vectorization Kernels Design}{15}{subsection.4.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}Functional Verification Results}{16}{subsection.4.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.1}ONNX Golden Reference Framework}{16}{subsubsection.4.9.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.2}Test Data Generation Strategy}{16}{subsubsection.4.9.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.3}Numerical Verification Metrics}{17}{subsubsection.4.9.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.4}Verification Threshold Definition}{17}{subsubsection.4.9.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.5}Discrete Functions Correctness Results}{17}{subsubsection.4.9.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.6}Models}{17}{subsubsection.4.9.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Methodology: Performance Validation}{17}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Hardware (RTL Cores)}{17}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Role of RTL Cores in Architectural Research}{17}{subsubsection.5.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Importance of Cycle-Accurate Simulation}{18}{subsubsection.5.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.3}Rationale for Selecting Ara and Vicuna}{18}{subsubsection.5.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Ara Vector Processor}{19}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Overview and Design Motivation}{19}{subsubsection.5.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Architectural Organization}{19}{subsubsection.5.2.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Top-level block diagram of the Ara2 system showing the vector coprocessor, detailed lane architecture, and host scalar core CVA6 integration.}}{20}{figure.5}\protected@file@percent }
-\newlabel{fig:ara_diagram}{{5}{20}{Top-level block diagram of the Ara2 system showing the vector coprocessor, detailed lane architecture, and host scalar core CVA6 integration}{figure.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}RVV Implementation}{20}{subsubsection.5.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.4}Vector Execution Model}{21}{subsubsection.5.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.5}Memory Subsystem}{21}{subsubsection.5.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.6}RTL Implementation}{21}{subsubsection.5.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.7}Benchmarking Suitability}{21}{subsubsection.5.2.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Vicuna RISC-V Vector Coprocessor}{22}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Overview and Design Motivation}{22}{subsubsection.5.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Architectural Organization}{22}{subsubsection.5.3.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Overview of Vicuna's architecture and its integration with the Ibex main core. Both cores share a common data cache with predictable memory arbitration ensuring deterministic timing behavior.}}{22}{figure.6}\protected@file@percent }
-\newlabel{fig:vicuna_diagram}{{6}{22}{Overview of Vicuna's architecture and its integration with the Ibex main core. Both cores share a common data cache with predictable memory arbitration ensuring deterministic timing behavior}{figure.6}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}RVV Implementation}{23}{subsubsection.5.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.4}Execution Model}{23}{subsubsection.5.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.5}Memory Subsystem}{23}{subsubsection.5.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.6}RTL Implementation}{23}{subsubsection.5.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.7}Benchmarking Suitability}{23}{subsubsection.5.3.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Comparative Analysis: Ara vs. Vicuna}{23}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{Abstract}{3}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{4}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation}{4}{subsection.1.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models.}}{4}{figure.1}\protected@file@percent }
+\newlabel{fig:ai-growth}{{1}{4}{Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Limitations of Current Solutions}{4}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}The RISC-V Vector Extension as a Solution}{5}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Problem Statement}{5}{subsection.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Research Objectives}{6}{subsection.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}Research Contributions}{6}{subsection.1.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}Thesis Organization}{7}{subsection.1.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background \& Related Work}{8}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}RISC-V Architecture Overview}{8}{subsection.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces RISC-V ecosystem growth. Source: RISC-V International}}{8}{figure.2}\protected@file@percent }
+\newlabel{ RISC-V ecosystem growth. Source: RISC-V International}{{2}{8}{RISC-V ecosystem growth. Source: RISC-V International}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}RISC-V Extensions for Machine Learning}{8}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}Standard Extensions}{9}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}The RISC-V Vector Extension}{9}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}Architectural Principles}{9}{subsubsection.2.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}Programming with RISC-V Vector Intrinsics}{10}{subsubsection.2.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Ara RISC-V Vector Coprocessor}{11}{subsection.2.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Top-level architecture diagram of the Ara RISC-V Vector Coprocessor}}{11}{figure.3}\protected@file@percent }
+\newlabel{fig:ara_architecture}{{3}{11}{Top-level architecture diagram of the Ara RISC-V Vector Coprocessor}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}Architecture Components}{11}{subsubsection.2.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}Ara as a Performance Reference}{12}{subsubsection.2.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Related Work: The RISC-V landscape for Vector Computing}{12}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{System-Level Infrastructure for RISC-V Vector Design}{12}{section*.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Classic SIMD (ARM Neon) vs. Vector Architecture (RISC-V RVV).}}{13}{figure.4}\protected@file@percent }
+\newlabel{fig:schlagel-rvv-vp}{{4}{13}{Classic SIMD (ARM Neon) vs. Vector Architecture (RISC-V RVV)}{figure.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Compiler, Application, and System-Level Performance Evaluation}{13}{section*.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets.}}{14}{figure.5}\protected@file@percent }
+\newlabel{fig:rvv-ann-performance}{{5}{14}{Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Geometric mean of speedup achieved through autovectorization across different loop categories and compilers using RVV 1.0.}}{14}{figure.6}\protected@file@percent }
+\newlabel{fig:carpentieri-autovec}{{6}{14}{Geometric mean of speedup achieved through autovectorization across different loop categories and compilers using RVV 1.0}{figure.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methodology: Architecture \& Implementations}{14}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Deep Learning Kernel Selection and Justification}{14}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Selection Criteria}{15}{subsubsection.3.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Prioritized Kernel Categories}{15}{subsubsection.3.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Development Toolchain}{15}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}RISC-V GNU Toolchain}{15}{subsubsection.3.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Toolchain Components}{15}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}QEMU Emulator}{16}{subsubsection.3.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why QEMU Over Spike}{16}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{QEMU User Mode Execution}{16}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Ara RTL Compilation and Simulation}{16}{subsubsection.3.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Ara Simulation Environment}{16}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.4}Docker Development Environment}{17}{subsubsection.3.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Docker Advantages}{17}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Docker Workflow}{18}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.5}ONNX Framework Integration}{18}{subsubsection.3.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}RISC-V Vectorization Kernels Design}{18}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Pattern 1: Compute-Bound FMA Operations}{18}{subsubsection.3.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Pattern 2: Sliding Window Kernels}{18}{subsubsection.3.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.3}Pattern 3: Pointwise/Elementwise Kernels}{18}{subsubsection.3.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{ReLU and Leaky ReLU Activation Functions}{19}{section*.20}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}Scalar ReLU pseudo-code}{19}{lstlisting.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}Scalar Leaky ReLU pseudo-code}{19}{lstlisting.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}Vectorized ReLU pseudo-code}{19}{lstlisting.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4}Vectorized Leaky ReLU pseudo-code}{19}{lstlisting.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Bias Add and Tensor Add Operations}{20}{section*.21}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {5}Scalar Bias Add pseudo-code}{20}{lstlisting.5}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {6}Scalar Tensor Add pseudo-code}{20}{lstlisting.6}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {7}Vectorized Bias Add pseudo-code}{20}{lstlisting.7}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {8}Vectorized Tensor Add pseudo-code}{20}{lstlisting.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.4}Pattern 4: Post-Processing Kernels - Non-Maximum Suppression}{21}{subsubsection.3.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scalar NMS Algorithm}{21}{section*.22}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {9}Scalar NMS pseudo-code}{21}{lstlisting.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Vectorized NMS Implementation}{21}{section*.23}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {10}Partially vectorized NMS pseudo-code}{21}{lstlisting.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Vectorized IoU Computation}{22}{section*.24}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {11}Vectorized IoU computation pseudo-code}{22}{lstlisting.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.5}Compute-Bound FMA Operations}{23}{subsubsection.3.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Matrix Multiplication (GEMM)}{23}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Kernel Description}{23}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Scalar Implementation}{24}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Vectorization Strategy}{24}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Implementation}{24}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Dense Layer (Fully Connected)}{25}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Kernel Description}{25}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Scalar Implementation}{25}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Vectorization Strategy}{25}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Implementation}{25}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.6}Sliding Window Kernels}{26}{subsubsection.3.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{2D Convolution}{26}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Kernel Description}{26}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Scalar Implementation}{26}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{General Vectorization}{27}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Implementation}{27}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Convolution as Matrix Multiplication (Im2Col)}{28}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Specialized 3×3 Vectorization}{29}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Max Pooling}{29}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Kernel Description}{30}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Scalar Implementation}{30}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Vectorization Strategy}{30}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {subparagraph}{Implementation}{30}{section*.46}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Functional Verification Results}{31}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.1}ONNX Golden Reference Framework}{31}{subsubsection.3.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Test Data Generation Strategy}{32}{subsubsection.3.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.3}Numerical Verification Metrics}{32}{subsubsection.3.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.4}Verification Threshold Definition}{32}{subsubsection.3.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.5}Discrete Functions Correctness Results}{33}{subsubsection.3.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.6}Models}{33}{subsubsection.3.4.6}\protected@file@percent }
+\newlabel{sec:models}{{3.4.6}{33}{Models}{subsubsection.3.4.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Model Selection Rationale:}{33}{section*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{LeNet-5 Architecture and Implementation:}{33}{section*.48}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces LeNet-5 functional verification results demonstrating correct digit classification using RVV-accelerated kernels. Each subfigure displays the input image alongside the predicted class probabilities computed via the Softmax output layer. All test samples were correctly classified with high confidence scores.}}{34}{figure.7}\protected@file@percent }
+\newlabel{fig:lenet5_results}{{7}{34}{LeNet-5 functional verification results demonstrating correct digit classification using RVV-accelerated kernels. Each subfigure displays the input image alongside the predicted class probabilities computed via the Softmax output layer. All test samples were correctly classified with high confidence scores}{figure.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Tiny-YOLOv2 Architecture and Implementation:}{34}{section*.49}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Tiny-YOLOv2 functional verification results demonstrating object detection using RVV-accelerated kernels. Detected objects are annotated with bounding boxes, class labels, and confidence scores. The results confirm correct localization and classification across diverse test images.}}{35}{figure.8}\protected@file@percent }
+\newlabel{fig:yolov2_results}{{8}{35}{Tiny-YOLOv2 functional verification results demonstrating object detection using RVV-accelerated kernels. Detected objects are annotated with bounding boxes, class labels, and confidence scores. The results confirm correct localization and classification across diverse test images}{figure.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Verification Methodology and Results:}{35}{section*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Methodology: Performance Validation}{36}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Hardware (RTL Cores)}{36}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Role of RTL Cores in Architectural Research}{36}{subsubsection.4.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Importance of Cycle-Accurate Simulation}{36}{subsubsection.4.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.3}Evolution of Core Selection: From Vicuna to Ara}{37}{subsubsection.4.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Vicuna RISC-V Vector Coprocessor}{37}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Overview and Design Motivation}{37}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Architectural Organization}{37}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Overview of Vicuna's architecture and its integration with the Ibex main core. Both cores share a common data cache with predictable memory arbitration ensuring deterministic timing behavior.}}{38}{figure.9}\protected@file@percent }
+\newlabel{fig:vicuna_diagram}{{9}{38}{Overview of Vicuna's architecture and its integration with the Ibex main core. Both cores share a common data cache with predictable memory arbitration ensuring deterministic timing behavior}{figure.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}RVV Implementation}{38}{subsubsection.4.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.4}Execution Model}{38}{subsubsection.4.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.5}Memory Subsystem}{39}{subsubsection.4.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.6}RTL Implementation}{39}{subsubsection.4.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.7}Benchmarking Suitability}{39}{subsubsection.4.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Ara Vector Processor}{39}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Overview and Design Motivation}{39}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Architectural Organization}{39}{subsubsection.4.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Top-level block diagram of the Ara2 system showing the vector coprocessor, lane-based organization, and integration with the CVA6 scalar core.}}{40}{figure.10}\protected@file@percent }
+\newlabel{fig:ara_diagram}{{10}{40}{Top-level block diagram of the Ara2 system showing the vector coprocessor, lane-based organization, and integration with the CVA6 scalar core}{figure.10}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}RVV Implementation}{40}{subsubsection.4.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.4}Vector Execution Model}{41}{subsubsection.4.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.5}Memory Subsystem}{41}{subsubsection.4.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.6}RTL Implementation}{41}{subsubsection.4.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.7}Benchmarking Suitability}{41}{subsubsection.4.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Comparative Analysis and Core Selection Rationale}{42}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.1}Architectural Trade-offs}{42}{subsubsection.4.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Final Comparative Positioning of RTL Cores}}{42}{table.1}\protected@file@percent }
+\newlabel{tab:core_comparison}{{1}{42}{Final Comparative Positioning of RTL Cores}{table.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.2}Rationale for Benchmarking on Ara}{42}{subsubsection.4.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.3}Summary of Methodology Pivot}{42}{subsubsection.4.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Validation Strategy}{42}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.1}Testbench Structure and Workflow}{43}{subsubsection.4.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.2}Cycle-Accurate Measurement Logic}{43}{subsubsection.4.5.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {12}Timing and Cycle Count Functions}{43}{lstlisting.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.5.3}Hardware Configuration and Leaky ReLU Case Study}{44}{subsubsection.4.5.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {13}Leaky ReLU Testbench Execution Logic}{44}{lstlisting.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Validation Results}{45}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.1}Performance Overview}{46}{subsubsection.4.6.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Peak speedup across all evaluated configurations for each RVV64\_Library kernel.}}{46}{table.2}\protected@file@percent }
+\newlabel{tab:peak_speedups}{{2}{46}{Peak speedup across all evaluated configurations for each RVV64\_Library kernel}{table.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.2}Compute-Bound FMA Operations}{46}{subsubsection.4.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Matrix Multiplication (MatMul) — Best Implementation per Size}}{46}{table.3}\protected@file@percent }
+\newlabel{tab:matmul_full}{{3}{46}{Matrix Multiplication (MatMul) — Best Implementation per Size}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Dense (Fully Connected) Layer — Best Implementation per Size}}{46}{table.4}\protected@file@percent }
+\newlabel{tab:dense_full}{{4}{46}{Dense (Fully Connected) Layer — Best Implementation per Size}{table.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.3}Sliding Window \& Filters}{46}{subsubsection.4.6.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Convolution (Conv) — Best Implementation per Configuration}}{47}{table.5}\protected@file@percent }
+\newlabel{tab:conv_full}{{5}{47}{Convolution (Conv) — Best Implementation per Configuration}{table.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces MaxPool — Best Vector Implementation (M8) per Configuration}}{47}{table.6}\protected@file@percent }
+\newlabel{tab:maxpool_full}{{6}{47}{MaxPool — Best Vector Implementation (M8) per Configuration}{table.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.4}Pointwise \& Elementwise Operations}{47}{subsubsection.4.6.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces ReLU and Leaky ReLU — Best Vector Implementation (M8)}}{47}{table.7}\protected@file@percent }
+\newlabel{tab:act_full}{{7}{47}{ReLU and Leaky ReLU — Best Vector Implementation (M8)}{table.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Batch Normalization — Best Vector Implementation (M8)}}{48}{table.8}\protected@file@percent }
+\newlabel{tab:batch_full}{{8}{48}{Batch Normalization — Best Vector Implementation (M8)}{table.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Additive Kernels — Best Implementation per Size}}{48}{table.9}\protected@file@percent }
+\newlabel{tab:add_full}{{9}{48}{Additive Kernels — Best Implementation per Size}{table.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.6.5}Results Discussion}{48}{subsubsection.4.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Compute-Bound Operations (MatMul \& Dense Layers)}{48}{section*.51}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Speedup of MatMul across matrix sizes}}{49}{figure.11}\protected@file@percent }
+\newlabel{fig:matmul_speedup}{{11}{49}{Speedup of MatMul across matrix sizes}{figure.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Sliding Window Operations (Convolution \& Max Pooling)}{49}{section*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Pointwise and Elementwise Operations (Activation \& Additive Kernels)}{49}{section*.53}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Overall Analysis}{50}{section*.54}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Open Source Library Architecture (To be named)}{50}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Design Philosophy and Importance}{50}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Library Structure}{50}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Python Wrapper Kernel Variants and Availability}}{51}{table.10}\protected@file@percent }
+\newlabel{tab:wrapper_variants}{{10}{51}{Python Wrapper Kernel Variants and Availability}{table.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Available Kernel Wrappers}{51}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}ReLU Activation}{51}{subsubsection.5.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Leaky ReLU Activation}{51}{subsubsection.5.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}Matrix Multiplication}{52}{subsubsection.5.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.4}Tensor Addition}{52}{subsubsection.5.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.5}Batch Normalization}{52}{subsubsection.5.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.6}Bias Addition}{53}{subsubsection.5.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.7}2D Convolution}{53}{subsubsection.5.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.8}2D Transposed Convolution}{53}{subsubsection.5.3.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.9}Dense (Fully Connected) Layer}{54}{subsubsection.5.3.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.10}Max Pooling}{54}{subsubsection.5.3.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.11}Softmax}{55}{subsubsection.5.3.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}LMUL Configuration Guidelines}{55}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Backend Utilities}{55}{subsection.5.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{55}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Conclusion}{55}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Future Work}{56}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.1}Extension to Additional Workload Domains}{56}{subsubsection.6.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.2}Deployment on Physical RISC-V Hardware}{56}{subsubsection.6.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.3}Enhancement of the Python Interface and Abstraction Layer}{56}{subsubsection.6.2.3}\protected@file@percent }
 \bibcite{ara2}{1}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Architectural Comparison of Ara and Vicuna}}{24}{table.1}\protected@file@percent }
-\newlabel{tab:ara_vicuna_comparison}{{1}{24}{Architectural Comparison of Ara and Vicuna}{table.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Validation Strategy}{24}{subsection.5.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Validation Results}{24}{subsection.5.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Open Source Library Architecture}{24}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion \& Future Work}{24}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Acknowledgment}{24}{section.8}\protected@file@percent }
 \bibcite{vicuna}{2}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Code Listings}{25}{section.9}\protected@file@percent }
-\gdef \@abspage@last{25}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.4}Kernel Optimization and Algorithmic Improvements}{57}{subsubsection.6.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.5}Expanded Neural Network Model Support}{57}{subsubsection.6.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Acknowledgment}{57}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Code Listings}{57}{section.8}\protected@file@percent }
+\gdef \@abspage@last{57}

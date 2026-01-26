@@ -1,4 +1,759 @@
-% !TEX root = ../Thesis.tex
 \subsection{RISC-V Vectorization Kernels Design}
+This section presents the design and implementation of optimized RISC-V vector kernels for machine learning and digital signal processing applications. The kernels are organized into four fundamental patterns based on their computational characteristics and memory access behaviors. Each pattern represents a distinct class of operations commonly found in neural network inference pipelines and computer vision workloads.
 
-\textit{[Placeholder]}
+% ============================================================
+% PATTERN 1: Compute-Bound FMA Operations
+% ============================================================
+\subsubsection{Pattern 1: Compute-Bound FMA Operations}
+
+% [EBRAHIM'S CONTENT - TO BE FILLED]
+
+\textit{[Placeholder: ebrahim edit within this file]}
+
+% ============================================================
+% PATTERN 2: Sliding Window Kernels
+% ============================================================
+\subsubsection{Pattern 2: Sliding Window Kernels}
+
+% [EBRAHIM'S CONTENT - TO BE FILLED]
+
+\textit{[Placeholder: ebrahim edit within this file]}
+
+% ============================================================
+% PATTERN 3: Pointwise/Elementwise Kernels
+% ============================================================
+\subsubsection{Pattern 3: Pointwise/Elementwise Kernels}
+
+Pointwise (elementwise) operations represent the most straightforward vectorization opportunities in machine learning workloads. These kernels exhibit several characteristics that make them ideal candidates for RISC-V vector acceleration:
+
+\begin{itemize}
+    \item \textbf{Elementwise independence}: No cross-element dependencies or data hazards
+    \item \textbf{Fully contiguous memory access}: Linear, predictable access patterns
+    \item \textbf{No reductions or control-flow coupling}: Minimal branching overhead
+    \item \textbf{High execution frequency}: Common operations in ML inference pipelines
+    \item \textbf{Immediate cost amortization}: Vector setup overhead paid back instantly
+\end{itemize}
+
+These properties make pointwise kernels the ``lowest-risk, highest-payoff'' RVV optimization targets. The kernels in this category include ReLU, Leaky ReLU, Bias Add, and Tensor Add operations.
+
+% ------------------------------------------------------------
+% ReLU and Leaky ReLU
+% ------------------------------------------------------------
+\paragraph{ReLU and Leaky ReLU Activation Functions}
+
+The Rectified Linear Unit (ReLU) is one of the most widely used activation functions in modern neural networks, defined as:
+
+\[
+\text{ReLU}(x) = \max(x, 0) = 
+\begin{cases}
+x & \text{if } x > 0 \\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+Leaky ReLU extends this definition to preserve small negative values using a scaling factor $\alpha$:
+
+\[
+\text{LeakyReLU}(x) = 
+\begin{cases}
+x & \text{if } x \geq 0 \\
+\alpha \cdot x & \text{otherwise}
+\end{cases}
+\]
+
+\textit{Scalar ReLU Implementation:}
+
+\begin{lstlisting}[language=Python, caption={Scalar ReLU pseudo-code}]
+for i = 0 to size-1:
+    output[i] = max(input[i], 0)
+end for
+\end{lstlisting}
+
+\textit{Scalar Leaky ReLU Implementation:}
+
+\begin{lstlisting}[language=Python, caption={Scalar Leaky ReLU pseudo-code}]
+for i = 0 to n-1:
+    if src[i] < 0:
+        dest[i] = src[i] * alpha
+    else:
+        dest[i] = src[i]
+    end if
+end for
+\end{lstlisting}
+
+\textit{Vectorized ReLU Implementation:}
+
+The vectorized ReLU leverages vector max operations and strip-mining to process multiple elements in parallel:
+
+\begin{lstlisting}[language=Python, caption={Vectorized ReLU pseudo-code}]
+v_zero = vector_of_zeros
+
+while there are elements left:
+    vl = vector_length_for_this_iteration
+    v_in = load_vector(input_pointer, vl)
+    v_out = max(v_in, v_zero)
+    store_vector(output_pointer, v_out, vl)
+    
+    advance pointers by vl
+    decrease remaining_count by vl
+end while
+\end{lstlisting}
+
+\textit{Vectorized Leaky ReLU Implementation:}
+
+Leaky ReLU vectorization uses masked operations to handle the conditional behavior efficiently:
+
+\begin{lstlisting}[language=Python, caption={Vectorized Leaky ReLU pseudo-code}]
+alpha_vec = broadcast(alpha)
+
+while remaining > largest_step (e.g., n*vector_length):
+    # Load n vectors: v0, v1, ..., vn
+    for each vi in {v0, v1, ..., vn}:
+        negative_mask = (vi < 0)
+        vi_leaky = negative_mask ? (vi * alpha_vec) : vi
+        store(vi_leaky)
+    end for
+    
+    skip forward n*vector_length elements
+end while
+\end{lstlisting}
+
+The vectorized implementation processes multiple elements in parallel, with the hardware automatically handling varying vector lengths across different VLEN configurations.
+
+% ------------------------------------------------------------
+% Bias Add and Tensor Add
+% ------------------------------------------------------------
+\paragraph{Bias Add and Tensor Add Operations}
+
+Bias addition is a fundamental operation in neural networks, where a learned bias vector is added to the output of convolutional or fully-connected layers. Tensor addition combines two tensors elementwise and is used throughout neural networks for residual connections and feature fusion.
+
+\textit{Scalar Bias Add Implementation:}
+
+\begin{lstlisting}[language=Python, caption={Scalar Bias Add pseudo-code}]
+for batch in batches:
+    for channel in channels:
+        bias_val = bias[channel]
+        for pixel in channel_pixels:
+            output[...] = input[...] + bias_val
+        end for
+    end for
+end for
+\end{lstlisting}
+
+\textit{Scalar Tensor Add Implementation:}
+
+\begin{lstlisting}[language=Python, caption={Scalar Tensor Add pseudo-code}]
+for i = 0 to size-1:
+    Output[i] = A[i] + B[i]
+end for
+\end{lstlisting}
+
+\textit{Vectorized Bias Add Implementation:}
+
+The vectorized bias add broadcasts the bias value using vector-scalar operations:
+
+\begin{lstlisting}[language=Python, caption={Vectorized Bias Add pseudo-code}]
+for channel in channels:
+    bias_val = bias[channel]
+    
+    for chunk in spatial_data by vector_size:
+        vec = load_vector(input + offset)
+        vec = vec + bias_val  # broadcast addition
+        store_vector(output + offset, vec)
+    end for
+end for
+\end{lstlisting}
+
+\textit{Vectorized Tensor Add Implementation:}
+
+Tensor addition vectorization is straightforward with vector-vector operations:
+
+\begin{lstlisting}[language=Python, caption={Vectorized Tensor Add pseudo-code}]
+set position = 0
+
+while position < size:
+    vl = min(vector_register_length, size - position)
+    
+    # Load vl elements from A[position...position+vl-1]
+    # Load vl elements from B[position...position+vl-1]
+    A_vector = load_vector(A + position, vl)
+    B_vector = load_vector(B + position, vl)
+    
+    result = A_vector + B_vector
+    
+    store_vector(Output + position, result, vl)
+    
+    position += vl
+end while
+\end{lstlisting}
+
+The vector-length agnostic programming model ensures these implementations automatically adapt to different hardware vector widths without modification.
+
+% ============================================================
+% PATTERN 4: Post-Processing Kernels (NMS)
+% ============================================================
+\subsubsection{Pattern 4: Post-Processing Kernels - Non-Maximum Suppression}
+
+Non-Maximum Suppression (NMS) is a critical post-processing step in object detection pipelines that eliminates redundant overlapping bounding boxes. Unlike the previous patterns, NMS presents unique vectorization challenges:
+
+\begin{itemize}
+    \item \textbf{Post-processing characteristic}: Not compute-heavy, but memory and branch-intensive
+    \item \textbf{Strong data dependencies}: Greedy sequential suppression logic
+    \item \textbf{Heavy sorting and conditional logic}: Conditional suppression patterns
+    \item \textbf{Irregular memory access}: Conditional operations create unpredictable patterns
+    \item \textbf{Moderate vectorization gains}: Limited parallelism opportunities
+\end{itemize}
+
+However, vectorization opportunities exist in specific NMS substeps:
+
+\begin{itemize}
+    \item \textbf{Score filtering}: Vector compare and compress operations
+    \item \textbf{Batched IoU computation}: Parallel min/max/sub/mul operations
+    \item \textbf{Threshold comparisons}: Vector masking operations
+\end{itemize}
+
+\paragraph{Scalar NMS Algorithm}
+
+The scalar NMS implementation follows a greedy sequential approach:
+
+\begin{lstlisting}[language=Python, caption={Scalar NMS pseudo-code}]
+# Step 1: Create list of (score, index) pairs for all detections
+# Step 2: Filter: keep only pairs where score >= score_threshold
+# Step 3: Sort pairs by score (DESCENDING)
+# Step 4: Initialize empty list 'selected'
+# Step 5: Initialize suppressed[N] = false (or use list of active candidates)
+
+while pairs_list is not empty AND |selected| < max_output_per_class:
+    a. Take top pair: current_index = pair.index
+    b. Add current_index to selected
+    c. current_box = boxes[current_index]
+    d. For each remaining candidate j after current in sorted list:
+           if suppressed[j]: continue
+           candidate_box = boxes[j.index]
+           if boxes do NOT overlap at all: continue
+           iou = compute_iou(current_box, candidate_box)
+           if iou >= iou_threshold:
+               suppress j (mark as suppressed / remove from consideration)
+           end if
+       end for
+end while
+
+# Step 7: Return selected indices
+\end{lstlisting}
+
+\paragraph{Vectorized NMS Implementation}
+
+The vectorized NMS strategically applies vectorization to substeps with high parallelism:
+
+\begin{lstlisting}[language=Python, caption={Partially vectorized NMS pseudo-code}]
+# Step 1: Collect high-confidence candidates (VECTORIZED)
+candidates = empty list of (score, index) pairs
+
+for i = 0 to N-1 step vector_length:
+    vl = min(vector_length, N - i)
+    v_scores = vector_load(scores[i:i+vl])
+    mask = (v_scores >= score_thresh)
+    
+    if any scores pass:
+        local_idx = [0 .. vl-1]
+        kept_idx = compress(local_idx, mask)
+        for each kept j:
+            global_i = i + j
+            add (scores[global_i], global_i) to candidates
+        end for
+    end if
+end for
+
+# Step 2: Sort candidates DESCENDING by score
+# Step 3: Convert all candidate boxes to corner format
+# box_corners[M][4]  (M = # of candidates after filter)
+
+# Step 4: selected = empty list
+#         suppressed = [false for all M candidates]
+
+# Step 5: Greedy suppression with vectorized IoU
+for each candidate i = 0 .. M-1 (sorted order):
+    if suppressed[i]: continue
+    if |selected| >= max_output_per_class: break
+    
+    add index of candidate i to selected
+    current_box = box_corners[i]
+    
+    # Inner suppression (can be partially vectorized)
+    for j = i+1 to M-1:
+        if suppressed[j]: continue
+        other_box = box_corners[j]
+        
+        if no overlap possible (quick reject): continue
+        
+        # VECTORIZED IoU computation
+        iou = vectorized_iou(current_box, other_box)
+        # Uses max/min/sub on (x1,y1,x2,y2)
+        # -> areas, union, iou = inter/union
+        
+        if iou >= iou_thresh:
+            suppressed[j] = true
+        end if
+    end for
+end for
+\end{lstlisting}
+
+\paragraph{Vectorized IoU Computation}
+
+The Intersection over Union (IoU) calculation benefits significantly from vectorization when computing IoU between one box and multiple candidate boxes simultaneously:
+
+\begin{lstlisting}[language=Python, caption={Vectorized IoU computation pseudo-code}]
+# current_box: [x1, y1, x2, y2]
+# other_boxes: array of [x1, y1, x2, y2] boxes (vectorized batch)
+
+# Broadcast current box coordinates
+current_x1_vec = broadcast(current_box.x1)
+current_y1_vec = broadcast(current_box.y1)
+current_x2_vec = broadcast(current_box.x2)
+current_y2_vec = broadcast(current_box.y2)
+
+# Load other boxes (vector loads)
+other_x1 = vector_load(other_boxes[:].x1)
+other_y1 = vector_load(other_boxes[:].y1)
+other_x2 = vector_load(other_boxes[:].x2)
+other_y2 = vector_load(other_boxes[:].y2)
+
+# Compute intersection coordinates (vectorized min/max)
+inter_x1 = max(current_x1_vec, other_x1)
+inter_y1 = max(current_y1_vec, other_y1)
+inter_x2 = min(current_x2_vec, other_x2)
+inter_y2 = min(current_y2_vec, other_y2)
+
+# Compute intersection width and height (vectorized subtraction)
+inter_w = inter_x2 - inter_x1
+inter_h = inter_y2 - inter_y1
+
+# Clamp to zero (no negative areas)
+inter_w = max(inter_w, 0)
+inter_h = max(inter_h, 0)
+
+# Intersection area (vectorized multiplication)
+inter_area = inter_w * inter_h
+
+# Compute individual box areas
+current_area = (current_box.x2 - current_box.x1) * 
+               (current_box.y2 - current_box.y1)
+
+other_w = other_x2 - other_x1
+other_h = other_y2 - other_y1
+other_area = other_w * other_h
+
+# Union area = area1 + area2 - intersection
+union_area = current_area + other_area - inter_area
+
+# IoU = intersection / union (vectorized division)
+iou = inter_area / union_area
+
+return iou
+\end{lstlisting}
+
+This vectorized IoU computation processes multiple bounding box comparisons in parallel, reducing the computational overhead of the NMS algorithm's inner loop. While the overall NMS algorithm remains largely sequential due to its greedy nature, vectorizing the IoU substep provides measurable performance improvements when processing large numbers of detection candidates.
+
+\subsubsection{Compute-Bound FMA Operations}
+
+Neural network workloads are dominated by matrix multiplication and fully connected layers. These operations form the computational backbone of both inference and training pipelines. Their defining characteristic is extremely high arithmetic intensity: we perform massive volumes of floating-point operations relative to the amount of data moved from memory. This makes them ideal candidates for vectorization.
+
+At the core of these operations lies the fused multiply-add (FMA), where we accumulate multiple products into a single result. Modern processors can execute FMAs in a single pipelined cycle, but scalar code wastes this potential by processing one operation at a time. Vector instructions let us pack multiple FMAs into each cycle, multiplying our computational throughput.
+
+These kernels also exhibit regular, predictable structure. Data dependencies are minimal and well-defined, memory access patterns follow sequential or strided layouts, and control flow remains simple. This regularity plays to the strengths of SIMD architectures, where we can fill vector registers densely with minimal overhead.
+
+\paragraph{Matrix Multiplication (GEMM)}
+
+\subparagraph{Kernel Description}
+
+General Matrix Multiply (GEMM) computes $C = A \times B$, where $A$ is $M \times K$, $B$ is $K \times N$, and the result $C$ is $M \times N$. Each output element represents a dot product:
+
+\[
+C[i][j] = \sum_{k=0}^{K-1} A[i][k] \cdot B[k][j]
+\]
+
+This operation underlies virtually all linear algebra in machine learning, from simple linear layers to complex attention mechanisms.
+
+\subparagraph{Scalar Implementation}
+
+The straightforward scalar approach uses three nested loops. For each row in $A$ and column in $B$, we accumulate a dot product by iterating through $K$ elements, multiplying corresponding pairs and summing results:
+
+\begin{verbatim}
+FOR each row i in matrix A
+    FOR each column j in matrix B
+        sum ← 0
+        FOR k = 0 to K-1
+            sum ← sum + A[i][k] × B[k][j]
+        C[i][j] ← sum
+\end{verbatim}
+
+This processes one output element at a time. Each multiply-add depends on the previous accumulation, preventing any overlap of operations. The deeply nested loops add control overhead, and we completely ignore the wide vector registers sitting idle in the processor. Modern CPUs with pipelined FMA units spend most of their time stalled, waiting for data dependencies to resolve.
+
+\subparagraph{Vectorization Strategy}
+
+Rather than computing output elements sequentially, we can process multiple columns of the output simultaneously. Instead of accumulating into a single scalar, we maintain $\textit{vl}$ parallel accumulators in a vector register, where $\textit{vl}$ represents the number of elements that fit in one vector based on available hardware width.
+
+This reorganization transforms the inner loop structure. For each element $A[i][k]$ in the current row, we broadcast that single value across all lanes of a vector register. We then load $\textit{vl}$ consecutive elements from row $k$ of matrix $B$ and multiply the broadcast value with this vector. The result updates all $\textit{vl}$ accumulators in parallel.
+
+This approach delivers several advantages. We exploit the full width of vector functional units, executing $\textit{vl}$ FMAs per cycle instead of one. Memory access to matrix $B$ becomes sequential and cache-friendly, since we load contiguous elements. Loop overhead drops because we process $\textit{vl}$ outputs per iteration instead of one.
+
+\subparagraph{Implementation}
+
+The vectorized code replaces the innermost column loop with a while loop that processes columns in chunks. We track how many columns remain to be processed and handle them in groups of $\textit{vl}$:
+
+\begin{verbatim}
+FOR each row i in matrix A
+    remaining_columns ← N
+    WHILE remaining_columns > 0
+        vl ← number of cols processed in parallel
+        j ← N - remaining_columns
+        acc_vector ← 0
+        FOR k = 0 to K-1
+            a_vector ← broadcast A[i][k]
+            b_vector ← load B[k][j : j+vl]
+            acc_vector ← acc_vector + (a_vector × b_vector)
+        END FOR
+        store acc_vector into C[i][j : j+vl]
+        remaining_columns ← remaining_columns - vl
+    END WHILE
+END FOR
+\end{verbatim}
+
+For each chunk of columns, we initialize a vector accumulator to zero. The inner loop over $k$ performs the dot product computation: we broadcast each element from row $i$ of matrix $A$ across all lanes, load $\textit{vl}$ consecutive elements from the corresponding row of $B$, multiply them element-wise, and accumulate the results. After completing the dot product across all $K$ elements, we store the vector of results to the output matrix.
+
+The broadcast operation is crucial here. It takes a single scalar value $A[i][k]$ and replicates it across every lane of a vector register, allowing that single value to be multiplied with $\textit{vl}$ different elements from $B$ simultaneously. The load from $B$ is sequential, fetching consecutive memory locations, which aligns perfectly with cache line sizes and enables efficient prefetching.
+
+The RISC-V vector extension determines $\textit{vl}$ dynamically at runtime based on the hardware's vector register width and the element size. When the number of remaining columns isn't evenly divisible by the maximum vector length, the hardware automatically reduces $\textit{vl}$ for the final iteration, processing exactly the remaining elements without any special-case code.
+
+\paragraph{Dense Layer (Fully Connected)}
+
+\subparagraph{Kernel Description}
+
+Dense layers compute weighted sums across all inputs for each output neuron. Given an input vector $x$ of size $K$ and a weight matrix $W$ of shape $N \times K$ (where each row corresponds to one output neuron), we compute:
+
+\[
+\text{output}[j] = \text{bias}[j] + \sum_{k=0}^{K-1} \text{input}[k] \cdot \text{weights}[j][k]
+\]
+
+This is essentially matrix-vector multiplication with bias addition. While conceptually similar to GEMM, we're multiplying a matrix by a single vector rather than another matrix, which affects how we structure the computation.
+
+\subparagraph{Scalar Implementation}
+
+The scalar code processes one output neuron at a time. We initialize each accumulator with its corresponding bias, then iterate through all input features, multiplying each by its weight and accumulating:
+
+\begin{verbatim}
+FOR each output neuron j = 0 to N-1
+    acc ← bias[j]
+    FOR each input feature k = 0 to K-1
+        acc ← acc + input[k] × weights[j][k]
+    output[j] ← acc
+\end{verbatim}
+
+By initializing with the bias value, we avoid a separate bias addition pass after computing the weighted sum. Each output neuron is computed independently with a sequential accumulation across all input features.
+
+Like scalar GEMM, this serializes all operations. Each accumulation depends on the previous one, and we process only a single output at a time. Vector units remain completely unutilized.
+
+\subparagraph{Vectorization Strategy}
+
+We parallelize across output neurons, computing $\textit{vl}$ neurons simultaneously. The key insight is that for each input feature, we can broadcast that feature value and multiply it with weights from multiple neurons in parallel.
+
+The memory access pattern differs from GEMM in an important way. In GEMM, consecutive output columns correspond to consecutive elements in memory (sequential access to $B$). Here, to compute multiple neurons in parallel, we need to load weights for the same input feature across different neurons. These weights are not contiguous in memory because the weight matrix is stored in row-major order, with each row representing one neuron's complete set of weights.
+
+For input feature $k$, the weights we need are at positions $\text{weights}[j][k]$, $\text{weights}[j+1][k]$, $\text{weights}[j+2][k]$, etc. These addresses are separated by $K$ elements (the stride of one row), making this a strided memory access pattern rather than a sequential one.
+
+\subparagraph{Implementation}
+
+The vectorized implementation processes output neurons in chunks, initializing accumulators directly with bias values:
+
+\begin{verbatim}
+j ← 0
+WHILE j < N
+    vl ← number of outputs processed in parallel
+    acc_vector ← load bias[j : j+vl]
+    FOR each input feature k = 0 to K-1
+        weight_vector ← load weights[j : j+vl][k]        
+                                          (strided)
+        input_vector ← broadcast input[k]
+        acc_vector ← acc_vector + 
+            (input_vector × weight_vector)
+    END FOR
+    store acc_vector into output[j : j+vl]
+    j ← j + vl
+END WHILE
+\end{verbatim}
+
+We start by loading $\textit{vl}$ bias values into the accumulator vector. This is a sequential load since bias values are stored contiguously. Then, for each input feature, we perform two key operations:
+
+First, we load weights using strided access. The notation $\text{weights}[j:j+vl][k]$ means we're loading element $k$ from rows $j$ through $j+vl-1$. These elements are separated by $K$ positions in memory (one full row), so we use a strided load instruction with stride equal to $K \times \text{element\_size}$. The RISC-V vector ISA provides efficient strided load instructions that handle this pattern in hardware, fetching non-contiguous elements without manual gathering.
+
+Second, we broadcast the input feature value across all vector lanes. This replicated value multiplies with the vector of weights, producing $\textit{vl}$ partial products that update the accumulators in parallel.
+
+After processing all $K$ input features, each lane of the accumulator vector contains the complete output for one neuron (weighted sum plus bias), ready to be stored to memory.
+
+The key advantage of initializing with bias values rather than zero is efficiency: we fold the bias addition into the initial load rather than performing a separate addition pass after the main computation. This saves both instructions and a complete pass over the output array.
+
+\subsubsection{Sliding Window Kernels}
+
+Sliding window operations differ fundamentally from the compute-bound kernels above. Here, a small kernel slides across a larger input, computing outputs based on local neighborhoods. These operations dominate convolutional neural networks and pooling layers.
+
+The defining characteristic is local spatial dependency: each output depends only on a small, localized region of input determined by kernel size and stride. Consecutive output positions often use overlapping input regions, creating opportunities for data reuse. However, this also introduces irregular memory access patterns and boundary conditions that complicate vectorization.
+
+Optimization strategies differ from dense matrix operations. While GEMM benefits from vectorizing across output dimensions, sliding window kernels often benefit more from vectorizing across output width or channels, combined with careful register blocking to exploit spatial locality.
+
+\paragraph{2D Convolution}
+
+\subparagraph{Kernel Description}
+
+Two-dimensional convolution is the fundamental operation in CNNs. Given an input feature map of shape $(C_{\text{in}}, H_{\text{in}}, W_{\text{in}})$, filters with $C_{\text{out}}$ output channels, and a kernel of size $(K_h, K_w)$, we compute an output of shape $(C_{\text{out}}, H_{\text{out}}, W_{\text{out}})$.
+
+For each output position and channel, we compute:
+
+\[
+\text{output}[oc][oh][ow] = \sum_{ic=0}^{C_{\text{in}}-1} \sum_{kh=0}^{K_h-1} \sum_{kw=0}^{K_w-1} \text{input}[ic][ih][iw] \cdot \text{kernel}[oc][ic][kh][kw]
+\]
+
+where input coordinates map to output coordinates through stride and padding:
+
+\[
+ih = oh \times \text{stride}_h - \text{pad}_h + kh, \quad iw = ow \times \text{stride}_w - \text{pad}_w + kw
+\]
+
+\subparagraph{Scalar Implementation}
+
+The scalar approach iterates over every dimension: batch, output channel, output position, input channel, and kernel position. For each kernel element, we compute the corresponding input coordinates, verify they're within bounds (handling padding), and accumulate the product:
+
+\begin{verbatim}
+Compute output height and width
+Initialize output to zero
+
+FOR each batch b
+    FOR each output channel oc, output row oh, output column ow
+        sum ← 0
+        FOR each input channel ic
+            FOR each kernel row kh
+                FOR each kernel column kw
+                    ih ← oh × stride_h - pad_h + kh
+                    iw ← ow × stride_w - pad_w + kw
+                    IF ih, iw inside input bounds
+                        sum ← sum + input[b][ic][ih][iw] 
+                                  × kernel[oc][ic][kh][kw]
+        output[b][oc][oh][ow] ← sum
+\end{verbatim}
+
+The output is initialized to zero at the start, then we accumulate contributions from all input channels and kernel positions. The innermost loops compute coordinate mappings and perform boundary checks to handle padding. When an input coordinate falls outside the valid range, we skip that multiply-accumulate, effectively treating out-of-bounds regions as zero (zero-padding).
+
+This straightforward implementation processes one output element at a time. The deeply nested loops incur substantial overhead, and the boundary checks add branching to every kernel position. Worse, consecutive output positions don't systematically reuse cached data, leading to poor memory behavior.
+
+\subparagraph{General Vectorization}
+
+The general vectorization strategy has two phases: kernel repacking followed by parallel output channel computation. We reorganize the kernel weights so that elements for consecutive output channels become contiguous in memory.
+
+In the original layout, kernel weights are organized as $\text{kernel}[oc][ic][kh][kw]$. To access weights for output channels $oc$, $oc+1$, $oc+2$, etc., for a fixed input channel and kernel position, we'd need to stride through memory with large jumps. By repacking into $\text{packed\_kernel}[ic][kh][kw][oc]$, we make weights for consecutive output channels adjacent in memory, enabling efficient sequential vector loads.
+
+During computation, we process $\textit{vl}$ output channels simultaneously. For each output position, we maintain $\textit{vl}$ parallel accumulators. As we iterate through input channels and kernel positions, we broadcast each input value and multiply it with a vector of repacked weights, updating all accumulators in parallel.
+
+\subparagraph{Implementation}
+
+The implementation starts with kernel repacking, then executes the vectorized convolution:
+
+\begin{verbatim}
+Repack kernel so output channels are contiguous
+Initialize output to zero
+
+FOR each batch b
+    FOR output channels oc in vector chunks
+        FOR each output row oh, output column ow
+            acc_vector ← output[b][oc:oc+vl][oh][ow]
+            FOR each input channel ic
+                FOR each kernel row kh
+                    FOR each kernel column kw
+                        ih ← oh × stride_h - pad_h + kh
+                        iw ← ow × stride_w - pad_w + kw
+                        IF ih, iw inside input bounds
+                            input_val ← input[b][ic][ih][iw]
+                            weight_vector ← packed_w[ic][kh][kw][oc:oc+vl]
+                            acc_vector ← acc_vector + input_val × weight_vector
+            store acc_vector to output
+\end{verbatim}
+
+We initialize the output to zero before the main computation begins. For each output position, we load the current accumulator state (which starts at zero) from the output array. This might seem redundant for the first iteration, but it allows us to accumulate contributions from multiple input channels consistently.
+
+The key operations happen in the innermost loops. For each valid input position, we load a single scalar input value. We then load a vector of $\textit{vl}$ consecutive kernel weights from the repacked array. The scalar input value is implicitly broadcast across all lanes when multiplied with the weight vector, producing $\textit{vl}$ partial products. These accumulate into the vector register holding our parallel output channel computations.
+
+After processing all input channels and kernel positions for a given output location, the accumulator vector contains the complete output values for $\textit{vl}$ channels at that spatial position. We store this vector back to the output array.
+
+The repacking cost is paid once during initialization and amortized across potentially thousands of forward passes. The memory layout transformation converts strided access (which would require expensive gather operations or multiple scalar loads) into efficient sequential loads.
+
+Boundary handling remains explicit through the conditional check. When coordinates fall outside the input bounds, we skip the multiply-accumulate entirely. This avoids the memory overhead of explicitly padding the input array, though it introduces some branching. For performance-critical applications where branches hurt, explicitly padding the input eliminates these conditionals at the cost of larger memory footprint.
+
+\subparagraph{Convolution as Matrix Multiplication (Im2Col)}
+
+An alternative approach transforms convolution into standard matrix multiplication. The Im2Col (image-to-column) method unfolds the input into a matrix where each column represents a flattened window. The kernel becomes a matrix where each row contains flattened weights for one output channel. Convolution then reduces to GEMM.
+
+This transformation works for any kernel size and allows us to leverage highly optimized matrix multiplication algorithms.
+
+\begin{verbatim}
+Compute output height and width
+
+// Step 1: Im2Col transformation
+FOR each output position (oh, ow)
+    FOR each input channel ic
+        FOR each kernel position kh, kw
+            col[K_index][oh×OW + ow] ← input value or 0 (padding)
+        END FOR
+    END FOR
+END FOR
+
+// Step 2: GEMM
+gemm_output ← kernel_matrix × col_matrix
+
+// Step 3: Bias Add
+FOR each output channel oc
+    FOR each output position
+        output[oc][pos] ← gemm_output[oc][pos] + bias[oc]
+    END FOR
+END FOR
+\end{verbatim}
+
+The Im2Col step unfolds the input into a 2D matrix. Each column of this matrix represents one output position's receptive field: all input values that contribute to that output, flattened into a 1D vector. The row index $K\_index$ combines the input channel and kernel position indices into a single linear index.
+
+For positions where the receptive field extends outside the input bounds (due to padding), we write zeros to the column matrix. This explicitly materializes the zero-padding in memory.
+
+After unfolding, we have a matrix multiplication problem: $\text{kernel\_matrix}$ is $C_{\text{out}} \times (C_{\text{in}} \times K_h \times K_w)$, and $\text{col\_matrix}$ is $(C_{\text{in}} \times K_h \times K_w) \times (H_{\text{out}} \times W_{\text{out}})$. The product gives us all output values for all channels and positions.
+
+Finally, we add bias values to each output channel. Since the GEMM produces outputs in channel-major order, we simply iterate through channels and positions, adding the appropriate bias to each element.
+
+The advantage is that GEMM kernels are among the most optimized operations on any platform, often hand-tuned in assembly with careful cache blocking and register tiling. By reducing convolution to GEMM, we leverage this existing optimization work.
+
+The disadvantage is memory overhead. The column matrix can be quite large: for a 224×224 input image with 64 channels and a 3×3 kernel, the unfolded matrix requires roughly 200MB of temporary storage. This overhead may be acceptable on systems with ample memory, but becomes prohibitive on embedded devices.
+
+The transformation is particularly effective when the same input will be convolved with multiple different kernels (as in neural network layers with many output channels), since the Im2Col cost is paid once and amortized across many GEMM operations.
+
+\subparagraph{Specialized 3×3 Vectorization}
+
+The 3×3 kernel size deserves special attention because it dominates modern CNN architectures. When we know the kernel size is fixed at 3×3, we can apply optimizations that wouldn't be practical for variable-size kernels.
+
+The key insight is that we can preload three consecutive input rows and keep them in registers across multiple output column computations. For a given output row, the input data from rows $oh$, $oh+1$, and $oh+2$ will be reused across all output columns in that row (assuming stride 1). By loading these rows once and reusing them, we dramatically reduce memory traffic.
+
+\begin{verbatim}
+FOR each output row oh
+    row0 ← input row oh
+    row1 ← input row oh+1
+    row2 ← input row oh+2
+    FOR output columns ow in vector chunks
+        Load vectors:
+            v00, v01, v02 from row0
+            v10, v11, v12 from row1
+            v20, v21, v22 from row2
+        acc ← v00 × k00
+        acc ← acc + v01 × k01
+        acc ← acc + v02 × k02
+        ...
+        acc ← acc + v22 × k22
+        store acc to output
+    END FOR
+END FOR
+\end{verbatim}
+
+We load three input rows into temporary storage outside the column loop. These represent the three rows of input that contribute to the current output row. Then, for each chunk of output columns, we load nine vector variables: three vectors from each of the three rows.
+
+Each vector contains $\textit{vl}$ consecutive elements from an input row. The notation $v01$ means "vector from row 0, offset by 1 position" this captures the three horizontal positions of the kernel across multiple output columns simultaneously.
+
+We then perform nine multiply-accumulate operations, one for each kernel position. Each operation multiplies one input vector with the corresponding kernel weight (broadcast to match the vector length) and accumulates into the result. After all nine operations, we have $\textit{vl}$ complete output values for consecutive output columns.
+
+This approach avoids the coordinate computation overhead of the general vectorization. We don't recalculate $ih$ and $iw$ for each kernel position; instead, we directly reference preloaded vectors. The overlapping window pattern means that $v01$ for the current output column becomes $v00$ for the next, creating register reuse opportunities that a smart compiler or hand-written assembly can exploit.
+
+Compared to Im2Col, this method uses minimal extra memory (just three row buffers) and avoids the unfolding step entirely. It's most effective for stride-1 convolutions where the input window overlap is maximal. For larger strides, the reuse benefits diminish, and Im2Col may become more attractive.
+
+The trade-off is specificity: this approach is hard-coded for 3×3 kernels. Generalizing it to other sizes would require different loop structures and vector load patterns, whereas Im2Col works uniformly for any kernel size.
+
+\paragraph{Max Pooling}
+
+\subparagraph{Kernel Description}
+
+Max pooling downsamples feature maps by taking the maximum value within each window. Given an input and a pooling kernel of size $(K_h, K_w)$, we compute:
+
+\[
+\text{output}[c][oh][ow] = \max_{kh=0}^{K_h-1} \max_{kw=0}^{K_w-1} \text{input}[c][ih][iw]
+\]
+
+where $(ih, iw)$ are determined by output position, stride, and padding. Unlike convolution, this involves only comparisons and selections, with no arithmetic operations.
+
+\subparagraph{Scalar Implementation}
+
+The scalar code processes one output position at a time. For each position, we compute the valid window boundaries (accounting for padding), initialize a maximum value to negative infinity, and scan all values within the window to find the maximum:
+
+\begin{verbatim}
+Compute output height and width
+
+FOR each batch b
+    FOR each channel c
+        FOR each output row oh
+            FOR each output column ow
+                h_start ← oh × stride_h - pad_h
+                w_start ← ow × stride_w - pad_w
+                h_end ← min(h_start + k_h, input_height)
+                w_end ← min(w_start + k_w, input_width)
+                h_start ← max(h_start, 0)
+                w_start ← max(w_start, 0)
+                max_val ← -(inf)
+                FOR h = h_start to h_end-1
+                    FOR w = w_start to w_end-1
+                        max_val ← max(max_val, input[b][c][h][w])
+                output[b][c][oh][ow] ← max_val
+
+\end{verbatim}
+
+We calculate the window boundaries explicitly, clamping them to the valid input range. This handles padding by simply restricting the region we scan. We initialize the maximum to negative infinity, ensuring any actual input value will be larger.
+
+The inner loops scan the valid window region, comparing each input value against the current maximum and updating when we find a larger value. After scanning the entire window, we write the maximum to the output.
+
+Though conceptually simple, this scalar implementation can still bottleneck shallow networks or configurations with large stride values that reduce spatial data reuse.
+
+\subparagraph{Vectorization Strategy}
+
+We vectorize across output columns, computing $\textit{vl}$ output positions simultaneously. Each vector lane maintains an independent maximum accumulator. As we scan the pooling window, we load vectors of input values and compute element-wise maximums, updating all lanes in parallel.
+
+The key insight is that maximum operations are inherently parallelizable: tracking maxima for multiple output positions requires no inter-lane communication. Each lane independently compares and updates its maximum value. The vector maximum instruction compares corresponding elements in two vectors and produces a result vector containing the element-wise maxima.
+
+\subparagraph{Implementation}
+
+The vectorized implementation processes output columns in chunks:
+
+\begin{verbatim}
+Compute output height and width
+
+FOR each batch b
+    FOR each channel c
+        FOR each output row oh
+            ih_start ← oh × stride_h - pad_h
+            ow ← 0
+            WHILE ow < out_w
+                vl ← number of columns processed in parallel
+                max_vector ← -(inf)
+                FOR kh = 0 to k_h-1
+                    ih ← ih_start + kh
+                    IF ih out of bounds: continuez
+                    FOR kw = 0 to k_w-1
+                        iw ← ow × stride_w - pad_w + kw
+                        input_vector ← load input values
+                        max_vector ← max(max_vector, input_vector)
+                store max_vector to output
+                ow ← ow + vl
+\end{verbatim}
+
+We compute the starting input row position once per output row, outside the column loop. This row start is the same for all output columns in this row, so computing it once saves redundant arithmetic.
+
+For each chunk of $\textit{vl}$ output columns, we initialize a vector of maximum values to negative infinity. This initialization broadcasts the scalar value $-\infty$ across all vector lanes, giving each lane its own independent maximum tracker.
+
+The inner loops iterate through the pooling window. For each kernel row, we check if the corresponding input row is within bounds. If not, we skip this entire row (the \texttt{continue} statement). For each kernel column, we compute the starting input column position and load $\textit{vl}$ consecutive input values.
+
+This load is crucial: for output column $ow$, we need input at position $ow \times \text{stride}_w - \text{pad}_w + kw$. For the next output column $ow+1$, we need input at position $(ow+1) \times \text{stride}_w - \text{pad}_w + kw$. These positions are separated by \texttt{stride\_w} in the input. So when stride is 1, we load consecutive elements; when stride is 2, we load every other element; and so on.
+
+The RISC-V vector ISA can handle this through either strided loads (when stride more than 1) or indexed loads. The notation $\text{load input values}$ abstracts this detail, but the actual implementation would use the appropriate load instruction variant.
+
+After loading input values, we compute the element-wise maximum with the current maximum vector. Each lane compares its input value against its current maximum and keeps whichever is larger. This process continues through all kernel positions.
+
+Once we've scanned the entire window, the maximum vector contains the final maximum values for $\textit{vl}$ output positions. We store this vector to the output array and advance to the next chunk of columns.
+
+The vectorization achieves significant speedup by computing $\textit{vl}$ output elements in parallel, with nearly the same work per output position as the scalar version, but amortized across $\textit{vl}$ lanes. The comparison-based nature of max pooling maps naturally to SIMD operations, making this one of the more straightforward kernels to vectorize effectively.

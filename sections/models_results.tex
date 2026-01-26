@@ -1,4 +1,159 @@
 % !TEX root = ../Thesis.tex
 \subsubsection{Models}
+\label{sec:models}
 
-\textit{[Placeholder]}
+Beyond the verification of individual discrete kernels, a critical aspect of functional validation involves assessing the correctness of the implemented RISC-V vectorized kernels when integrated into complete deep learning inference pipelines. To this end, two representative convolutional neural network models were implemented and deployed using exclusively the RVV-accelerated kernels developed in this work: LeNet-5 and Tiny-YOLOv2. These models were selected to provide comprehensive coverage of the implemented kernel categories while representing distinct computational patterns and application domains within computer vision.
+
+\paragraph{Model Selection Rationale:}
+
+The selection of LeNet-5 and Tiny-YOLOv2 for end-to-end functional verification was driven by several key considerations. First, these architectures collectively exercise the majority of kernels implemented in the library, including convolution, max pooling, dense (fully connected) layers, batch normalization, activation functions (ReLU, Leaky ReLU, and Softmax), bias addition, and tensor addition operations. Second, the models represent different scales of computational complexity---LeNet-5 is a lightweight architecture suitable for embedded deployment, while Tiny-YOLOv2 presents a substantially more demanding workload with deeper convolutional layers and larger feature maps. Third, both models address well-established computer vision tasks with readily available ground truth data, facilitating objective assessment of functional correctness.
+
+\paragraph{LeNet-5 Architecture and Implementation:}
+
+LeNet-5, originally proposed by LeCun et al.\ for handwritten digit recognition, serves as a foundational convolutional neural network architecture. The implemented version processes grayscale input images of dimensions $32 \times 32$ pixels and produces classification probabilities across ten digit classes (0--9). The network architecture comprises the following layer sequence: an initial $5 \times 5$ convolution producing six feature maps, followed by ReLU activation and $2 \times 2$ max pooling; a second convolutional stage with two parallel branches, each containing $5 \times 5$ convolutions producing sixteen feature maps, with subsequent ReLU activation and pooling; a third $5 \times 5$ convolution generating 120 feature maps; and finally, two fully connected (dense) layers with 84 and 10 neurons respectively, concluding with Softmax activation for probability distribution output.
+
+The LeNet-5 implementation directly maps to the following vectorized kernels from the library:
+
+\begin{itemize}
+    \item \texttt{conv2d} --- Spatial convolution with im2col-GEMM optimization
+    \item \texttt{maxpool\_e32m8} --- Vectorized $2 \times 2$ max pooling with stride 2
+    \item \texttt{relu\_e32m8} --- Element-wise ReLU activation
+    \item \texttt{bias\_add\_e32m8} --- Channel-wise bias addition
+    \item \texttt{dense\_e32m8} --- Fully connected layer computation
+    \item \texttt{tensor\_add\_e32m8} --- Element-wise tensor addition for branch merging
+    \item \texttt{softmax} --- Probability normalization for classification output
+\end{itemize}
+
+Model weights were extracted from a pre-trained ONNX model and stored as raw IEEE 754 single-precision floating-point binary files. The inference pipeline was implemented in both C++ (utilizing RVV intrinsics directly) and Python (via the \texttt{pyv} wrapper library), enabling cross-validation between implementations. Functional verification was performed using sample images from the MNIST dataset, with predictions compared against the expected ground truth labels.
+
+% ============================================================
+% FIGURE: LeNet-5 Results (Two-Column Layout)
+% ============================================================
+\begin{figure}[H]
+    \centering
+    
+    % Row 1
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/lenet5_prediction_0.png}
+        
+        (a) Prediction for digit 0
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/lenet5_prediction_3.png}
+        
+        (b) Prediction for digit 3
+    \end{minipage}
+    
+    \vspace{0.4cm}
+    
+    % Row 2
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/lenet5_prediction_4.png}
+        
+        (c) Prediction for digit 4
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/lenet5_prediction_6.png}
+        
+        (d) Prediction for digit 6
+    \end{minipage}
+    
+    \vspace{0.4cm}
+    
+    % Row 3 (centered single image)
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/lenet5_prediction_8.png}
+        
+        (e) Prediction for digit 8
+    \end{minipage}
+    
+    \caption{LeNet-5 functional verification results demonstrating correct digit classification using RVV-accelerated kernels. Each subfigure displays the input image alongside the predicted class probabilities computed via the Softmax output layer. All test samples were correctly classified with high confidence scores.}
+    \label{fig:lenet5_results}
+\end{figure}
+
+\paragraph{Tiny-YOLOv2 Architecture and Implementation:}
+
+Tiny-YOLOv2 represents a significantly more complex verification target, implementing real-time object detection on $416 \times 416$ RGB input images. The architecture processes inputs through nine convolutional layers with progressively increasing channel depths (16, 32, 64, 128, 256, 512, 1024 channels), interspersed with six max pooling operations for spatial downsampling. Each convolutional layer is followed by batch normalization and Leaky ReLU activation (with negative slope $\alpha = 0.1$). The final convolutional layer produces a $13 \times 13 \times 125$ output tensor encoding bounding box predictions across five anchor boxes, with each anchor containing four coordinate values, one objectness score, and twenty class probabilities for the PASCAL VOC dataset categories.
+
+The Tiny-YOLOv2 implementation exercises an expanded set of vectorized kernels:
+
+\begin{itemize}
+    \item \texttt{conv2d} --- Multiple convolution configurations with varying kernel sizes and channel counts
+    \item \texttt{batch\_norm\_e32m8} --- Fused batch normalization with learned scale, bias, mean, and variance parameters
+    \item \texttt{leaky\_relu\_e32m8} --- Leaky ReLU activation with configurable negative slope
+    \item \texttt{maxpool\_e32m8} --- Max pooling with both stride-1 and stride-2 configurations
+    \item \texttt{bias\_add\_e32m8} --- Bias addition for the final detection layer
+    \item \texttt{nms\_e32m8} --- Non-maximum suppression for post-processing detections
+\end{itemize}
+
+Post-processing operations including sigmoid activation for objectness scores, Softmax for class probabilities, anchor box decoding, and non-maximum suppression (NMS) were implemented to produce final bounding box predictions. The model weights were extracted from the official Tiny-YOLOv2 ONNX model, totaling approximately 15.8 million parameters across all layers.
+
+% ============================================================
+% FIGURE: Tiny-YOLOv2 Results (Two-Column Layout)
+% ============================================================
+\begin{figure}[H]
+    \centering
+    
+    % Row 1
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/output_detected_1.jpg}
+        
+        (a) Detection result 1
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/output_detected_2.jpg}
+        
+        (b) Detection result 2
+    \end{minipage}
+    
+    \vspace{0.4cm}
+    
+    % Row 2
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/output_detected_3.jpg}
+        
+        (c) Detection result 3
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/output_detected_4.jpg}
+        
+        (d) Detection result 4
+    \end{minipage}
+    
+    \vspace{0.4cm}
+    
+    % Row 3 (centered single image)
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/output_detected_5.jpg}
+        
+        (e) Detection result 5
+    \end{minipage}
+    
+    \caption{Tiny-YOLOv2 functional verification results demonstrating object detection using RVV-accelerated kernels. Detected objects are annotated with bounding boxes, class labels, and confidence scores. The results confirm correct localization and classification across diverse test images.}
+    \label{fig:yolov2_results}
+\end{figure}
+
+\paragraph{Verification Methodology and Results:}
+
+The functional verification of both models followed a systematic approach ensuring correctness at multiple levels. First, intermediate layer outputs were compared against reference implementations executed through the ONNX Runtime framework, verifying that numerical discrepancies remained within acceptable floating-point tolerance thresholds. Second, end-to-end inference correctness was validated by confirming that final predictions (digit classifications for LeNet-5 and object detections for Tiny-YOLOv2) matched expected ground truth annotations.
+
+For LeNet-5, all test images from the MNIST sample set were correctly classified, demonstrating that the sequential composition of vectorized kernels preserves numerical accuracy through the entire inference pipeline. The visualization results presented in Figure~\ref{fig:lenet5_results} illustrate the Softmax probability distributions, showing high-confidence predictions for the correct digit classes.
+
+For Tiny-YOLOv2, object detection results were validated against reference detections, with bounding box coordinates and class predictions exhibiting agreement within acceptable numerical tolerances. The detection visualizations in Figure~\ref{fig:yolov2_results} demonstrate successful localization and classification of objects across various test images.
+
+
+The successful implementation and verification of LeNet-5 and Tiny-YOLOv2 using the RVV64\_Library kernels establishes several important findings. First, the individual vectorized kernels maintain numerical stability when composed into deep computational graphs with hundreds of sequential operations. Second, the library's modular design enables straightforward integration into complete inference pipelines without requiring kernel-level modifications. Third, the Python wrapper layer provides functionally equivalent results to the native C++ implementation, validating the correctness of the foreign function interface bindings. These model-level verifications complement the discrete kernel testing described in previous sections, providing confidence that the library is suitable for deployment in real-world deep learning applications on RISC-V platforms.

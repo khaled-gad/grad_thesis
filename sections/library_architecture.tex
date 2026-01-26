@@ -1,4 +1,370 @@
 % !TEX root = ../Thesis.tex
-\section{Open Source Library Architecture}
+\section{Open Source Library Architecture (To be named)} %Khaled
 
-\textit{[Placeholder]}
+A critical aspect of this work extends beyond the hardware implementation to provide a comprehensive, user-friendly software interface for the RISC-V Vector Extension (RVV) accelerated kernels. The \texttt{(To be named)} library offers Python wrappers that bridge the gap between high-level deep learning frameworks and the low-level RVV-optimized C implementations. This approach significantly enhances usability and accessibility for researchers and developers who wish to leverage hardware acceleration without delving into assembly-level programming.
+
+\subsection{Design Philosophy and Importance}
+
+The Python wrapper library addresses a fundamental challenge in hardware-software co-design: making optimized low-level implementations accessible to a broader audience. While the underlying C/assembly kernels provide maximum performance through direct RVV intrinsics, the Python interface offers several key advantages:
+
+\begin{itemize}
+    \item \textbf{Ease of Integration}: Researchers can integrate RVV-accelerated operations directly into Python-based machine learning pipelines using familiar NumPy array semantics.
+    \item \textbf{Variant Selection}: Users can easily switch between scalar baseline implementations and various LMUL configurations (M1, M2, M4, M8) to benchmark and compare performance characteristics.
+    \item \textbf{Tiled Execution Support}: Several kernels offer tiled variants that improve cache locality for large tensors, accessible through simple API parameters.
+    \item \textbf{Rapid Prototyping}: The wrappers enable quick experimentation with different kernel variants without recompilation, facilitating performance exploration and optimization studies.
+\end{itemize}
+
+\subsection{Library Structure} %Khaled - Check please
+
+The \texttt{(To be named)} library follows a modular architecture organized into three layers:
+
+\begin{enumerate}
+    \item \textbf{Backend Layer} (\texttt{backend.py}): Provides utility functions for memory management and pointer conversion between NumPy arrays and C-compatible float pointers using Python's \texttt{ctypes} module.
+    \item \textbf{Wrapper Layer} (\texttt{wrappers/}): Contains individual wrapper modules for each kernel type, handling the \texttt{ctypes} interface to shared libraries.
+    \item \textbf{Kernel API Layer} (\texttt{kernels.py}): Exposes high-level Pythonic functions with automatic shape inference, memory allocation, and variant selection.
+\end{enumerate}
+
+\subsection{Available Kernel Wrappers} %Khaled - Looks good but check please
+
+The library provides wrappers for eleven distinct neural network operations, each with multiple implementation variants. Table~\ref{tab:wrapper_variants} summarizes the available implementations.
+
+\begin{table}[htbp]
+\centering
+\caption{Python Wrapper Kernel Variants and Availability}
+\label{tab:wrapper_variants}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Kernel} & \textbf{Scalar} & \textbf{M1} & \textbf{M2} & \textbf{M4} & \textbf{M8} & \textbf{Tiled} \\
+\hline
+ReLU & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & -- \\
+\hline
+Leaky ReLU & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+MatMul & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & -- \\
+\hline
+Tensor Add & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & -- \\
+\hline
+Batch Norm & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+Bias Add & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & -- \\
+\hline
+Conv2D & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & 3x3 Specialized \\
+\hline
+Conv2D Transpose & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & 3x3 Specialized \\
+\hline
+Dense (FC) & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & -- \\
+\hline
+MaxPool & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+Softmax & \checkmark & -- & -- & -- & -- & -- \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{ReLU Activation}
+
+The ReLU wrapper provides element-wise rectified linear unit activation supporting scalar and all LMUL variants.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+relu(x: np.ndarray, variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item \texttt{x}: Input tensor (any shape, float32, C-contiguous)
+    \item \texttt{variant}: One of \texttt{"scalar"}, \texttt{"M1"}, \texttt{"M2"}, \texttt{"M4"}, \texttt{"M8"}
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+import numpy as np
+from pyv.kernels import relu
+
+x = np.random.randn(1, 64, 32, 32).astype(np.float32)
+y = relu(x, variant="M8")  # RVV-accelerated with LMUL=8
+\end{verbatim}
+
+\subsubsection{Leaky ReLU Activation}
+
+The Leaky ReLU wrapper extends ReLU with a configurable negative slope parameter and includes tiled variants for improved cache performance on large tensors.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+leaky_relu(x: np.ndarray, alpha: float = 0.01, variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Available Variants:}
+\begin{itemize}
+    \item Standard: \texttt{"scalar"}, \texttt{"M1"}, \texttt{"M2"}, \texttt{"M4"}, \texttt{"M8"}
+    \item Tiled: \texttt{"tiled\_scalar"}, \texttt{"tiled\_M1"}, \texttt{"tiled\_M2"}, \texttt{"tiled\_M4"}, \texttt{"tiled\_M8"}
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import leaky_relu
+
+x = np.random.randn(1, 128, 16, 16).astype(np.float32)
+y = leaky_relu(x, alpha=0.2, variant="M4")
+\end{verbatim}
+
+\subsubsection{Matrix Multiplication}
+
+The MatMul wrapper performs general matrix multiplication $C = A \times B$ with support for all LMUL configurations.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+matmul(A: np.ndarray, B: np.ndarray, variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item \texttt{A}: Matrix of shape $(M, K)$, float32
+    \item \texttt{B}: Matrix of shape $(K, N)$, float32
+    \item \texttt{variant}: One of \texttt{"scalar"}, \texttt{"M1"}, \texttt{"M2"}, \texttt{"M4"}, \texttt{"M8"}
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import matmul
+
+A = np.random.randn(128, 256).astype(np.float32)
+B = np.random.randn(256, 64).astype(np.float32)
+C = matmul(A, B, variant="M8")  # C is (128, 64)
+\end{verbatim}
+
+\subsubsection{Tensor Addition}
+
+The Tensor Add wrapper performs element-wise addition of two tensors with matching shapes.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+tensor_add(A: np.ndarray, B: np.ndarray, variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import tensor_add
+
+A = np.random.randn(1, 64, 32, 32).astype(np.float32)
+B = np.random.randn(1, 64, 32, 32).astype(np.float32)
+C = tensor_add(A, B, variant="M4")
+\end{verbatim}
+
+\subsubsection{Batch Normalization}
+
+The Batch Normalization wrapper implements inference-mode batch normalization with learned scale and bias parameters. Both standard and tiled variants are available for all LMUL configurations.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+batch_norm(x: np.ndarray, scale: np.ndarray, bias: np.ndarray, 
+           mean: np.ndarray, variance: np.ndarray, 
+           epsilon: float = 1e-5, variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item \texttt{x}: Input tensor of shape $(N, C, H, W)$, float32
+    \item \texttt{scale}, \texttt{bias}, \texttt{mean}, \texttt{variance}: Per-channel parameters of shape $(C,)$
+    \item \texttt{epsilon}: Small constant for numerical stability
+    \item \texttt{variant}: Standard variants or tiled variants (\texttt{"tiled\_M1"} through \texttt{"tiled\_M8"})
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import batch_norm
+
+x = np.random.randn(1, 64, 32, 32).astype(np.float32)
+scale = np.ones(64, dtype=np.float32)
+bias = np.zeros(64, dtype=np.float32)
+mean = np.zeros(64, dtype=np.float32)
+var = np.ones(64, dtype=np.float32)
+
+y = batch_norm(x, scale, bias, mean, var, epsilon=1e-5, variant="tiled_M8")
+\end{verbatim}
+
+\subsubsection{Bias Addition}
+
+The Bias Add wrapper adds a per-channel bias to feature maps, commonly used after convolution operations.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+bias_add(input: np.ndarray, bias: np.ndarray, variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item \texttt{input}: Tensor of shape $(N, C, H, W)$, float32
+    \item \texttt{bias}: Bias vector of shape $(C,)$
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import bias_add
+
+x = np.random.randn(1, 128, 16, 16).astype(np.float32)
+b = np.random.randn(128).astype(np.float32)
+y = bias_add(x, b, variant="M8")
+\end{verbatim}
+
+\subsubsection{2D Convolution}
+
+The Conv2D wrapper provides the most comprehensive set of implementations, including standard convolutions, Im2Col+GEMM variants, and specialized 3$\times$3 kernels optimized for common filter sizes.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+conv2d(input: np.ndarray, kernel: np.ndarray, bias: np.ndarray = None,
+       stride=(1,1), pad=(0,0), variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Available Variants:}
+\begin{itemize}
+    \item Standard: \texttt{"scalar"}, \texttt{"M1"}, \texttt{"M2"}, \texttt{"M4"}, \texttt{"M8"}
+    \item Im2Col+GEMM: \texttt{"im2col\_M8"} (optimized for larger convolutions)
+    \item Specialized 3$\times$3: \texttt{"3x3\_M1"}, \texttt{"3x3\_M2"}, \texttt{"3x3\_M4"}, \texttt{"3x3\_M8"}
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import conv2d
+
+x = np.random.randn(1, 3, 224, 224).astype(np.float32)
+w = np.random.randn(64, 3, 3, 3).astype(np.float32)
+
+# Standard vectorized convolution
+y1 = conv2d(x, w, stride=(1,1), pad=(1,1), variant="M8")
+
+# Specialized 3x3 kernel
+y2 = conv2d(x, w, stride=(1,1), pad=(1,1), variant="3x3_M8")
+
+# Im2Col+GEMM approach
+y3 = conv2d(x, w, stride=(1,1), pad=(1,1), variant="im2col_M8")
+\end{verbatim}
+
+\subsubsection{2D Transposed Convolution}
+
+The Conv2D Transpose wrapper implements transposed (deconvolution) operations used in decoder networks and generative models. Specialized 3$\times$3 RVV kernels are available for common upsampling configurations.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+conv_transpose(input: np.ndarray, kernel: np.ndarray, 
+               stride=(1,1), pad=(0,0), variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Available Variants:}
+\begin{itemize}
+    \item Standard: \texttt{"scalar"}, \texttt{"M1"}, \texttt{"M2"}, \texttt{"M4"}, \texttt{"M8"}
+    \item Specialized 3$\times$3 RVV (automatically selected for 3$\times$3 kernels)
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import conv_transpose
+
+x = np.random.randn(1, 256, 8, 8).astype(np.float32)
+w = np.random.randn(256, 128, 3, 3).astype(np.float32)
+y = conv_transpose(x, w, stride=(2,2), pad=(1,1), variant="M8")
+\end{verbatim}
+
+\subsubsection{Dense (Fully Connected) Layer}
+
+The Dense wrapper implements fully connected layer computation with bias addition.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+dense(x: np.ndarray, weights: np.ndarray, bias: np.ndarray, 
+      variant="M8") -> np.ndarray
+\end{verbatim}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item \texttt{x}: Input vector of shape $(in\_features,)$
+    \item \texttt{weights}: Weight matrix of shape $(out\_features, in\_features)$
+    \item \texttt{bias}: Bias vector of shape $(out\_features,)$
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import dense
+
+x = np.random.randn(512).astype(np.float32)
+W = np.random.randn(10, 512).astype(np.float32)
+b = np.random.randn(10).astype(np.float32)
+y = dense(x, W, b, variant="M8")  # y is (10,)
+\end{verbatim}
+
+\subsubsection{Max Pooling}
+
+The MaxPool wrapper provides max pooling with configurable kernel size, stride, and padding. Tiled variants offer improved performance for large feature maps.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+maxpool(input: np.ndarray, k_h: int, k_w: int, 
+        stride_h: int = 1, stride_w: int = 1, 
+        pad_h: int = 0, pad_w: int = 0, variant="M8",
+        tile_h: int = None, tile_w: int = None) -> np.ndarray
+\end{verbatim}
+
+\textbf{Available Variants:}
+\begin{itemize}
+    \item Standard: \texttt{"scalar"}, \texttt{"M1"}, \texttt{"M2"}, \texttt{"M4"}, \texttt{"M8"}
+    \item Tiled: \texttt{"tiled\_M1"}, \texttt{"tiled\_M2"}, \texttt{"tiled\_M4"}, \texttt{"tiled\_M8"}
+\end{itemize}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import maxpool
+
+x = np.random.randn(1, 64, 112, 112).astype(np.float32)
+
+# Standard 2x2 max pooling with stride 2
+y = maxpool(x, k_h=2, k_w=2, stride_h=2, stride_w=2, variant="M8")
+
+# Tiled variant for better cache performance
+y_tiled = maxpool(x, k_h=2, k_w=2, stride_h=2, stride_w=2, 
+                  variant="tiled_M8", tile_h=16, tile_w=16)
+\end{verbatim}
+
+\subsubsection{Softmax}
+
+The Softmax wrapper provides numerically stable softmax computation for 1D or 2D inputs.
+
+\textbf{Function Signature:}
+\begin{verbatim}
+softmax(x: np.ndarray) -> np.ndarray
+\end{verbatim}
+
+\textbf{Usage Example:}
+\begin{verbatim}
+from pyv.kernels import softmax
+
+logits = np.random.randn(10).astype(np.float32)
+probs = softmax(logits)  # Sum to 1.0
+\end{verbatim}
+
+\subsection{LMUL Configuration Guidelines}
+
+The LMUL (Length MULtiplier) parameter in RISC-V Vector Extension determines how many vector registers are grouped together for operations. Selecting the appropriate LMUL involves trade-offs:
+
+\begin{itemize}
+    \item \textbf{M1}: Uses single registers, maximum flexibility but lower throughput per instruction.
+    \item \textbf{M2}: Groups 2 registers, doubling vector length with moderate register pressure.
+    \item \textbf{M4}: Groups 4 registers, good balance for medium-sized workloads.
+    \item \textbf{M8}: Groups 8 registers, maximum throughput but highest register pressure.
+\end{itemize}
+
+For most deep learning workloads with large tensors, \texttt{M8} provides optimal performance. However, kernels with complex control flow or multiple active vectors may benefit from lower LMUL values to reduce register spilling.
+
+\subsection{Backend Utilities}
+
+The backend module provides essential pointer conversion utilities:
+
+\begin{verbatim}
+from pyv.backend import ptr_f32
+
+# Convert NumPy array to C float pointer
+arr = np.zeros((100,), dtype=np.float32)
+c_ptr = ptr_f32(arr)  # ctypes.POINTER(ctypes.c_float)
+\end{verbatim}
+
+This utility ensures proper memory alignment and type checking, requiring arrays to be float32 and C-contiguous for correct operation with the underlying C kernels.

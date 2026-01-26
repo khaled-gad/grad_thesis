@@ -1,4 +1,126 @@
 % !TEX root = ../Thesis.tex
 \subsection{Validation Strategy}
 
-\textit{[Placeholder]}
+The validation of the Ara vector coprocessor and its integration with the CVA6 scalar core is performed through high-fidelity Register Transfer Level (RTL) simulation. To achieve the necessary simulation speed for complex ML kernels while maintaining cycle accuracy, this project utilizes \textbf{Verilator}. Unlike traditional event-driven simulators, Verilator transpiles the SystemVerilog hardware description into optimized C++ models. Consequently, the verification environment is constructed as a C++ software testbench that drives the compiled hardware model.
+
+\subsubsection{Testbench Structure and Workflow}
+
+The validation process is organized into discrete testbench projects for each kernel ($Conv2D$, $MaxPool$, etc.). The directory structure for a typical kernel testbench is organized as follows:
+
+\begin{itemize}
+    \item \textbf{\texttt{kernel/kernels.cpp}:} Contains the core RVV 1.0 implementation of the algorithm using C intrinsics or inline assembly.
+    \item \textbf{\texttt{script/gen\_data.py}:} A Python script utilizing NumPy to generate golden reference data and input tensors. It generates the data to be processed by the kernels and writes it into an assembly file.
+    \item \textbf{\texttt{data.S}:} An assembly file containing the linked input data, weight buffers, and expected results. This data is linked at the final stage with the compiled main program and the transpiled hardware modules.
+    \item \textbf{\texttt{main.cpp}:} The top-level C++ testbench that instantiates the Verilated hardware model, initializes memory, and executes the simulation.
+    \item \textbf{\texttt{Makefile}:} Manages the compilation of the SystemVerilog RTL, the linking of generated data, and executable generation.
+\end{itemize}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/hardware_validation_strategy.png}	
+\end{figure}
+
+\subsubsection{Cycle-Accurate Measurement Logic}
+
+To evaluate the efficiency of the RVV implementations, precise timing measurement is required. This is achieved through instrumentation functions interfacing with the RISC-V \texttt{mcycle} CSR.
+
+\begin{lstlisting}[language=C++, caption={Timing and Cycle Count Functions}]
+// Start and stop the counter
+inline void start_timer() { 
+    timer = -get_cycle_count(); 
+}
+
+inline void stop_timer() { 
+    timer += get_cycle_count(); 
+}
+
+// Get the value of the timer
+inline int64_t get_timer() { 
+    return timer; 
+}
+
+// Return the current value of the cycle counter
+inline int64_t get_cycle_count() {
+    int64_t cycle_count;
+    // The fence is needed to be sure that Ara is idle, and it is 
+    // not performing the last vector stores when we read mcycle
+    asm volatile("fence; csrr %[cycle_count], cycle"
+                 : [cycle_count] "=r"(cycle_count));
+    return cycle_count;
+}
+\end{lstlisting}
+
+The use of the \texttt{fence} instruction is critical; it ensures the scalar core does not read the cycle counter until Ara has completed all pending memory stores, providing a true representation of the hardware execution time.
+
+\subsubsection{Hardware Configuration and Leaky ReLU Case Study}
+
+For this research, the Ara coprocessor is configured with a Vector Length ($VLEN$) of $1024$ bits, allowing a single vector register to hold $32$ single-precision floating-point numbers. The physical datapath is organized into \textbf{4 vector lanes}. 
+
+
+
+Below is an example of the \texttt{main.cpp} structure used for validating the \texttt{Leaky ReLU} kernel:
+
+\begin{lstlisting}[language=C++, caption={Leaky ReLU Testbench Execution Logic}]
+#include <stdint.h>
+#include <string.h>
+#include "runtime.h"
+#include "util.h"
+
+#ifdef SPIKE
+#include <stdio.h>
+#else
+#include "printf.h"
+#endif
+
+extern "C" {
+	extern uint32_t NUM_ELEMENTS;
+	extern float ALPHA_VAL;
+	extern float input_data[];
+	extern float golden_data[];
+	extern float output_data[];
+	
+	void leaky_relu_vector(float* data, size_t n, float alpha);
+	void leaky_relu_scalar(float* data, size_t n, float alpha);
+}
+
+int verify(float* res, float* gold, int size) {
+	int err = 0;
+	for(int i=0; i<size; i++) {
+		float diff = res[i] - gold[i];
+		if(diff < 0) diff = -diff;
+		if(diff > 0.0001f) {
+			err++;
+			if(err < 5) printf("Err @ %d: %f != %f\n", i, res[i], gold[i]);
+		}
+	}
+	return err;
+}
+
+int main() {
+	uint32_t N = NUM_ELEMENTS;
+	float alpha = ALPHA_VAL;
+
+	printf("\n=== LEAKY RELU [N: %d, Alpha: %.2f] ===\n", N, alpha);
+
+	// Scalar Test
+	memcpy(output_data, input_data, N * sizeof(float));
+	start_timer();
+	leaky_relu_scalar(output_data, N, alpha);
+	stop_timer();
+	printf("Scalar Cycles: %d\n", get_timer());
+
+	// Vector Test
+	memcpy(output_data, input_data, N * sizeof(float));
+	start_timer();
+	leaky_relu_vector(output_data, N, alpha);
+	stop_timer();
+	int t_vec = get_timer();
+	printf("Vector Cycles: %d\n", t_vec);
+
+	// Optional: Verify Correctness
+	if(verify(output_data, golden_data, N) == 0) printf("Status: PASSED\n");
+	else printf("Status: FAILED\n");
+
+	return 0;
+}
+\end{lstlisting}

@@ -1,11 +1,11 @@
 % !TEX root = ../Thesis.tex
 \subsection{Development Toolchain}
 
-\subsection{RISC-V GNU Toolchain}
+\subsubsection{RISC-V GNU Toolchain}
 
 The RISC-V GNU Toolchain provides the foundational components necessary to build, compile, link, and debug code for the RISC-V ISA. This toolchain was selected for its active community support, regular updates, and comprehensive support for both native and emulated environments, including full support for the vector extension.
 
-\subsubsection{Toolchain Components}
+\paragraph{Toolchain Components}
 
 \textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-gcc}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
 \begin{itemize}
@@ -24,11 +24,11 @@ The RISC-V GNU Toolchain provides the foundational components necessary to build
 
 \textbf{Runtime Libraries:} Standard runtime support including newlib and glibc, providing C standard library functionality for both bare-metal and Linux environments.
 
-\subsection{QEMU Emulator}
+\subsubsection{QEMU Emulator}
 
 QEMU (Quick Emulator) serves as our primary execution environment for RISC-V code. As a full system emulator, QEMU provides comprehensive support for user-mode and full-system emulation, including the RISC-V vector extension in recent versions.
 
-\subsubsection{Why QEMU Over Spike}
+\paragraph{Why QEMU Over Spike}
 
 While Spike is the official RISC-V ISA simulator from the RISC-V Foundation, we chose QEMU for several key advantages:
 
@@ -42,7 +42,7 @@ While Spike is the official RISC-V ISA simulator from the RISC-V Foundation, we 
 
 \textbf{Community and Documentation:} QEMU benefits from wider usage, more extensive documentation, and more active development than Spike, with a large community providing support and bug fixes.
 
-\subsubsection{QEMU User Mode Execution}
+\paragraph{QEMU User Mode Execution}
 
 Our typical workflow uses QEMU in user-mode emulation, where RISC-V Linux binaries are executed directly on the host system:
 
@@ -58,11 +58,11 @@ This approach provides:
     \item Configurable vector length (VLEN) for testing portability
 \end{itemize}
 
-\subsection{Ara RTL Compilation and Simulation}
+\subsubsection{Ara RTL Compilation and Simulation}
 
 Ara provides a cycle-accurate hardware model written in SystemVerilog, enabling precise performance measurement of our vectorized kernels. The Ara repository includes the complete RTL description of the vector coprocessor, testbench infrastructure, and build scripts.
 
-\subsubsection{Ara Simulation Environment}
+\paragraph{Ara Simulation Environment}
 
 \textbf{Hardware Description:} Ara's RTL is synthesizable and can be simulated using industry-standard tools like Verilator. The repository includes:
 \begin{itemize}
@@ -101,11 +101,11 @@ Ara provides a cycle-accurate hardware model written in SystemVerilog, enabling 
 
 This cycle-accurate measurement is essential for quantifying the real-world performance benefits of our vectorization efforts, as it accounts for all microarchitectural effects including banking conflicts, memory latency, and pipeline stalls that are not visible in pure ISA-level simulation.
 
-\subsection{Docker Development Environment}
+\subsubsection{Docker Development Environment}
 
 To ensure consistency across team members' development environments and simplify onboarding, we created a comprehensive Docker image containing all necessary tools: the RISC-V GNU toolchain, QEMU with vector support, and associated utilities.
 
-\subsubsection{Docker Advantages}
+\paragraph{Docker Advantages}
 
 \textbf{Reproducibility:} Every team member works in an identical environment, eliminating ``works on my machine'' issues and ensuring consistent build outputs.
 
@@ -115,7 +115,7 @@ To ensure consistency across team members' development environments and simplify
 
 \textbf{Version Control:} The Dockerfile serves as documentation of the exact tool versions and configurations used, enabling future reproducibility and facilitating environment updates.
 
-\subsubsection{Docker Workflow}
+\paragraph{Docker Workflow}
 
 Our Docker image includes:
 \begin{itemize}
@@ -134,7 +134,7 @@ Team members mount their local source code directory into the container, enablin
     \item Persistent storage of development files
 \end{itemize}
 
-\subsection{ONNX Framework Integration}
+\subsubsection{ONNX Framework Integration}
 
 ONNX Runtime provides our functional verification framework, enabling validation of kernel correctness against reference implementations. The ONNX ecosystem includes:
 
