@@ -7,7 +7,7 @@ The RISC-V GNU Toolchain provides the foundational components necessary to build
 
 \paragraph{Toolchain Components}
 
-\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-gcc}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
+\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-g++}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
 \begin{itemize}
     \item \texttt{-march=rv64gcv}: Enables the full RV64GCV ISA including vector extensions
     \item \texttt{-O2}, \texttt{-O3}: Optimization levels that leverage vector instructions
