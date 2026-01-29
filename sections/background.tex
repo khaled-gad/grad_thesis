@@ -118,42 +118,6 @@ vfloat32m1_t v_sum = __riscv_vfredsum_vs_f32m1_f32m1(v, v_zero, vl);
 float sum = __riscv_vfmv_f_s_f32m1_f32(v_sum);
 \end{lstlisting}
 
-\subsection{Ara RISC-V Vector Coprocessor}
-
-Ara is a scalable vector coprocessor developed at ETH Zurich that works alongside the CVA6 (formerly Ariane) scalar core to accelerate RISC-V vector operations. It supports 2--16 parallel lanes and implements the RV64GCV instruction set. The processor uses a lane-based design where each lane handles 64-bit wide operations. Vector length (VLEN) can be configured from 128 to 1024 bits depending on application needs. It achieves up to 97\% FPU utilization when running a $256 \times 256$ double-precision matrix multiplication on sixteen lanes.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/ara.jpg}
-    \caption{Top-level architecture diagram of the Ara RISC-V Vector Coprocessor}
-    \label{fig:ara_architecture}
-\end{figure}
-\subsubsection{Architecture Components}
-
-\textbf{Lane Design:} Each lane operates as an independent vector processing unit with its own ALU and FPU. The lanes process different parts of vector data in parallel, with each lane handling vector elements based on its position. For example, in a 4-lane configuration, lane 0 processes elements 0, 4, 8, 12, while lane 1 handles elements 1, 5, 9, 13.
-
-\textbf{Sequencer:} The sequencer acts as the control center for instruction dispatch and execution tracking, maintaining a global view of all vector instructions across lanes. It can track up to 8 parallel vector instructions and ensures correct execution order while interfacing with the CVA6 scalar core to coordinate vector and scalar instruction execution.
-
-\textbf{Vector Register File (VRF):} The VRF features eight 64-bit wide banks per lane, providing 512 bits of total bandwidth per lane. Banks are accessed in parallel to supply operands to multiple units simultaneously. When multiple functional units need to access the same bank, conflicts are resolved dynamically with a weighted round-robin arbiter. The initial bank of each vector register is shifted in a ``barber's pole'' fashion to avoid banking conflicts when functional units fetch the first element of different vector registers.
-
-\textbf{Slide Unit (SLDU):} The SLDU handles vector element rearrangement operations essential for many algorithms, performing vector slides, element insertion and extraction, and vector shuffles. It must access all VRF banks simultaneously for some operations.
-
-\textbf{Vector Load/Store Unit (VLSU):} The VLSU is responsible for all vector memory operations and includes sophisticated address generation capabilities. It handles multiple outstanding memory requests and includes logic for address calculation for different stride patterns, memory request coalescing for unit-stride operations, and memory ordering constraint handling.
-
-\textbf{Queue Management:} The multi-banked organization of the VRF can lead to banking conflicts when several functional units try to access operands in the same bank. Each lane has a set of operand queues between the VRF and the functional units to absorb such banking conflicts.
-
-\subsubsection{Ara as a Performance Reference}
-
-Ara serves as the hardware reference platform for this project, providing cycle-accurate performance measurements of our vectorized kernels. By compiling and running our implementations on Ara's synthesizable RTL model, we can obtain realistic performance metrics including:
-
-\begin{itemize}
-    \item \textbf{Cycle Counts:} Precise measurement of execution cycles for both vectorized and scalar implementations
-    \item \textbf{Speedup Analysis:} Quantitative comparison showing the performance benefits of vectorization
-    \item \textbf{Hardware Utilization:} Insights into how effectively our code uses the vector processing resources
-    \item \textbf{Energy Efficiency:} Understanding of the power-performance trade-offs in our implementations
-\end{itemize}
-
-
-
 \subsection{Related Work: The RISC-V landscape for Vector Computing}
 
 \paragraph{System-Level Infrastructure for RISC-V Vector Design}
