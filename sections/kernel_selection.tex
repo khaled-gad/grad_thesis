@@ -1,30 +1,56 @@
 % !TEX root = ../Thesis.tex
 \subsection{Deep Learning Kernel Selection and Justification}
 
-The development of the RVV64\_Library begins with careful selection of computational kernels that represent fundamental building blocks for machine learning inference and digital signal processing applications. The selection process follows a systematic prioritization strategy based on several criteria.
+The development of the RVV64\_Library begins with careful selection of computational kernels that represent fundamental building blocks for machine learning inference and digital signal processing applications. The kernels chosen for the RVV64\_Library are grouped into six categories. Each category reflects a selection criterion emphasizing compute intensity, data-parallel structure, predictable memory access, composability, and representativeness for typical inference pipelines.
 
-\subsubsection{Selection Criteria}
+\subsubsection{Selection Criteria Categories}
 
-Kernels are selected based on the following criteria:
+The six categories of kernels selected for the RVV64\_Library are as follows:
 
 \begin{enumerate}
-    \item \textbf{Computational significance}: Operations that constitute performance bottlenecks in target applications. Profiling studies of neural network inference workloads indicate that matrix multiplication and convolution operations account for 80-95\% of total execution time, making them priority targets for optimization.
-    
-    \item \textbf{Data parallelism potential}: Operations exhibiting high degrees of data-level parallelism that can be efficiently mapped to RVV's vector execution model. Element-wise operations and reduction operations naturally fit this category.
-    
-    \item \textbf{Memory access patterns}: Operations with predictable memory access patterns that can leverage RVV's unit-stride, strided, and indexed memory operations without excessive overhead.
-    
-    \item \textbf{Composability}: Fundamental operations that can be composed to build more complex computational graphs. For example, matrix multiplication and activation functions are basic building blocks for fully-connected neural network layers.
-    
-    \item \textbf{Algorithmic complexity}: A mix of simple and complex kernels to demonstrate RVV's versatility. Simple element-wise operations like ReLU provide straightforward vectorization examples, while operations like Softmax requiring normalization demonstrate handling of complex multi-phase algorithms.
+    \item \textbf{Compute-intensive FMA Operations}: These kernels operate on dense arrays with regular, unit-stride memory access and nested loop structure. Implementations typically use blocking/tiling to expose long inner loops and maximize register reuse, while the inner-most operations are sequences of fused multiply-adds. Such structure yields high arithmetic intensity and sustained use of vector functional units.
+
+    Kernels in this category include: matrix multiplication and dense (fully connected layer).
+
+    \item \textbf{Sliding-window kernels}: These kernels compute outputs by applying a small kernel over local spatial neighborhoods of an input tensor (e.g., the standard convolution inner loop that multiplies a $K\times Kh\times Kw$ patch by kernel weights and accumulates results). Implementations may transform the problem to an implicit matrix multiply (im2col) or keep the sliding-window loop nest; both approaches aim to increase contiguous inner work and exploit reuse of input pixels across neighboring windows.
+
+    Kernels in this category include: convolution, transposed convolution, and maxpooling.
+
+    \item \textbf{Pointwise activations and elementwise arithmetic}: Pointwise kernels apply the same small computation independently to each tensor element (for example, max(0,x) for ReLU or an affine bias+scale followed by a nonlinear function). Because dependencies are per-element, these kernels are typically implemented as single-pass unit-stride operations that can be fused with neighboring operators to reduce memory traffic.
+
+    Kernels in this category include: ReLU, Leaky ReLU, Tensor Add, and Bias Add.
+
+    \item \textbf{Tensor indexing and data movement}: These kernels perform layout transformations, indexed loads/stores, or sparse data movements. They are often memory-bound and may exhibit irregular access; implementations therefore rely on batched indexed operations, in-register permutation, and careful prefetching or blocking to amortize address computation and reduce cache misses.
+
+    Kernels in this category include: gather, gather\_elements, scatter\_elements.
+
+    \item \textbf{Statistical and normalization layers}: Normalization kernels typically have a two-phase structure: a reduction phase that computes statistics (sum, mean, variance, or max) over one or more axes, followed by an elementwise normalization and optional affine rescale. Softmax similarly computes a max and exponentials followed by a sum reduction and normalization. Implementations target numerically stable reductions and exploit partial in-register reductions to minimize memory traffic.
+
+    Kernels in this category include: Batch Normalization (inference).
+
+    \item \textbf{Postprocessing (NMS)}: Postprocessing kernels perform selection, suppression, or decoding operations with irregular control flow and variable-sized outputs (for example, non-maximum suppression for object detection). Implementations often separate dense arithmetic (IoU, score comparisons) — which can be vectorized — from the final selection and compacting phases which may require scalar coordination or masked writes.
+
+    Kernels in this category include: non-maximum suppression (NMS).
 \end{enumerate}
 
-\subsubsection{Prioritized Kernel Categories}
 
-Based on these criteria, kernels are organized into three priority tiers tailored to AI and computer vision workloads, targeting models such as LeNet-5 and Tiny-YOLOv2.
 
-\textbf{Tier 1 (Core Linear Algebra for DNNs)}: Matrix multiplication, matrix addition, matrix transposition, and dot product. These operations form the backbone of convolutional and fully connected layers, dominating the computation in deep neural networks used for image classification and object detection.
+\subsubsection{RVV Vectorization Benefits by Category}
 
-\textbf{Tier 2 (Activation, Normalization, and Basic CV)}: ReLU, Sigmoid, Tanh, and Softmax activation functions, along with simple elementwise normalization and scaling. These operations are lighter than matrix kernels but are essential for expressing nonlinearities in CNNs like LeNet-5 and for stabilizing training and inference in models such as Tiny-YOLOv2.
+This subsection describes how each category maps to the RISC-V Vector (RVV) architectural features and the expected performance advantages. The RISC-V Vector Extension provides length-agnostic vector execution, flexible element widths, predicated operations for handling tails, and strided/indexed memory instructions that are central to the mappings below (RISC-V Vector Extension specification).
 
-\textbf{Tier 3 (Specialized Vision Operations)}: Convolution and pooling operations, as well as domain-specific kernels commonly used in computer vision pipelines (e.g., feature extraction, downsampling, and simple pre/post-processing). These operations showcase RVV's ability to handle complex multi-dimensional data access patterns typical of CNN-based AI workloads.
+\begin{enumerate}
+    \item \textbf{Compute-intensive FMA Operations}: GEMM and dot-product kernels have high arithmetic intensity and regular, unit-stride access to dense matrices. RVV benefits include long, chained vector multiply-accumulate sequences using floating-point vector instructions, efficient use of register grouping (LMUL) to increase effective vector width, and hardware-supported reductions for dot-products. Vectorized blocking and inner-loop unrolling map well to RVV's vsetvl-driven VL tuning, enabling near-peak use of available vector functional units.
+
+    \item \textbf{Sliding-window kernels}: Convolutions can be transformed to matrix-multiply-like inner loops (im2col) or implemented directly with sliding-window inner loops. RVV's strided and indexed loads allow efficient loading of kernel windows without expensive scalar gathers; predicated vector operations handle border and padding conditions without branch mispredictions. Data reuse across windows benefits from vector registers holding multiple channel or kernel elements, reducing memory traffic and improving arithmetic-to-memory ratio.
+
+    \item \textbf{Pointwise activations and elementwise arithmetic}: These operations are embarrassingly parallel with unit-stride access, making them ideal for wide vector lanes. RVV executes elementwise transforms (e.g., max for ReLU) across many elements per instruction, using masks to implement conditional activations (e.g., Leaky ReLU). Low overhead for lane-tail handling preserves correctness for arbitrary tensor sizes.
+
+    \item \textbf{Tensor indexing and data movement}: Gather/scatter and permutation kernels rely on RVV's indexed load/store capabilities. While irregular accesses are generally memory-bandwidth bound, RVV's indexed operations can process multiple index entries per vector instruction, amortizing the cost of address calculation. When indices are contiguous or have simple strides, strided loads provide near-unit-stride efficiency. Vector-based layout transforms also allow in-register rearrangement to avoid extra memory passes.
+
+    \item \textbf{Batch Normalization (inference)}: The Batch normalization kernel is a memory-bound, unit-stride pass that applies the same small parameter set across spatial and batch dimensions. RVV accelerates this pattern by loading per-channel parameters into vector registers or scalar registers and applying vectorized multiply-add sequences across long contiguous segments of data; masked operations handle tails and fused implementations can combine scale+shift with an activation to reduce memory traffic.
+
+    \item \textbf{Non-maximum suppression (NMS)}: NMS iteratively selects high-scoring bounding boxes and suppresses overlapping boxes whose IoU exceeds a threshold. The computationally intensive portion is the pairwise IoU and score-thresholding work which can be expressed as many parallel box-pair comparisons. RVV benefits by computing IoU numerators/denominators and threshold predicates across many candidate boxes per vector instruction, using masks to mark suppressed elements. The remaining selection/compaction step typically requires scalar coordination or masked compress-store operations, but the heavy arithmetic and comparisons are offloaded to vector units for measurable speedups.
+\end{enumerate}
+
+In summary, the six-category taxonomy guides kernel prioritization by pairing algorithmic characteristics with RVV capabilities: high arithmetic intensity and unit-stride access maximize compute throughput; predictable strided or indexed access benefits from RVV memory modes; and reductions, predication, and flexible vector lengths enable efficient handling of normalization and irregular tails.

@@ -7,7 +7,7 @@ The RISC-V GNU Toolchain provides the foundational components necessary to build
 
 \paragraph{Toolchain Components}
 
-\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-gcc}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
+\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-g++}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
 \begin{itemize}
     \item \texttt{-march=rv64gcv}: Enables the full RV64GCV ISA including vector extensions
     \item \texttt{-O2}, \texttt{-O3}: Optimization levels that leverage vector instructions
@@ -58,89 +58,65 @@ This approach provides:
     \item Configurable vector length (VLEN) for testing portability
 \end{itemize}
 
-\subsubsection{Ara RTL Compilation and Simulation}
 
-Ara provides a cycle-accurate hardware model written in SystemVerilog, enabling precise performance measurement of our vectorized kernels. The Ara repository includes the complete RTL description of the vector coprocessor, testbench infrastructure, and build scripts.
+%%%%%%%%%%%%%%%%% ONNX SECTION %%%%%%%%%%%%%%%%%
 
-\paragraph{Ara Simulation Environment}
-
-\textbf{Hardware Description:} Ara's RTL is synthesizable and can be simulated using industry-standard tools like Verilator. The repository includes:
-\begin{itemize}
-    \item Complete processor core with configurable lane count
-    \item Memory system models
-    \item Instruction trace generation
-    \item Performance counter interfaces
-\end{itemize}
-
-\textbf{Software Integration:} Ara supports standard RISC-V toolchains and can execute the same binaries produced by our compilation flow. Programs are loaded into simulated memory and executed cycle-by-cycle, with detailed logging of:
-\begin{itemize}
-    \item Instruction execution sequences
-    \item Vector register states
-    \item Memory access patterns
-    \item Pipeline utilization
-    \item Cycle-accurate timing
-\end{itemize}
-
-\textbf{Performance Measurement:} Ara's simulation environment provides precise metrics for evaluating our kernels:
-\begin{itemize}
-    \item Total cycle count for kernel execution
-    \item Vector unit utilization percentages
-    \item Memory bandwidth consumption
-    \item Instruction-level parallelism achieved
-\end{itemize}
-
-\textbf{Compilation and Execution Flow:}
-\begin{enumerate}
-    \item Compile C++ code with RVV intrinsics using RISC-V GCC
-    \item Generate ELF binary with embedded test data
-    \item Load binary into Ara simulation environment
-    \item Execute simulation and collect performance traces
-    \item Extract cycle counts and utilization metrics
-    \item Compare vectorized vs. scalar implementations
-\end{enumerate}
-
-This cycle-accurate measurement is essential for quantifying the real-world performance benefits of our vectorization efforts, as it accounts for all microarchitectural effects including banking conflicts, memory latency, and pipeline stalls that are not visible in pure ISA-level simulation.
-
-\subsubsection{Docker Development Environment}
-
-To ensure consistency across team members' development environments and simplify onboarding, we created a comprehensive Docker image containing all necessary tools: the RISC-V GNU toolchain, QEMU with vector support, and associated utilities.
-
-\paragraph{Docker Advantages}
-
-\textbf{Reproducibility:} Every team member works in an identical environment, eliminating ``works on my machine'' issues and ensuring consistent build outputs.
-
-\textbf{Portability:} The development environment can be deployed on any system supporting Docker, regardless of host OS (Linux, macOS, Windows).
-
-\textbf{Isolation:} Tool installations and configurations are isolated from the host system, preventing conflicts with other software and allowing easy rollback to known-good states.
-
-\textbf{Version Control:} The Dockerfile serves as documentation of the exact tool versions and configurations used, enabling future reproducibility and facilitating environment updates.
-
-\paragraph{Docker Workflow}
-
-Our Docker image includes:
-\begin{itemize}
-    \item RISC-V GNU Toolchain (complete build from source)
-    \item QEMU 8.2+ with RVV support
-    \item Development utilities (make, cmake, git)
-    \item Text editors and debugging tools
-    \item Pre-configured environment variables
-\end{itemize}
-
-Team members mount their local source code directory into the container, enabling:
-\begin{itemize}
-    \item Code editing with familiar host-side tools
-    \item Compilation and execution inside the container
-    \item Direct access to build artifacts on the host
-    \item Persistent storage of development files
-\end{itemize}
-
-\subsubsection{ONNX Framework Integration}
-
-ONNX Runtime provides our functional verification framework, enabling validation of kernel correctness against reference implementations. The ONNX ecosystem includes:
-
-\textbf{Model Conversion Tools:} Utilities for converting models from PyTorch, TensorFlow, and other frameworks to ONNX format.
-
-\textbf{Reference Runtime:} A highly optimized C++ inference engine that serves as our ground truth for correctness validation.
+\subsubsection{ONNX: Open Neural Network Exchange}
 
 
-\textbf{Operator Testing:} ONNX's operator test suite provides standardized test cases for individual operations, which we use to validate each kernel implementation.
+The Open Neural Network Exchange (ONNX) is an open standard designed to represent machine learning and deep learning models in a framework-independent manner. It was originally established through a collaboration between Facebook and Microsoft with the objective of improving interoperability across machine learning frameworks, tools, and hardware platforms.
+
+ONNX defines a common intermediate representation for machine learning models, enabling them to be exported from one framework and executed or analyzed in another without modification. This representation is based on a computational graph abstraction, where nodes correspond to standardized operators and edges represent the flow of multi-dimensional tensors between operators.
+
+The adoption of ONNX has been widely supported by both academia and industry, and it is now integrated into many popular machine learning frameworks and deployment toolchains. Its design emphasizes portability, reproducibility, and long-term maintainability, making it particularly suitable for systems-level research and hardware-oriented optimization efforts.
+
+In the context of this project, ONNX serves as a unifying abstraction layer between high-level machine learning models and low-level, architecture-specific kernel implementations targeting the RISC-V Vector Extension.
+
+\paragraph{Components of ONNX and Their Role in the Project}
+
+\subparagraph{ONNX Model Components}
+
+An ONNX model represents a machine learning computation as a directed computational graph, where nodes correspond to standardized operators and edges represent the flow of multi-dimensional tensor data between operators. This graph-based representation explicitly defines model inputs, outputs, and intermediate computations, providing a clear and structured description of the overall computation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.2\textwidth]{figures/ONNX-GRAPH-EX.png}
+    \caption{ONNX Model Computational Graph example illustrating nodes (operators) and edges (tensor data flow).}
+    \label{fig:onnx_graph}
+\end{figure}
+
+ONNX operators are drawn from a predefined and versioned operator set, with each operator having deterministic and well-specified mathematical semantics. In addition, ONNX models explicitly define tensor data types, shapes, and constant parameters, enabling consistent interpretation of computations across different software and hardware platforms. This standardized structure allows ONNX models to serve as precise and reproducible representations of intended kernel behavior.
+
+\subparagraph{Role of ONNX in the Project}
+
+In this project, ONNX models are used as golden references for the functional validation of machine learning kernels implemented using the RISC-V Vector Extension. The ONNX representation mirrors the functionality of the developed kernels by explicitly defining the same inputs, outputs, and computational operations, independent of any specific hardware implementation.
+
+The RVV-based kernel outputs are compared directly against the corresponding outputs generated from ONNX models executed using a validated ONNX runtime. Since ONNX provides a standardized and hardware-agnostic format with deterministic operator behavior, it serves as a reliable baseline for correctness verification. This approach ensures that discrepancies in output can be attributed to kernel implementation issues rather than ambiguities in operator definitions or execution semantics.
+
+By adopting ONNX as the functional reference, the project achieves reproducible and framework-independent validation, strengthening confidence that the optimized vectorized kernels preserve the intended computational behavior while improving performance.
+
+%%%%%%%%%%%%%%%%%% RTL CORES SECTION %%%%%%%%%%%%%%%%%
+
+\subsubsection{RTL Cores and Hardware Simulation}
+
+Hardware simulation using Register Transfer Level (RTL) cores plays a critical role in the development and evaluation of vectorized machine learning kernels. While functional simulators are sufficient for validating instruction set compliance, they lack the temporal accuracy required to capture microarchitectural effects such as pipeline behavior, memory contention, and vector execution overheads. For this reason, this project employs cycle-accurate RTL cores to provide a realistic evaluation environment for RISC-V Vector Extension (RVV)-based kernel development.
+
+Two RTL vector processors are used in this work: the \textit{Vicuna} vector coprocessor and the \textit{Ara} vector processor. Together, they represent complementary points in the RISC-V vector design space and provide a robust simulation foundation for functional and performance-oriented analysis.
+
+\paragraph{Vicuna RISC-V Vector Coprocessor}
+
+Vicuna is a 32-bit RISC-V vector coprocessor designed with a primary emphasis on timing predictability and deterministic execution. It targets the \texttt{Zve32x} subset of the RVV 1.0 specification, making it well-suited for embedded and edge-class workloads that rely on integer and fixed-point vector operations, such as quantized neural networks.
+
+The architecture prioritizes worst-case execution time (WCET) analyzability by avoiding microarchitectural features that introduce timing variability, such as out-of-order execution or banked register files. As a result, Vicuna provides a cycle-accurate and bit-accurate simulation environment in which vector instruction latency is a deterministic function of vector length and hardware configuration. In this project, Vicuna serves as a baseline RTL platform for evaluating vector execution behavior in predictable embedded-class systems.
+
+\paragraph{Ara Vector Processor}
+
+Ara is a 64-bit, application-class RISC-V vector processor designed to maximize throughput and floating-point utilization for high-performance computing and machine learning workloads. It implements the full RVV 1.0 specification, supporting a wide range of data types, including IEEE-754 single- and double-precision floating-point formats.
+
+Ara employs a lane-based vector architecture with scalable parallelism and supports advanced features such as vector chaining, masked execution, and high-bandwidth vector memory operations. Its tight integration with a scalar host core enables efficient amortization of instruction overhead across long vector sequences, making it particularly well-suited for compute-intensive kernels such as matrix multiplication, convolution, and activation functions.
+
+In this project, Ara provides a high-fidelity RTL simulation environment for evaluating the performance and correctness of vectorized machine learning kernels under realistic architectural constraints.
+
+
+
+\subparagraph{\textbf{A detailed architectural analysis, execution model discussion, and performance evaluation of both the Vicuna and Ara cores are presented in Section~4 of this thesis.}}
