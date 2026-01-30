@@ -3,60 +3,72 @@
 
 \subsubsection{RISC-V GNU Toolchain}
 
-The RISC-V GNU Toolchain provides the foundational components necessary to build, compile, link, and debug code for the RISC-V ISA. This toolchain was selected for its active community support, regular updates, and comprehensive support for both native and emulated environments, including full support for the vector extension.
+The RISC-V GNU Toolchain provides the foundational software infrastructure required to develop, compile, link, and debug programs targeting the RISC-V instruction set architecture. In this project, the toolchain serves as the primary means of compiling and validating RISC-V Vector Extension (RVV)–based kernel implementations prior to functional verification and RTL-level evaluation.
+
+The toolchain was selected due to its mature support for the RISC-V ecosystem, active community maintenance, and integration of RVV 1.0 intrinsics within the GNU Compiler Collection (GCC). This enables the development of vectorized kernels using high-level C/C++ code while maintaining explicit control over generated vector instructions.
 
 \paragraph{Toolchain Components}
 
-\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-g++}):} Translates C/C++ source code into RISC-V assembly and object code. The compiler includes full support for RISC-V vector intrinsics, allowing developers to write vectorized code using high-level C/C++ functions that map directly to vector instructions. Architecture-specific flags enable vector extension support, including:
+\textbf{Compiler (\texttt{riscv64-unknown-linux-gnu-g++}):}  
+The GCC compiler translates C/C++ source code into RISC-V assembly and object code. In this work, vectorization is primarily achieved through explicit RVV intrinsics rather than relying on automatic vectorization. This approach ensures deterministic mapping between source-level kernel implementations and the generated vector instructions, which is essential for functional verification and architectural analysis.
+
+The following architecture-specific compilation flags are used throughout the project:
 \begin{itemize}
-    \item \texttt{-march=rv64gcv}: Enables the full RV64GCV ISA including vector extensions
-    \item \texttt{-O2}, \texttt{-O3}: Optimization levels that leverage vector instructions
-    \item \texttt{-mabi=lp64d}: Specifies the 64-bit ABI with double-precision floating-point
+    \item \texttt{-march=rv64gcv}: Enables the RV64GCV ISA, including the RISC-V Vector Extension
+    \item \texttt{-mabi=lp64d}: Specifies the 64-bit ABI with double-precision floating-point support
+    \item \texttt{-O2}, \texttt{-O3}: Enable standard compiler optimizations without altering the explicit vectorization strategy
 \end{itemize}
 
-\textbf{Assembler (\texttt{riscv64-unknown-linux-gnu-as}):} Converts assembly code into object files, supporting both standard RISC-V instructions and vector extension opcodes.
+\textbf{Assembler (\texttt{riscv64-unknown-linux-gnu-as}):}  
+Converts RISC-V assembly code into object files, supporting both scalar and RVV instruction encodings. It is used indirectly through the compiler toolchain and for inspecting compiler-generated assembly during kernel analysis.
 
-\textbf{Linker (\texttt{riscv64-unknown-linux-gnu-ld}):} Links multiple object files and resolves external references to produce final executable binaries.
+\textbf{Linker (\texttt{riscv64-unknown-linux-gnu-ld}):}  
+Links object files and resolves external symbols to produce final executable binaries suitable for execution under emulation or simulation.
 
-\textbf{Debugger (\texttt{riscv64-unknown-linux-gnu-gdb}):} Enables source-level debugging and inspection of RISC-V binaries running under emulation, with support for examining vector register contents.
+\textbf{Debugger (\texttt{riscv64-unknown-linux-gnu-gdb}):}  
+Provides source-level debugging capabilities for RISC-V binaries executed under QEMU, including inspection of scalar and vector registers. This functionality is essential for validating intermediate kernel states during development.
 
-\textbf{Binary Utilities:} Tools like \texttt{objdump}, \texttt{readelf}, and \texttt{nm} for inspecting compiled binaries, verifying instruction encoding, and analyzing symbol tables.
+\textbf{Binary Utilities:}  
+Tools such as \texttt{objdump}, \texttt{readelf}, and \texttt{nm} are used to inspect binaries, verify RVV instruction generation, and analyze symbol information.
 
-\textbf{Runtime Libraries:} Standard runtime support including newlib and glibc, providing C standard library functionality for both bare-metal and Linux environments.
+\textbf{Runtime Libraries:}  
+The GNU C Library (\texttt{glibc}) is used for Linux-based execution under QEMU, providing standard runtime support required for user-mode and system-mode emulation. Bare-metal runtime support is not a primary focus of this work.
+
+Collectively, the RISC-V GNU Toolchain constitutes the software development layer of the project, enabling portable kernel implementation and serving as the entry point for subsequent functional and RTL-level verification.
+
+% ------------------------------------------------------------
 
 \subsubsection{QEMU Emulator}
 
-QEMU (Quick Emulator) serves as our primary execution environment for RISC-V code. As a full system emulator, QEMU provides comprehensive support for user-mode and full-system emulation, including the RISC-V vector extension in recent versions.
+QEMU (Quick Emulator) is employed as the primary functional execution environment for RISC-V binaries in this project. QEMU provides architecturally correct emulation of the RISC-V ISA, including the RISC-V Vector Extension, and is used exclusively for functional correctness validation and software-level testing. Performance results reported in this thesis are derived from RTL simulation rather than QEMU execution.
 
-\paragraph{Why QEMU Over Spike}
+QEMU was selected over alternative simulators due to its system-level completeness, integration with standard debugging tools, and practical support for executing complex software stacks.
 
-While Spike is the official RISC-V ISA simulator from the RISC-V Foundation, we chose QEMU for several key advantages:
+\paragraph{Rationale for Using QEMU}
 
-\textbf{System Completeness:} QEMU emulates entire Linux-based systems, not just the ISA, enabling realistic testing of our implementations including system calls, memory management, and I/O operations.
+While Spike is the official RISC-V ISA simulator, QEMU offers several advantages aligned with the goals of this project. QEMU supports full Linux execution environments, enabling realistic testing of vectorized kernels in the presence of system calls, memory management, and runtime libraries. Additionally, QEMU integrates seamlessly with GDB, allowing interactive debugging and inspection of vector register state.
 
-\textbf{Debugging Integration:} QEMU integrates seamlessly with GDB, allowing source-level debugging with breakpoints, watchpoints, and inspection of both scalar and vector registers.
+QEMU employs dynamic binary translation, which significantly reduces simulation time compared to purely interpretive simulators. This improvement in execution speed enhances development productivity when validating functional correctness across a large number of test cases and kernel configurations. Furthermore, modern QEMU versions provide architecturally accurate support for RVV 1.0 instructions, enabling reliable ISA-level validation.
 
-\textbf{Performance:} QEMU uses dynamic binary translation, providing faster execution than Spike's interpretive approach, which is crucial when running complex neural network workloads.
+\paragraph{QEMU User-Mode Emulation}
 
-\textbf{Vector Extension Support:} Modern QEMU versions include comprehensive RVV support, accurately emulating vector instructions including the latest intrinsics.
-
-\textbf{Community and Documentation:} QEMU benefits from wider usage, more extensive documentation, and more active development than Spike, with a large community providing support and bug fixes.
-
-\paragraph{QEMU User Mode Execution}
-
-Our typical workflow uses QEMU in user-mode emulation, where RISC-V Linux binaries are executed directly on the host system:
+QEMU user-mode emulation is the primary execution mode used throughout this project. In this mode, RISC-V Linux binaries are executed directly on the host system without emulating a full hardware platform:
 
 \begin{lstlisting}[language=bash]
 qemu-riscv64 -cpu rv64,v=true,vlen=256 ./my_program
 \end{lstlisting}
 
-This approach provides:
-\begin{itemize}
-    \item Fast startup times
-    \item Direct access to host file system
-    \item Straightforward integration with development tools
-    \item Configurable vector length (VLEN) for testing portability
-\end{itemize}
+User-mode emulation offers fast startup times, direct access to the host file system, and straightforward integration with development tools. Importantly, it allows the vector length (\texttt{VLEN}) to be configured at runtime, enabling validation of Vector Length Agnostic (VLA) kernel behavior across multiple vector configurations.
+
+\paragraph{QEMU System-Mode Emulation}
+
+In addition to user-mode execution, QEMU system-mode emulation is employed during the development of Python wrappers for the kernel library. System-mode emulation provides a complete virtualized RISC-V machine, including bootloader, kernel, and virtual devices, enabling end-to-end testing of library integration within a full operating system environment.
+
+This mode is particularly valuable for validating language bindings, dynamic linking behavior, and interaction between Python-based tooling and the underlying RISC-V kernel implementations. While system-mode execution incurs higher simulation overhead, it provides a realistic software stack that closely mirrors deployment scenarios.
+
+\paragraph{Role in the Verification Workflow}
+
+Within the overall methodology, QEMU serves as the functional validation layer. Kernel outputs produced under QEMU are compared against ONNX-based golden references to ensure correctness and portability. Once functional correctness is established, performance and microarchitectural behavior are evaluated using cycle-accurate RTL simulation on the Vicuna and Ara cores.
 
 
 %%%%%%%%%%%%%%%%% ONNX SECTION %%%%%%%%%%%%%%%%%
