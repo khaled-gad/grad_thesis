@@ -9,7 +9,7 @@ The rapid evolution of artificial intelligence (AI) and digital signal processin
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/Flops.png}
-    \caption{Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models.\cite{ourworldindata}}
+	\caption[Growth in AI model computational requirements]{Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models.\cite{ourworldindata}}
     \label{fig:ai-growth}
 \end{figure}
 
@@ -43,9 +43,9 @@ Proprietary vector processing solutions, such as Intel's Advanced Vector Extensi
 
 RISC-V Vector Extensions (RVV) emerged as a promising solution to address these challenges by providing an open-source, royalty-free vector processing architecture specifically designed for data-parallel computation \cite{riscv-v-spec}. Unlike proprietary alternatives, RVV is developed through an open, collaborative process that ensures the architecture meets the diverse needs of the computing community.
 
-The most distinctive feature of RVV is its \textbf{vector-length agnostic (VLA)} programming model, which represents a fundamental departure from traditional fixed-width SIMD approaches \cite{riscv-v-spec}. In conventional vector processing, software must be written for specific vector widths, and different code paths are often required to support processors with different vector capabilities. RVV's vector-length agnostic model allows the same code to run efficiently across processors with different vector lengths, from embedded systems with short vectors to high-performance computing systems with very long vectors.
+The most distinctive feature of RVV is its \textbf{vector-length agnostic (VLA)} programming model, which represents a fundamental departure from traditional fixed-width SIMD approaches. In conventional vector processing, software must be written for specific vector widths, and different code paths are often required to support processors with different vector capabilities. RVV's vector-length agnostic model allows the same code to run efficiently across processors with different vector lengths, from embedded systems with short vectors to high-performance computing systems with very long vectors.
 
-This flexibility is particularly valuable for AI and DSP applications, which span a wide range of computing environments with different performance and power requirements. An AI inference algorithm written using RVV can run efficiently on both a power-constrained edge device with 128-bit vectors and a high-performance server processor with 2048-bit vectors, without requiring code modifications or recompilation. The ratification of RVV Version 1.0 in late 2021 provided a crucial guarantee of stability, signaling to the industry that the architecture was mature and ready for widespread adoption \cite{riscv-v-spec}.
+This flexibility is particularly valuable for AI and DSP applications, which span a wide range of computing environments with different performance and power requirements. An AI inference algorithm written using RVV can run efficiently on both a power-constrained edge device with 128-bit vectors and a high-performance server processor with 2048-bit vectors, without requiring code modifications or recompilation. The ratification of RVV Version 1.0 in late 2021 provided a crucial guarantee of stability, signaling to the industry that the architecture was mature and ready for widespread adoption.
 
 \subsection{Problem Statement}
 
@@ -91,7 +91,7 @@ This thesis makes the following contributions to the field of RISC-V vector proc
     
     \item \textbf{A library of optimized RVV kernels (RVV64\_Library)} implementing a wide array of operations for neural network inference and signal processing. The library demonstrates efficient use of advanced RVV features, including strip-mining loops, vector-length agnostic programming, LMUL configuration, and masked operations.
     
-    \item \textbf{Performance characterization on a high-performance RTL platform:} Implementation and evaluation were conducted using \textbf{Ara} \cite{ara}, a 64-bit vector coprocessor targeting application-class workloads. The study explores the impact of Ara's microarchitecture, including its configurable lane counts and full floating-point support, on kernel efficiency.
+    \item \textbf{Performance characterization on a high-performance RTL platform:} Implementation and evaluation were conducted using \textbf{Ara}, a 64-bit vector coprocessor targeting application-class workloads. The study explores the impact of Ara's microarchitecture, including its configurable lane counts and full floating-point support, on kernel efficiency.
     
     \item \textbf{Quantitative analysis} demonstrating significant performance gains through vectorization. Experimental results on the Ara co-processor show substantial speedups ranging from $4\times$ to over $70\times$ compared to scalar baseline implementations, highlighting the efficiency of the RVV ISA for data-parallel workloads.
     
