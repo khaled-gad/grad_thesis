@@ -1,7 +1,7 @@
 % !TEX root = ../Thesis.tex
 \subsection{Hardware (RTL Cores)}
 
-In the rigorous domain of computer architecture research, particularly within the context of next-generation machine learning (ML) workload acceleration, the simulation environment serves as the foundational bedrock for all performance claims and design space explorations. While high-level functional simulators—such as Spike or QEMU—provide a mechanism for validating instruction set architecture (ISA) compliance and functional correctness, they fundamentally lack the temporal fidelity required to model complex microarchitectural phenomena.
+In the rigorous domain of computer architecture research, particularly within the context of next-generation machine learning (ML) workload acceleration, the simulation environment serves as the foundational bedrock for all performance claims and design space explorations. While high-level functional simulators—such as Spike \cite{spike-simulator} or QEMU \cite{qemu-riscv}—provide a mechanism for validating instruction set architecture (ISA) compliance and functional correctness, they fundamentally lack the temporal fidelity required to model complex microarchitectural phenomena.
 
 \subsubsection{Role of RTL Cores in Architectural Research}
 
@@ -9,21 +9,17 @@ For a graduation thesis focused on the benchmarking of RISC-V vector architectur
 
 Simulation at this level allows the researcher to observe the precise interaction between the scalar host processor and the vector accelerator, capturing the ``handshake'' overheads that are often idealized in abstract models. Furthermore, RTL simulation is the only methodology capable of generating credible Power, Performance, and Area (PPA) metrics. By simulating the actual hardware description that would eventually be mapped to silicon or Field-Programmable Gate Arrays (FPGAs), researchers can derive energy efficiency numbers (e.g., FLOPS/Watt) and area utilization statistics (e.g., gate counts or LUT usage) that are grounded in physical reality rather than theoretical estimation.
 
-For machine learning workloads, which are characteristically defined by dense linear algebra operations (GEMM), convolutions (CONV2D), and high-bandwidth memory access patterns, RTL cores reveal the true utilization of functional units (FUs). They allow for the precise measurement of ``raw throughput ideality''—a metric comparing achieved performance against theoretical peaks—and facilitate the identification of non-obvious bottlenecks, such as the scalar core's instruction issue rate limiting the performance of short-vector kernels.
-
 \subsubsection{Importance of Cycle-Accurate Simulation}
 
-The evaluation of vectorized ML kernels requires a simulation environment that can faithfully model the behavior of the RISC-V Vector (RVV) extension. The RVV specification introduces a paradigm of data-level parallelism that is significantly more complex than traditional SIMD (Single Instruction, Multiple Data) approaches found in fixed-width architectures. Features such as Vector Length Agnosticism (VLA), dynamic Element Width (SEW) grouping (LMUL), and masked execution create a vast design space where theoretical efficiency does not always translate to realized performance.
+The evaluation of vectorized ML kernels requires a simulation environment that can faithfully model the behavior of the RISC-V Vector (RVV) extension. The RVV specification introduces a paradigm of data-level parallelism that is significantly more complex than traditional SIMD (Single Instruction, Multiple Data) approaches found in fixed-width architectures. Features such as Vector Length Agnosticism (VLA), dynamic Element Width (SEW) grouping (LMUL), and masked execution create a vast design space where theoretical efficiency does not always translate to realized performance \cite{riscv-v-spec}.
 
 Cycle-accurate simulation is paramount for evaluating these kernels because it exposes the latency penalties associated with microarchitectural housekeeping. For instance, the ``strip-mining'' loops common in ML kernels require the hardware to dynamically adjust the vector length (\texttt{vsetvli}) and handle potentially misaligned memory accesses. An RTL simulation reveals the setup time of the vector pipeline, the latency of the Vector Load/Store Unit (VLSU) when handling strided accesses (common in tensor operations), and the impact of coherent cache hierarchies on memory bandwidth.
 
-Without cycle-accurate visibility, a researcher might overestimate the performance of a matrix multiplication kernel by failing to account for the cycles lost to cache invalidations or the serialization of micro-operations within the vector unit. Moreover, ML workloads often exhibit phases of computation that are distinct: memory-bound phases (e.g., activation loading) and compute-bound phases (e.g., matrix accumulation). RTL cores allow for the construction of ``Roofline'' models based on empirical data, plotting arithmetic intensity against achieved floating-point operations per second.
-
 \subsubsection{Evolution of Core Selection: From Vicuna to Ara}
 
-The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight FPGA implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
+The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight FPGA implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
 
-While Vicuna served as a robust baseline for integer-only quantized kernels, it lacked the Vector Floating-Point Units ($VFPU$) necessary for modern inference and training benchmarks. This necessitated a transition to \textbf{Ara}, a significantly more powerful and flexible architecture. Unlike the embedded constraints of Vicuna, Ara supports the full $64$-bit floating-point spectrum and provides a much more sophisticated RTL simulation environment, offering higher temporal fidelity and parametric scalability.
+While Vicuna served as a robust baseline for integer-only quantized kernels, it lacked the Vector Floating-Point Units ($VFPU$) necessary for modern inference and training benchmarks. This necessitated a transition to \textbf{Ara} \cite{ara}, a significantly more powerful and flexible architecture. Unlike the embedded constraints of Vicuna, Ara supports the full $64$-bit floating-point spectrum and provides a much more sophisticated RTL simulation environment, offering higher temporal fidelity and parametric scalability.
 
 Due to these architectural requirements, the methodology for the performance validation phase of this thesis was refined. While both cores are analyzed to represent the diversity of the RISC-V vector ecosystem, the actual benchmarking of complex, compute-intensive kernels—such as $Conv2D$, $MaxPool$, and $ReLU$—is performed exclusively on the \textbf{Ara} core. This approach ensures that the benchmarking suite can evaluate the hardware's ability to handle the high arithmetic intensity and precision demands characteristic of modern neural network layers, which remain outside the functional scope of integer-only embedded cores.
 
@@ -41,14 +37,14 @@ Despite its focus on predictability, Vicuna does not sacrifice scalability. It i
 
 \subsubsection{Architectural Organization}
 
-Vicuna acts as a coprocessor to a main scalar core. The reference integration uses the Ibex core (a small, efficient 2-stage RISC-V core) or the CV32E40X. Communication is handled via the OpenHW Group's CORE-V eXtension Interface (XIF), where the main core fetches instructions and dispatches valid vector instructions to Vicuna.
+Vicuna acts as a coprocessor to a main scalar core. The reference integration uses the Ibex core (a small, efficient 2-stage RISC-V core) or the CV32E40X \cite{cv32e40x}. Communication is handled via the OpenHW Group's CORE-V eXtension Interface (XIF), where the main core fetches instructions and dispatches valid vector instructions to Vicuna.
 
 Vicuna is highly configurable, allowing for independent scaling of the architectural vector length (VLEN) and the physical datapath width (VPIPE\_W). To minimize logic consumption on FPGAs, Vicuna avoids complex sub-word selection multiplexers; instead, it utilizes operand shift registers to feed functional units. Source vector registers are read entirely into these buffers and shifted into the processing pipeline cycle-by-cycle. Furthermore, to eliminate the timing unpredictability of bank conflicts, the Vector Register File (VRF) is implemented as a multi-ported XOR-based RAM rather than a banked architecture. This ensures that register access latency remains constant regardless of the instruction sequence or data pattern.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/Vicuna.jpg}
-\caption{Overview of Vicuna's architecture and its integration with the Ibex main core. Both cores share a common data cache with predictable memory arbitration ensuring deterministic timing behavior.}
+\caption[Architectural overview of Vicuna and Ibex integration]{Overview of Vicuna's architecture and its integration with the Ibex main core. Both cores share a common data cache with predictable memory arbitration ensuring deterministic timing behavior.}
 \label{fig:vicuna_diagram}
 \end{figure}
 
@@ -86,67 +82,44 @@ Vicuna represents the \textit{predictable-efficiency} design point in the benchm
 
 \subsubsection{Overview and Design Motivation}
 
-Ara is a 64-bit vector processor designed for high-throughput, energy-efficient execution of data-parallel workloads. Unlike Vicuna’s focus on timing predictability, Ara is optimized for maximal floating-point utilization, making it suitable for High-Performance Computing (HPC) and Machine Learning (ML) applications. It implements the full RVV 1.0 specification, supporting a wide range of data types from 64-bit double-precision floating-point values down to 8-bit integers.
+Ara \cite{ara} is a 64-bit vector processor designed for high-throughput, energy-efficient execution of data-parallel workloads. Unlike Vicuna’s focus on timing predictability, Ara is optimized for maximal floating-point utilization, making it suitable for High-Performance Computing (HPC) and Machine Learning (ML) applications. It implements the full RVV 1.0 specification, supporting a wide range of data types from 64-bit double-precision floating-point values down to 8-bit integers.
 
-Ara operates as a coprocessor tightly coupled with a scalar host core, typically CVA6 (formerly Ariane). Its primary architectural goal is to amortize the instruction fetch and decode costs of the scalar core across long vector sequences, achieving a high ratio of FLOPS per Watt. The design explicitly draws inspiration from classical vector supercomputers such as the Cray-1, as well as contemporary systems like the Fugaku A64FX processor, positioning Ara as an open-source RISC-V vector architecture for the exascale era.
+Ara operates as a coprocessor tightly coupled with a scalar host core, specifically the \textbf{CVA6} (formerly Ariane) \cite{cva6}. Its primary architectural goal is to amortize the instruction fetch and decode costs of the scalar core across long vector sequences, achieving a high ratio of FLOPS per Watt. The design explicitly draws inspiration from classical vector supercomputers such as the Cray-1, positioning Ara as a leading open-source RISC-V vector architecture.
 
-Ara's architectural evolution—most notably the transition from Ara to Ara2—was driven by two main objectives: strict compliance with the ratified RISC-V Vector Extension version 1.0 (RVV 1.0) and aggressive scaling of floating-point throughput. This evolution required substantial microarchitectural changes to support dynamic vector length configuration, masking semantics, and mixed element widths, while enabling parametric scaling across a wide range of performance and power targets.
+The version of Ara utilized in this research represents the second generation of the architecture (often referred to in literature as \textbf{Ara2}). This iteration was specifically re-engineered for strict compliance with the ratified \textbf{RISC-V Vector Extension version 1.0}, introducing substantial microarchitectural changes to support dynamic vector length configuration, masking semantics, and mixed element widths.
 
 \subsubsection{Architectural Organization}
 
-The Ara system operates as a coherent vector coprocessor tightly integrated with the CVA6 scalar core. CVA6 manages the control plane, including instruction fetch, control flow, and exception handling. Vector instructions are dispatched to Ara only after they are committed in the scalar pipeline, ensuring non-speculative execution and simplifying the vector unit’s control logic by eliminating rollback requirements due to branch mispredictions.
+The Ara system operates as a coherent vector coprocessor. CVA6 manages the control plane, including instruction fetch and exception handling. Vector instructions are dispatched to Ara only after they are committed in the scalar pipeline, ensuring non-speculative execution.
 
-Ara’s microarchitecture is composed of $N$ identical vector lanes, where $N$ is typically a power of two ($2, 4, 8, 16$). Each lane contains a proportional slice of the Vector Register File (VRF) and a set of functional units, including a Vector ALU (VALU) and a Vector Floating-Point Unit (VFPU). To provide high register bandwidth without incurring the area cost of multi-ported memories, Ara implements a \emph{barber-pole} banking scheme. In this layout, vector elements are distributed across banks and lanes such that, for most element-wise operations, operands are locally available within each lane, minimizing cross-lane data movement.
+Ara’s microarchitecture is composed of $N$ identical vector lanes (typically 2, 4, 8, or 16). Each lane contains a slice of the Vector Register File (VRF) and functional units (VALU and VFPU). To provide high register bandwidth, Ara implements a \emph{barber-pole} banking scheme. This layout ensures that vector elements are distributed such that most operations find their operands locally within the lane, minimizing cross-lane data movement.
 
-This banking strategy allows Ara to achieve high VRF bandwidth using simple single-port SRAMs while maintaining scalability. Consecutive vector elements are striped across lanes (e.g., element 0 in lane 0, element 1 in lane 1), enabling the processor to execute up to $N$ operations per cycle for fully vectorized workloads.
+
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/ara.jpg}
-\caption{Top-level block diagram of the Ara2 system showing the vector coprocessor, lane-based organization, and integration with the CVA6 scalar core.}
+\caption[Top-level block diagram of the Ara system]{Top-level block diagram of the Ara system showing the vector coprocessor, lane-based organization, and integration with the CVA6 scalar host.\cite{ara}}
 \label{fig:ara_diagram}
 \end{figure}
 
-\subsubsection{RVV Implementation}
-
-Ara fully implements the frozen RVV 1.0 extension with comprehensive feature support:
-
-\begin{itemize}
-    \item \textbf{Data Types:} IEEE-754 floating-point formats (FP16, FP32, FP64) and standard integer types (INT8, INT16, INT32, INT64)
-    \item \textbf{Reductions:} Support for ordered and unordered vector reductions, including floating-point reductions requiring precise control of execution order
-    \item \textbf{Masking:} Full support for masked execution, enabling element-wise predication through dedicated mask registers
-    \item \textbf{Permutations:} Support for permutation instructions such as \texttt{vslideup}, \texttt{vslidedown}, \texttt{vgather}, and \texttt{vscatter} via a dedicated on-chip interconnect
-\end{itemize}
-
 \subsubsection{Vector Execution Model}
 
-Ara adheres to the Vector Length Agnostic (VLA) programming model mandated by the RISC-V specification. While the hardware vector length (VLEN) is fixed per instantiation, software binaries remain portable across implementations. At runtime, the \texttt{vsetvli} instruction configures the application vector length (AVL), which is automatically distributed across the available lanes. If the AVL exceeds the number of parallel lanes, the hardware transparently strip-mines the operation, executing the vector in temporal chunks.
+Ara adheres to the \textbf{Vector Length Agnostic (VLA)} model. While the hardware vector length (VLEN) is fixed, the \texttt{vsetvli} instruction allows software to configure the application vector length (AVL) dynamically. If the AVL exceeds the hardware capacity, Ara transparently strip-mines the operation into temporal chunks.
 
-While element-wise instructions execute independently within each lane, operations involving data movement—such as reductions, masking, and permutations—are handled by centralized Mask and Permutation Units. These operations require cross-lane communication and are implemented using an $O(L \log L)$ interconnect, where $L$ is the number of lanes.
+For reduction operations, Ara employs a three-step algorithm: local partial reductions within lanes, cross-lane shuffling, and a final scalar write-back. This decoupled model allows arithmetic pipelines to remain highly utilized even during irregular data access patterns.
 
-For reduction operations, Ara employs a three-step algorithm: first, partial reductions are performed locally within each lane; second, cross-lane shuffling aligns partial results; finally, the scalar result is written back to the destination register. This decoupled execution model allows arithmetic pipelines to remain highly utilized while centralized units manage irregular data access patterns.
+\subsubsection{Memory Subsystem and Coherence}
 
-Ara supports vector chaining, enabling dependent instructions to begin execution before their predecessors have fully completed, provided that the required operands are available. This capability is essential for sustaining high utilization of deep floating-point pipelines in sequences such as fused multiply-accumulate (\texttt{vfmacc}) operations.
+The Vector Load/Store Unit (VLSU) interfaces Ara with the high-bandwidth AXI memory system, supporting unit-stride, strided, and indexed (scatter/gather) accesses. A critical feature of this implementation is the robust hardware coherence mechanism: the CVA6 data cache operates in write-through mode, ensuring scalar stores are visible to Ara, while vector stores generate invalidation signals to the CVA6 cache to maintain a consistent memory view.
 
-\subsubsection{Memory Subsystem}
+\subsubsection{RTL Implementation and Scalability}
 
-The Vector Load/Store Unit (VLSU) serves as the interface between the high-bandwidth AXI memory system and the vector lanes. It supports unit-stride, strided, and indexed (scatter/gather) memory accesses and is responsible for routing memory data to the appropriate lanes and VRF banks. Due to its flexible routing requirements, the complexity of the VLSU scales superlinearly with the number of lanes.
-
-Ara2 introduces a robust hardware coherence mechanism between the scalar and vector domains. The CVA6 data cache operates in write-through mode, ensuring that scalar stores are immediately visible to Ara. Conversely, vector stores issued by Ara generate invalidation signals to the CVA6 cache, forcing eviction of affected cache lines. This hardware-based scheme eliminates the need for software-managed fence instructions while maintaining a coherent memory view across scalar and vector execution.
-
-\subsubsection{RTL Implementation}
-
-Implemented in GlobalFoundries 22FDX (22nm FD-SOI) technology, Ara (in its Ara2 iteration) achieves a clock frequency of $1.35$ GHz for configurations up to 8 lanes, with a critical path of approximately 40 FO4 delays. The design is highly parameterized, supporting lane counts of $2$, $4$, $8$, and $16$.
-
-While the area of the functional units scales linearly with the number of lanes, the interconnect structures—particularly the Slide Unit (SLDU) and Mask Unit (MASKU)—exhibit superlinear scaling. To mitigate this, Ara2 restricts slide operations to power-of-two strides, reducing interconnect complexity from $O(L^2)$ to $O(L \log L)$ and enabling feasible scaling to larger lane counts.
-
-In a 16-lane configuration, Ara achieves over $98\%$ FPU utilization on matrix multiplication kernels and a peak energy efficiency of $37.8$ DP-GFLOPS/W. The 64-lane ``AraXL'' variant occupies only $3.8\times$ the area of the 16-lane design, demonstrating near-linear area scaling and superior efficiency compared to traditional SIMD or multi-core scalar architectures.
+Implemented in GlobalFoundries 22FDX technology, Ara achieves a clock frequency of $1.35$~GHz. The design is highly parameterized; while functional units scale linearly with lane counts, the interconnect structures (Mask and Permutation units) scale superlinearly. By restricting certain operations to power-of-two strides, Ara reduces interconnect complexity from $O(L^2)$ to $O(L \log L)$, enabling feasible scaling up to 16 lanes and beyond.
 
 \subsubsection{Benchmarking Suitability}
 
-Ara is exceptionally well-suited for benchmarking compute-bound machine learning and HPC kernels. For large problem sizes (e.g., $128 \times 128$ matrices), Ara sustains 97--99\% floating-point unit utilization, indicating that memory latency and control overhead are effectively hidden by the microarchitecture.
-
-The bit-accurate and fully RVV-compliant implementation enables precise tuning of kernels written using RVV intrinsics, allowing researchers to analyze lane utilization, register pressure, and instruction scheduling effects. Benchmarking results further show that for smaller problem sizes, multi-core systems with smaller vector units may outperform a single large vector processor, providing valuable insights into architectural trade-offs across scalability regimes.
+Ara is exceptionally well-suited for benchmarking compute-bound ML kernels. For large problem sizes, Ara sustains 97--99\% floating-point unit utilization, indicating that memory latency and control overhead are effectively hidden. This makes it an ideal platform for evaluating the library of kernels developed in this thesis, providing clear insights into lane utilization and arithmetic intensity.
 
 % ------------------------------------------------------------
 % Comparative Analysis

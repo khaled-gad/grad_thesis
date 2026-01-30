@@ -2,7 +2,7 @@
 \subsubsection{Models}
 \label{sec:models}
 
-Beyond the verification of individual discrete kernels, a critical aspect of functional validation involves assessing the correctness of the implemented RISC-V vectorized kernels when integrated into complete deep learning inference pipelines. To this end, two representative convolutional neural network models were implemented and deployed using exclusively the RVV-accelerated kernels developed in this work: LeNet-5 and Tiny-YOLOv2. These models were selected to provide comprehensive coverage of the implemented kernel categories while representing distinct computational patterns and application domains within computer vision.
+Beyond the verification of individual discrete kernels, a critical aspect of functional validation involves assessing the correctness of the implemented RISC-V vectorized kernels when integrated into complete deep learning inference pipelines. To this end, two representative convolutional neural network models were implemented and deployed using exclusively the RVV-accelerated kernels developed in this work: LeNet-5\cite{lecun1998gradient} and Tiny-YOLOv2\cite{redmon2016yolo}. These models were selected to provide comprehensive coverage of the implemented kernel categories while representing distinct computational patterns and application domains within computer vision.
 
 \paragraph{Model Selection Rationale:}
 
@@ -74,7 +74,7 @@ Model weights were extracted from a pre-trained ONNX model and stored as raw IEE
         (e) Prediction for digit 8
     \end{minipage}
     
-    \caption{LeNet-5 functional verification results demonstrating correct digit classification using RVV-accelerated kernels. Each subfigure displays the input image alongside the predicted class probabilities computed via the Softmax output layer. All test samples were correctly classified with high confidence scores.}
+	\caption[LeNet-5 functional verification results]{LeNet-5 functional verification results demonstrating correct digit classification using RVV-accelerated kernels. Each subfigure displays the input image alongside the predicted class probabilities computed via the Softmax output layer. All test samples were correctly classified with high confidence scores.}
     \label{fig:lenet5_results}
 \end{figure}
 
@@ -143,7 +143,7 @@ Post-processing operations including sigmoid activation for objectness scores, S
         (e) Detection result 5
     \end{minipage}
     
-    \caption{Tiny-YOLOv2 functional verification results demonstrating object detection using RVV-accelerated kernels. Detected objects are annotated with bounding boxes, class labels, and confidence scores. The results confirm correct localization and classification across diverse test images.}
+	\caption[Tiny-YOLOv2 object detection verification results]{Tiny-YOLOv2 functional verification results demonstrating object detection using RVV-accelerated kernels. Detected objects are annotated with bounding boxes, class labels, and confidence scores. The results confirm correct localization and classification across diverse test images.}
     \label{fig:yolov2_results}
 \end{figure}
 

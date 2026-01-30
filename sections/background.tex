@@ -2,7 +2,7 @@
 
 \subsection{RISC-V Architecture Overview}
 
-RISC-V (pronounced ``risk-five'') is an open-source instruction set architecture (ISA) that has revolutionized processor design by providing a free, extensible alternative to proprietary architectures. Developed at the University of California, Berkeley, beginning in 2010, RISC-V was created to address fundamental limitations in the processor industry, particularly the dominance of proprietary ISAs that created barriers to innovation and increased costs for processor development.
+RISC-V (pronounced ``risk-five'') is an open-source instruction set architecture (ISA) that has revolutionized processor design by providing a free, extensible alternative to proprietary architectures. Developed at the University of California, Berkeley, beginning in 2010 \cite{riscv-v-spec}, RISC-V was created to address fundamental limitations in the processor industry, particularly the dominance of proprietary ISAs that created barriers to innovation and increased costs for processor development.
 
 The development of RISC-V was motivated by several critical issues in the computing industry that had become increasingly problematic for AI and DSP applications. Traditional proprietary ISAs, such as x86 and ARM, require expensive licensing agreements that can be prohibitive for companies developing specialized processors for AI and DSP workloads. These licensing costs are particularly burdensome for startups and research institutions that want to experiment with novel architectural approaches.
 
@@ -12,16 +12,14 @@ RISC-V addresses these challenges through several fundamental design principles 
 
 \textbf{Modular Architecture:} RISC-V follows a modular design philosophy where a minimal base integer instruction set is supplemented by optional standard extensions. This modularity is particularly valuable for AI and DSP processors, which can include only the extensions needed for their specific applications, reducing implementation complexity and cost.
 
-
 \textbf{Scalability Across Application Domains:} RISC-V supports multiple data widths (32-bit, 64-bit, and 128-bit) and can scale from microcontrollers to high-performance processors. This scalability is crucial for AI and DSP applications, which span a wide range of computing environments from embedded edge devices to high-performance computing clusters.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/growth.png}
-    \caption{RISC-V ecosystem growth. Source: RISC-V International}
-    \label{ RISC-V ecosystem growth. Source: RISC-V International}
+    \caption{RISC-V ecosystem growth. Source: RISC-V International \cite{riscv-v-spec}}
+    \label{fig:growth}
 \end{figure}    
-
 
 \subsection{RISC-V Extensions for Machine Learning}
 
@@ -29,13 +27,17 @@ The extensible nature of RISC-V is fundamental to its success in AI and DSP appl
 
 \subsubsection{Standard Extensions}
 
-\textbf{M Extension (Integer Multiplication and Division):} The M extension adds integer multiplication, division, and remainder operations that are fundamental for many AI and DSP algorithms. In AI applications, integer multiplication is crucial for quantized neural networks that use integer arithmetic instead of floating-point operations to reduce power consumption and increase performance.
+The modular nature of RISC-V allows the base integer ISA to be supplemented with standard extensions to meet the requirements of specific application domains:
 
-\textbf{F Extension (Single-Precision Floating-Point):} The F extension provides IEEE 754 single-precision (32-bit) floating-point arithmetic, which is the most commonly used precision for AI training and many DSP applications. The extension includes fused multiply-add (FMA) instructions that are particularly important for AI and DSP workloads, as convolution operations in neural networks consist primarily of multiply-accumulate patterns that can be efficiently implemented using FMA instructions.
-
-\textbf{D Extension (Double-Precision Floating-Point):} The D extension adds IEEE 754 double-precision (64-bit) floating-point arithmetic, which is important for AI training applications that require higher numerical precision and certain DSP applications that need extended dynamic range.
-
-\textbf{V Extension (Vector Operations):} The V extension is the most significant addition to RISC-V for AI and DSP applications, providing comprehensive support for data-parallel vector operations. This extension represents a fundamental advancement in vector processing architecture and is the primary focus of this work.
+\begin{itemize}
+    \item \textbf{M Extension (Integer Multiplication and Division):} Adds hardware support for integer multiplication and division. This is essential for quantized neural networks and DSP algorithms where integer arithmetic is used to minimize power consumption.
+    
+    \item \textbf{F Extension (Single-Precision Floating-Point):} Provides IEEE 754 32-bit floating-point arithmetic. It introduces Fused Multiply-Add (FMA) instructions, which are critical for the multiply-accumulate (MAC) patterns dominant in convolution operations.
+    
+    \item \textbf{D Extension (Double-Precision Floating-Point):} Adds 64-bit floating-point support, necessary for AI training phases requiring high numerical stability and DSP applications with extended dynamic range requirements.
+    
+    \item \textbf{V Extension (Vector Operations):} The primary focus of this research, providing comprehensive support for data-parallel operations through a vector-length agnostic architecture. It enables high-throughput execution for the tensor and matrix operations found in modern AI workloads.
+\end{itemize}
 
 \subsection{The RISC-V Vector Extension}
 
@@ -80,7 +82,7 @@ This approach means a single compiled binary can run with optimal efficiency on 
 
 While assembly language provides direct control over vector instructions, RISC-V vector intrinsics offer a more maintainable and portable approach to vectorized programming. Intrinsics are C/C++ functions that map directly to vector instructions, providing the performance benefits of assembly with the readability and toolchain integration of high-level languages.
 
-\textbf{Advantages of Intrinsics:}
+\noindent \textbf{Advantages of Intrinsics:}
 \begin{itemize}
     \item \textbf{Compiler Integration:} Intrinsics work seamlessly with standard C/C++ compilers, enabling better optimization, register allocation, and instruction scheduling
     \item \textbf{Type Safety:} Unlike inline assembly, intrinsics are type-checked by the compiler, catching errors at compile time
@@ -88,7 +90,9 @@ While assembly language provides direct control over vector instructions, RISC-V
     \item \textbf{Maintainability:} Intrinsic-based code is more readable and easier to debug than raw assembly
 \end{itemize}
 
-\textbf{Common Intrinsic Patterns:}
+\vspace{3pt}
+\noindent \textbf{Common Intrinsic Patterns:}
+\vspace{3pt}
 
 \textit{Setting Vector Length:}
 \begin{lstlisting}[language=C++]
@@ -120,90 +124,40 @@ float sum = __riscv_vfmv_f_s_f32m1_f32(v_sum);
 
 \subsection{Related Work: The RISC-V landscape for Vector Computing}
 
-\paragraph{System-Level Infrastructure for RISC-V Vector Design}
-The following papers focus on the modeling, simulation, verification, and reliability analysis infrastructure required to design and evaluate RISC-V vector-enabled systems before and during hardware implementation.
-
-This subsection expands the descriptions for each of the selected papers to reflect their specific scientific contributions to the RISC-V and hardware--software co-design communities.
+\paragraph{System-Level Infrastructure for RISC-V Vector Design} The following papers focus on the modeling, simulation, verification, and reliability analysis infrastructure required to design and evaluate RISC-V vector-enabled systems before and during hardware implementation.
 
 \subsubsection*{Herdt et al.: Extensible and Configurable RISC-V Virtual Prototype}
 
-This paper introduces the first open-source, extensible \textbf{Virtual Prototype (VP)} based on the RISC-V architecture, implemented using standard-compliant \textbf{SystemC and TLM-2.0}. The primary scientific contribution is the creation of a middle-ground simulation environment that bridges the gap between high-speed but inflexible \textbf{Instruction Set Simulators (ISSs)} and highly accurate but extremely slow \textbf{Register Transfer Level (RTL)} models.
-
-The VP architecture is built around a \textbf{RISC-V RV32IM core} and a generic bus system enabling easy platform reconfiguration. System-level features include a \textbf{PLIC-based interrupt controller}, a core-local interrupt controller (CLINT), and peripherals such as a DMA controller and a terminal.
-
-Key \textbf{SystemC performance optimizations} include:
-\begin{itemize}
-    \item \textbf{Direct Memory Interface (DMI)} for bypassing bus transactions.
-    \item \textbf{Temporal decoupling} to reduce simulation kernel synchronization overhead.
-\end{itemize}
-
-The VP achieves execution speeds of up to \textbf{20 million instructions per second}, several orders of magnitude faster than RTL simulation, enabling practical design space exploration.
+This paper \cite{herdt2018extensible} introduces the first open-source, extensible \textbf{Virtual Prototype (VP)} based on the RISC-V architecture, implemented using standard-compliant \textbf{SystemC and TLM-2.0}. The primary scientific contribution is the creation of a middle-ground simulation environment that bridges the gap between high-speed but inflexible \textbf{Instruction Set Simulators (ISSs)} and highly accurate but extremely slow \textbf{Register Transfer Level (RTL)} models.
 
 \subsubsection*{Schlägl et al.: Unlocking Vector Processing for System-Level Evaluation}
 
-Schlägl et al.\ present the first open-source SystemC TLM-based virtual prototype with full support for the \textbf{RISC-V Vector Extension (RVV) version~1.0}. The work addresses the lack of early-stage modeling tools capable of supporting the more than 600 vector instructions introduced by the standard.
-
-A major contribution is an \textbf{automated instruction generation framework} that produces over \textbf{20,000 lines of C++ code}, ensuring consistency across RV32 and RV64 implementations. The resulting \textbf{RISC-V VP++} supports masking, register grouping, and widening/narrowing operations, as well as a parameterizable execution cycle model.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/Classic SIMD (ARM Neon) vs. Vector Architecture (RISC-V RVV).png}
-    \caption{Classic SIMD (ARM Neon) vs. Vector Architecture (RISC-V RVV).}
-    \label{fig:schlagel-rvv-vp}
-\end{figure}
-
-The authors validate correctness using a comprehensive verification chain combining FORCE-RISCV, Spike-based reference execution, and coverage analysis with riscvOVPsim, achieving 81.44\% basic coverage. Design-space exploration studies reveal non-linear performance scaling due to memory interface bottlenecks.
+Schlägl et al. \cite{schlaegl2024riscv} present the first open-source SystemC TLM-based virtual prototype with full support for the \textbf{RISC-V Vector Extension (RVV) version 1.0}. The work addresses the lack of early-stage modeling tools capable of supporting the more than 600 vector instructions introduced by the standard.
 
 \subsubsection*{Quiroga et al.: Reusable Verification Environment for Vector Accelerators}
 
-Quiroga et al.\ propose a \textbf{UVM-based, interface-agnostic verification environment} for RISC-V vector accelerators, enabling reuse across heterogeneous projects such as EPI and eProcessor.
-
-The framework integrates constrained random generation via \textbf{RISCV-DV}, a Spike-based golden model using SystemVerilog DPI, and polymorphic wrappers to abstract interconnect protocols such as OVI and AMBA~CHI. This modularity reduces simulation overhead and enables early bug discovery during RTL development.
+Quiroga et al. \cite{quiroga2022reusable} propose a \textbf{UVM-based, interface-agnostic verification environment} for RISC-V vector accelerators, enabling reuse across heterogeneous projects such as EPI and eProcessor.
 
 \subsubsection*{Imianosky et al.: Reliability and Performance of Vector Multiplication Units}
 
-Imianosky et al.\ analyze performance--reliability trade-offs in fault-tolerant RISC-V systems by extending the \textbf{HARV-SoC} with \textbf{Zve32x} vector multiplication support.
+Imianosky et al. \cite{imianosky2024reliability} analyze performance--reliability trade-offs in fault-tolerant RISC-V systems by extending the \textbf{HARV-SoC} with \textbf{Zve32x} vector multiplication support. Fault-injection experiments show that vector acceleration achieves up to \textbf{28.69$\times$} speedup while often improving overall reliability due to reduced execution time.
 
-Fault-injection experiments simulating neutron-induced single-event upsets show that vector acceleration achieves up to \textbf{28.69$\times$} speedup while often improving overall reliability due to reduced execution time. Reliability is shown to be highly dependent on \textbf{SEW}, with 8-bit configurations offering the most favorable trade-off.
+\paragraph{Compiler, Application, and System-Level Performance Evaluation} This group of papers evaluates how RISC-V vector capabilities translate into real-world performance across compilers, applications, and high-performance computing systems.
 
-\paragraph{Compiler, Application, and System-Level Performance Evaluation}
-This group of papers evaluates how RISC-V vector capabilities translate into real-world performance across compilers, applications, memory-bound workloads, and high-performance computing systems, including machine learning workloads.
+\subsubsection*{Al-Assir et al.: Arrow RISC-V Vector Accelerator} Al-Assir et al. \cite{alassir2021arrow} present \textbf{Arrow}, a RISC-V vector accelerator optimized for machine learning inference. By focusing on a configurable architecture that supports different vector lengths and data types, Arrow demonstrates significant energy efficiency and throughput gains for edge-based ML tasks compared to scalar implementations.
 
 \subsubsection*{Wang et al.: SPEED --- Scalable Multi-Precision DNN Processor}
 
-Wang et al.\ propose \textbf{SPEED}, a scalable multi-precision DNN processor designed to overcome limitations of baseline RVV implementations. SPEED integrates a highly parameterized \textbf{Systolic Array Unit (SAU)} within each vector lane and introduces custom instructions to orchestrate data movement and computation.
-
-Synthesized in 28\,nm technology, SPEED achieves area-efficiency improvements of \textbf{2.04$\times$} for 16-bit and \textbf{1.63$\times$} for 8-bit operations compared to the Ara processor.
-
-\subsubsection*{Rumyantsev et al.: RVV Efficiency for ANN Algorithms}
-
-Rumyantsev et al.\ investigate the use of RVV to accelerate \textbf{Approximate Nearest Neighbor (ANN)} algorithms such as IVFFlat, IVFPQ, and HNSW. Using RVV intrinsics on a Lichee Pi~4A platform, the optimized implementations achieve speedups of up to \textbf{2.58$\times$} over scalar baselines.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/performance.png}
-    \caption{Performance acceleration from RVV optimization for various ANN algorithms on the Epsilon and GloVe datasets.}
-    \label{fig:rvv-ann-performance}
-\end{figure}
+Wang et al. propose \textbf{SPEED}, a scalable multi-precision DNN processor designed to overcome limitations of baseline RVV implementations. SPEED integrates a highly parameterized \textbf{Systolic Array Unit (SAU)} within each vector lane. Synthesized in 28,nm technology, SPEED achieves area-efficiency improvements of \textbf{2.04$\times$} for 16-bit and \textbf{1.63$\times$} for 8-bit operations compared to the Ara processor \cite{wang2024speed}.
 
 \subsubsection*{Carpentieri et al.: Performance Analysis of Autovectorization on RVV Boards}
 
-Carpentieri et al.\ present an empirical evaluation of \textbf{compiler-driven autovectorization} on real RISC-V hardware, comparing GCC and LLVM across TSVC benchmarks and real-world applications.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/Geometric mean of speedup.png}
-    \caption{Geometric mean of speedup achieved through autovectorization across different loop categories and compilers using
-RVV 1.0.}
-    \label{fig:carpentieri-autovec}
-\end{figure}
-
-The study shows that \textbf{Vector Length Specific (VLS)} programming often outperforms VLA due to reduced runtime overhead, and that careful tuning of \textbf{LMUL} can yield speedups of up to \textbf{3$\times$}. LLVM~19 outperforms GCC~14 in most benchmark cases, though higher LMUL values can increase register pressure.
+Carpentieri et al. \cite{carpentieri2025performance} present an empirical evaluation of \textbf{compiler-driven autovectorization} on real RISC-V hardware, comparing GCC and LLVM across TSVC benchmarks and real-world applications. The study shows that careful tuning of \textbf{LMUL} can yield speedups of up to \textbf{3$\times$}.
 
 \subsubsection*{Volokitin et al.: Memory-Bound Kernels on RISC-V CPUs}
 
-Volokitin et al.\ evaluate memory-bound kernels on RISC-V platforms and show that classical optimizations such as cache blocking and unit-stride access transfer effectively from x86 and ARM architectures. Despite lower absolute bandwidth, RISC-V systems demonstrate high memory subsystem utilization efficiency.
+Volokitin et al. \cite{volokitin2023case} evaluate memory-bound kernels on RISC-V platforms and show that classical optimizations such as cache blocking and unit-stride access transfer effectively from x86 and ARM architectures.
 
 \subsubsection*{Brown: Evaluating the Sophon SG2044 for High Performance Computing}
 
-Brown evaluates RISC-V’s suitability for \textbf{High Performance Computing} through an analysis of the \textbf{Sophon SG2044}. With mainline RVV~1.0 support and a 32-channel DDR5 memory subsystem, the SG2044 achieves up to a \textbf{4.91$\times$} speedup over its predecessor, positioning RISC-V as a competitive architecture for multi-core server workloads.
+Brown \cite{brown2025riscv} evaluates RISC-V’s suitability for \textbf{High Performance Computing} through an analysis of the \textbf{Sophon SG2044}. With mainline RVV 1.0 support and a 32-channel DDR5 memory subsystem, the SG2044 achieves up to a \textbf{4.91$\times$} speedup over its predecessor.

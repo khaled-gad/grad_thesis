@@ -1,6 +1,4 @@
-\documentclass{article}
-
-% Required packages
+\documentclass[12pt]{article}
 
 \usepackage{amsmath}
 \usepackage{graphicx}
@@ -17,6 +15,11 @@
 \usepackage{xcolor}
 \usepackage{url}
 
+\usepackage{longtable}
+\usepackage{booktabs}
+
+\setlength{\parindent}{0pt}      % no paragraph indent
+\setlength{\parskip}{0.4em}      % vertical space between paragraphs
 
 % Configure code listings
 \lstset{
@@ -38,22 +41,37 @@
 \tableofcontents
 \newpage
 
+\listoffigures
+\listoftables
+\newpage
+
 % =============================================================================
 % Abstract
 % =============================================================================
 \input{sections/abstract.tex}
 
 % =============================================================================
+% Acknowledgment
+% =============================================================================
+\input{sections/acknowledgment.tex}
+
+% =============================================================================
+% List of Abbreviations
+% =============================================================================
+\newpage
+\input{sections/abbreviations.tex}
+
+% =============================================================================
 % Introduction
 % =============================================================================
+\newpage
 \input{sections/introduction.tex}
 
 % =============================================================================
 % Background & Related Work
 % =============================================================================
+\newpage
 \input{sections/background.tex}
-
-
 
 % =============================================================================
 % Methodology: Architecture & Implementations
@@ -108,11 +126,6 @@
 % =============================================================================
 \newpage
 \input{sections/conclusion_future_work.tex}
-
-% =============================================================================
-% Acknowledgment
-% =============================================================================
-\input{sections/acknowledgment.tex}
 
 % =============================================================================
 % References

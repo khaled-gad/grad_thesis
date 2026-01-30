@@ -9,7 +9,7 @@ The rapid evolution of artificial intelligence (AI) and digital signal processin
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/Flops.png}
-    \caption{Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models.}
+	\caption[Growth in AI model computational requirements]{Exponential growth in AI model computational requirements over time, showing the dramatic increase in FLOPs required for training state-of-the-art models.\cite{ourworldindata}}
     \label{fig:ai-growth}
 \end{figure}
 
@@ -41,7 +41,7 @@ Proprietary vector processing solutions, such as Intel's Advanced Vector Extensi
 
 \subsection{The RISC-V Vector Extension as a Solution}
 
-RISC-V Vector Extensions (RVV) emerged as a promising solution to address these challenges by providing an open-source, royalty-free vector processing architecture specifically designed for data-parallel computation. Unlike proprietary alternatives, RVV is developed through an open, collaborative process that ensures the architecture meets the diverse needs of the computing community.
+RISC-V Vector Extensions (RVV) emerged as a promising solution to address these challenges by providing an open-source, royalty-free vector processing architecture specifically designed for data-parallel computation \cite{riscv-v-spec}. Unlike proprietary alternatives, RVV is developed through an open, collaborative process that ensures the architecture meets the diverse needs of the computing community.
 
 The most distinctive feature of RVV is its \textbf{vector-length agnostic (VLA)} programming model, which represents a fundamental departure from traditional fixed-width SIMD approaches. In conventional vector processing, software must be written for specific vector widths, and different code paths are often required to support processors with different vector capabilities. RVV's vector-length agnostic model allows the same code to run efficiently across processors with different vector lengths, from embedded systems with short vectors to high-performance computing systems with very long vectors.
 
@@ -59,46 +59,43 @@ Despite the architectural advantages of the RISC-V Vector Extension, developing 
 
 Furthermore, the absence of widely available RVV-capable silicon necessitates reliance on emulation and RTL simulation environments for development and validation. This creates additional complexity in establishing reproducible benchmarking methodologies that can provide meaningful performance insights.
 
-\subsection{Research Objectives}
+\subsection{Project Objectives}
 
 This thesis investigates the role and potential impact of RISC-V Vector Extensions in accelerating AI and DSP applications. The primary objectives of this research are:
 
 \begin{enumerate}
     \item \textbf{Develop a systematic framework} for the design, verification, and performance evaluation of RISC-V vector kernels that integrates open-source tools into a reproducible workflow.
     
-    \item \textbf{Implement optimized RVV kernels} for fundamental machine learning and DSP operations, including:
+    \item \textbf{Implement a comprehensive library of optimized RVV kernels} categorized by their computational patterns:
     \begin{itemize}
-        \item Matrix operations: multiplication, transposition, addition
-        \item Activation functions: ReLU, Softmax
-        \item Convolutional layers
-        \item Training kernels: linear regression gradient descent
+        \item \textbf{Compute-Intensive Linear Operators:} Matrix multiplication (\textit{matmul}), fully connected layers (\textit{dense}), and both standard and transposed convolutions.
+        \item \textbf{Pointwise Activation and Arithmetic:} Rectified Linear Unit (\textit{ReLU}), Leaky ReLU, bias addition, and element-wise tensor addition.
+        \item \textbf{Statistical and Normalization Kernels:} Batch normalization and the Softmax probability function.
+        \item \textbf{Spatial Reduction and Indexing:} Max pooling, as well as ONNX-style data movement operations including Gather, GatherElements, and ScatterElements.
+        \item \textbf{Decision Kernels:} Post-processing operations such as Non-Maximum Suppression (NMS).
     \end{itemize}
     
-    \item \textbf{Establish functional verification methodologies} using ONNX (Open Neural Network Exchange) as a golden reference framework, ensuring correctness through quantitative metrics such as Signal-to-Noise Ratio (SNR) and Maximum Absolute Error.
+    \item \textbf{Establish functional verification methodologies} using ONNX (Open Neural Network Exchange) \cite{onnx} as a golden reference framework, ensuring correctness through quantitative metrics such as Signal-to-Noise Ratio (SNR) and Maximum Absolute Error (MaxAbs).
     
-    \item \textbf{Conduct cycle-accurate performance evaluation} using RTL simulation with the Ara and Vicuna vector coprocessors, quantifying the speedup achieved through vectorization over scalar implementations.
+    \item \textbf{Conduct cycle-accurate performance evaluation} using RTL simulation with the Vicuna \cite{vicuna} and Ara \cite{ara} vector coprocessors, quantifying the speedup achieved through vectorization over scalar implementations.
     
     \item \textbf{Analyze the trade-offs} between different architectural approaches (high-performance vs. embedded) and provide insights into optimal kernel design strategies for various deployment scenarios.
 \end{enumerate}
 
-\subsection{Research Contributions}
+\subsection{Project Contributions}
 
 This thesis makes the following contributions to the field of RISC-V vector processing for machine learning and DSP applications:
 
 \begin{enumerate}
     \item \textbf{A reproducible three-step framework} integrating kernel design using RVV C-intrinsics, functional verification against ONNX golden references, and cycle-accurate performance analysis using RTL simulation with Verilator. This framework provides a systematic methodology that can be adopted by other researchers and developers.
     
-    \item \textbf{A library of optimized RVV kernels} (RVV64\_Library) implementing fundamental operations for neural network inference and signal processing. The library demonstrates efficient use of RVV features including strip-mining loops, vector length agnostic programming, LMUL configuration, and masked operations.
+    \item \textbf{A library of optimized RVV kernels (RVV64\_Library)} implementing a wide array of operations for neural network inference and signal processing. The library demonstrates efficient use of advanced RVV features, including strip-mining loops, vector-length agnostic programming, LMUL configuration, and masked operations.
     
-    \item \textbf{Comprehensive performance characterization} of vectorized kernels on two distinct RTL platforms:
-    \begin{itemize}
-        \item \textbf{Ara}: A high-performance 64-bit vector coprocessor targeting application-class workloads with configurable lane counts (2--16 lanes) and full floating-point support.
-        \item \textbf{Vicuna}: A timing-predictable 32-bit vector coprocessor targeting embedded real-time systems with deterministic execution guarantees.
-    \end{itemize}
+    \item \textbf{Performance characterization on a high-performance RTL platform:} Implementation and evaluation were conducted using \textbf{Ara}, a 64-bit vector coprocessor targeting application-class workloads. The study explores the impact of Ara's microarchitecture, including its configurable lane counts and full floating-point support, on kernel efficiency.
     
-    \item \textbf{Quantitative analysis} demonstrating significant speedups achieved through vectorization, with experimental results showing up to 3.6$\\times$ improvement for matrix multiplication and 2.6$\\times$ for ReLU activation compared to scalar implementations.
+    \item \textbf{Quantitative analysis} demonstrating significant performance gains through vectorization. Experimental results on the Ara co-processor show substantial speedups ranging from $4\times$ to over $70\times$ compared to scalar baseline implementations, highlighting the efficiency of the RVV ISA for data-parallel workloads.
     
-    \item \textbf{A containerized development environment} (Docker-based) ensuring reproducibility across different development systems and simplifying the onboarding process for future researchers working with RISC-V vector extensions.
+    \item \textbf{High-level language integration through Python wrappers:} The development of a bridging layer using the \texttt{ctypes} foreign function interface, allowing the execution of optimized C++ vector kernels directly from a Python environment. This enables high-level algorithmic development and testing while maintaining the raw performance and hardware-level control of C++ implementations.
 \end{enumerate}
 
 \subsection{Thesis Organization}
@@ -107,18 +104,18 @@ The remainder of this thesis is organized as follows to guide the reader from fo
 
 \textbf{Chapter 2: Background and Related Work} establishes the necessary theoretical foundation, providing a detailed overview of the RISC-V ISA, its relevant extensions, and the architectural principles of the Vector (RVV) extension. This chapter reviews the vector-length agnostic programming model, control and status registers, and the rich instruction set that enables efficient data-parallel processing. Additionally, it examines foundational academic research on RVV for machine learning acceleration, including work on specialized processors and prior vectorization efforts.
 
-\textbf{Chapter 3: Development Tools} outlines the practical tools and workflows established for implementation and validation. This includes the RISC-V GNU toolchain configuration, QEMU emulator setup for functional testing, Ara RTL simulation environment, Docker containerization for reproducible development, and ONNX framework integration for functional verification.
+\textbf{Chapter 3: Development Tools} outlines the practical tools and workflows established for implementation and validation. This includes the RISC-V GNU toolchain configuration \cite{riscv-gnu-toolchain}, QEMU emulator setup for functional testing \cite{qemu-riscv}, Ara RTL simulation environment, Docker containerization for reproducible development, and ONNX framework integration for functional verification.
 
-\textbf{Chapter 4: Methodology} presents the systematic three-step framework that forms the core of this research: (1) kernel design using RVV C-intrinsics with vector-length agnostic programming, (2) functional verification against ONNX golden references using quantitative metrics (SNR and MaxAbs), and (3) cycle-accurate performance evaluation using RTL simulation with Verilator. This chapter details the kernel selection criteria, vectorization design approach, verification workflow, and performance measurement techniques.
+\textbf{Chapter 4: Methodology} presents the systematic three-step framework that forms the core of this research: (1) kernel design using RVV C-intrinsics with vector-length agnostic programming, (2) functional verification against ONNX golden references using quantitative metrics (SNR and MaxAbs), and (3) cycle-accurate performance evaluation using RTL simulation with Verilator \cite{verilator}. This chapter details the kernel selection criteria, vectorization design approach, verification workflow, and performance measurement techniques.
 
-\textbf{Chapter 5: Library} introduces the RVV64\_Library, our collection of optimized RISC-V vector kernels for machine learning and DSP applications. This chapter systematically presents each implemented kernel---including matrix operations (multiplication, transposition), activation functions (ReLU, Softmax), convolutional layers, and training kernels (linear regression)---with detailed explanations of the naive sequential approach, proposed RVV-based solution, and performance optimization strategies.
+\textbf{Chapter 5: Library} introduces the RVV64\_Library, our collection of optimized RISC-V vector kernels for machine learning and DSP applications. This chapter systematically presents each implemented kernel---including matrix operations, activation functions, convolutional layers, and data movement operations---with detailed explanations of the naive sequential approach, proposed RVV-based solution, and performance optimization strategies.
 
-\textbf{Chapter 6: Hardware (RTL Cores)} details the two RTL platforms used for cycle-accurate performance evaluation: Ara and Vicuna. This chapter explains the role of RTL simulation in architectural research, describes the microarchitectural details of each coprocessor (Ara for high-performance throughput-oriented workloads and Vicuna for timing-predictable embedded systems), and justifies their selection as representative platforms spanning the full spectrum of RISC-V vector implementations.
+\textbf{Chapter 6: Hardware (RTL Cores)} details the RTL platform used for cycle-accurate performance evaluation: Ara. This chapter explains the role of RTL simulation in architectural research, describes the microarchitectural details of the Ara coprocessor, and discusses the hardware-software interface for vector offloading.
 
-\textbf{Chapter 7: Results and Discussion} presents both theoretical analysis and empirical evaluation of the implemented kernels. This chapter provides complexity analysis, theoretical speedup calculations, and experimental results from RTL simulation on both Ara and Vicuna platforms. Quantitative performance improvements are analyzed, including achieved speedups, functional unit utilization, and the impact of different LMUL configurations. The discussion interprets these results in the context of ML/DSP application deployment scenarios.
+\textbf{Chapter 7: Results and Discussion} presents both theoretical analysis and empirical evaluation of the implemented kernels. This chapter provides complexity analysis, theoretical speedup calculations, and experimental results from RTL simulation. Quantitative performance improvements are analyzed, including achieved speedups, functional unit utilization, and the impact of different LMUL configurations. The discussion interprets these results in the context of ML/DSP application deployment scenarios.
 
-\textbf{Chapter 8: Conclusion} summarizes the key findings of this research, reflecting on the demonstrated effectiveness of the RISC-V Vector Extension for accelerating data-parallel workloads. This chapter synthesizes the contributions made through our systematic framework, optimized kernel library, and comprehensive performance characterization across diverse hardware platforms.
+\textbf{Chapter 8: Conclusion} summarizes the key findings of this research, reflecting on the demonstrated effectiveness of the RISC-V Vector Extension for accelerating data-parallel workloads. This chapter synthesizes the contributions made through our systematic framework, optimized kernel library, and comprehensive performance characterization.
 
-\textbf{Chapter 9: Future Work} outlines promising directions for extending this research, including algorithmic expansion to additional ML operators (pooling, normalization, attention mechanisms), hardware-level validation on FPGA and ASIC platforms, integration with established ML frameworks (TensorFlow Lite, ONNX Runtime), and exploration of multi-core vector configurations for improved scalability.
+\textbf{Chapter 9: Future Work} outlines promising directions for extending this research, including algorithmic expansion to additional ML operators (pooling, normalization, attention mechanisms), hardware-level validation on FPGA platforms, and integration with established ML frameworks such as TensorFlow Lite or ONNX Runtime.
 
-Supporting materials are provided in the final sections, including acknowledgments of collaborators and advisors, a comprehensive reference list, and complete source code listings for all implemented kernels in the appendix.
+Supporting materials are provided in the final sections, including a comprehensive reference list, sample code implementations in the appendix, and a link to the official GitHub repository containing the full source code for the RVV64\_Library.
