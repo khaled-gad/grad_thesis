@@ -1,71 +1,92 @@
 % !TEX root = ../Thesis.tex
-\subsection{Functional Verification Results}
 
-After designing and implementing vectorized kernels, the verification phase ensures functional correctness by comparing kernel outputs against trusted reference implementations. This phase ensures that vectorized implementations produce mathematically correct results, accounting for minor numerical variations inherent in floating-point arithmetic.
+\subsection{Functional Verification Results and Discussion}
 
-\subsubsection{ONNX Golden Reference Framework}
+\subsubsection{Test Setup and Verification Flow}
 
-The Open Neural Network Exchange (ONNX) framework serves as the golden reference standard for functional verification. ONNX defines a hardware-agnostic computational graph representation where operations are specified as named operators and data dependencies as edges between nodes.
+To ensure the correctness and reliability of the vectorized ML kernels implemented using the RISC-V Vector Extension (RVV), a comprehensive functional verification methodology was established. The verification process validates that the custom C++ implementations produce numerically equivalent results to industry-standard machine learning frameworks, specifically using ONNX Runtime as the golden reference.
 
-The verification workflow follows this sequence:
+\subsubsection{Verification Architecture}
 
+The verification flow follows a dual-path approach comparing the RVV-vectorized kernels against ONNX Runtime inference results. Figure~\ref{fig:verification_flow} illustrates the complete verification architecture, which consists of two parallel execution paths:
+
+\textbf{Path 1: RVV Implementation Path}
 \begin{enumerate}
-    \item \textbf{ONNX model creation}: A reference model is constructed in ONNX format, implementing the same computation as the RVV kernel using standard ONNX operators
-    \item \textbf{Test data generation}: Identical input datasets are generated for both the RVV kernel and the ONNX model
-    \item \textbf{Parallel execution}: The RVV kernel and ONNX model execute using the same inputs
-    \item \textbf{Metric computation}: Output arrays are compared using quantitative metrics to account for numerical precision differences
-    \item \textbf{Correctness verification}: Metrics are evaluated against predefined thresholds to confirm functional equivalence
+    \item Design and implement vectorized kernels using C++ with RISC-V Vector intrinsics
+    \item Implement corresponding scalar kernel versions for reference
+    \item Execute kernels and save results in binary (.bin) files for comparison
 \end{enumerate}
 
-This approach provides several advantages:
+\textbf{Path 2: ONNX Golden Reference Path}
+\begin{enumerate}
+    \item Generate ONNX model/graph representing the same operation
+    \item Import the ONNX model in Python using ONNX Runtime
+    \item Run inference to obtain golden reference results
+\end{enumerate}
 
+The outputs from both paths are then compared using quantitative metrics to assess functional correctness. This dual-path methodology ensures that the RVV implementations conform to the mathematical specifications of standard ML operations.
+
+% Uncomment and adjust path when you add the figure
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\textwidth]{figures/func verification flow.png}
+    \caption{Functional verification flow diagram}
+    \label{fig:verification_flow}
+\end{figure}
+
+\subsubsection{Verification Metrics}
+
+To quantitatively assess the functional correctness of the RVV-vectorized kernels, two primary metrics were employed: Signal-to-Noise Ratio (SNR) and Maximum Absolute Error. These metrics provide complementary perspectives on numerical accuracy.
+
+\paragraph{Signal-to-Noise Ratio (SNR)}
+
+The Signal-to-Noise Ratio provides a relative measure of the accuracy of the RVV implementation compared to the golden reference. It is calculated using the following formula:
+
+\begin{equation}
+\text{SNR} = 10 \times \log_{10}\left(\frac{\sum y_i^2}{\sum (y_i - \hat{y}_i)^2}\right)
+\label{eq:snr}
+\end{equation}
+
+where:
 \begin{itemize}
-    \item \textbf{Hardware-agnostic validation}: ONNX references are independent of any specific CPU or accelerator
-    \item \textbf{Industry standard}: ONNX is widely adopted in machine learning frameworks (TensorFlow, PyTorch, ONNX Runtime)
-    \item \textbf{Reproducibility}: ONNX models can be distributed and verified independently
-    \item \textbf{Compositional verification}: Complex kernels can be built from simpler verified kernels
+    \item $y_i$ = ONNX golden reference output values
+    \item $\hat{y}_i$ = RVV implementation output values
+    \item $\sum$ denotes summation over all output elements
 \end{itemize}
 
-\subsubsection{Test Data Generation Strategy}
+A higher SNR indicates better agreement between the RVV implementation and the golden reference. For floating-point operations, an SNR above 90~dB is generally considered excellent, indicating that the error is negligible compared to the signal magnitude. For fixed-point and integer operations, the acceptable threshold may vary depending on the data representation and bit width.
 
-Test datasets are carefully designed to exercise different numerical and algorithmic scenarios:
+\paragraph{Maximum Absolute Error}
 
-\begin{enumerate}
-    \item \textbf{Boundary value testing}: Inputs include zero, small positive/negative values, large values near representable limits, and special floating-point values (NaN, infinity) where applicable
-    
-    \item \textbf{Random data generation}: Pseudo-random inputs drawn from uniform or normal distributions to test general-case behavior
-    
-    \item \textbf{Structured patterns}: Regular patterns such as identity matrices, constant arrays, and linearly-increasing sequences to facilitate manual verification and debugging
-    
-    \item \textbf{Real-world data samples}: Actual data from deployed models and signal processing applications to ensure practical applicability
-\end{enumerate}
+The Maximum Absolute Error provides an absolute measure of the worst-case deviation between the RVV implementation and the golden reference:
 
-\subsubsection{Numerical Verification Metrics}
+\begin{equation}
+\text{Max Absolute Error} = \max(|y_i - \hat{y}_i|)
+\label{eq:max_error}
+\end{equation}
 
-The framework employs two quantitative metrics to assess functional correctness:
+This metric is particularly important for identifying outliers and worst-case scenarios. While SNR provides an overall measure of accuracy, the maximum absolute error ensures that no individual output value deviates significantly from the expected result. For functional correctness, it is crucial that this error remains within acceptable numerical precision bounds, typically on the order of machine epsilon for the given data type multiplied by the computational depth of the operation.
 
-\begin{enumerate}
-    \item \textbf{Signal-to-Noise Ratio (SNR)}: Measures the ratio of the reference signal power to the error power:
-    
-    \begin{equation}
-    \text{SNR (dB)} = 10 \cdot \log_{10}\left(\frac{\sum_i \text{ref}_i^2}{\sum_i (\text{ref}_i - \text{test}_i)^2}\right)
-    \end{equation}
-    
-    SNR values greater than 100 dB indicate excellent agreement, with SNR of 40 dB or higher generally considered acceptable for signal processing applications.
-    
-    \item \textbf{Maximum Absolute Error (MaxAbs)}: Captures the largest deviation between corresponding output elements:
-    
-    \begin{equation}
-    \text{MaxAbs} = \max_i |\text{ref}_i - \text{test}_i|
-    \end{equation}
-\end{enumerate}
+\subsubsection{Verification Thresholds}
 
-\subsubsection{Verification Threshold Definition}
+To determine whether a kernel passes functional verification, the following thresholds were established based on numerical precision characteristics of different data types and operation complexity:
 
-Acceptance thresholds for SNR and MaxAbs are defined based on the kernel type and numerical precision requirements:
+\begin{table}[htbp]
+\centering
+\caption{Verification threshold criteria for different data types and operation complexities}
+\label{tab:verification_thresholds}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+\textbf{Data Type} & \textbf{Operation} & \textbf{Min SNR (dB)} & \textbf{Max Abs Error} \\ 
+\midrule
+FP32 & Simple & $> 100$ & $< 10^{-6}$ \\
+FP32 & Complex & $> 80$ & $< 10^{-5}$ \\
+FP64 & Any & $> 120$ & $< 10^{-12}$ \\
+INT8/INT16 & Any & $> 60$ & $= 0$ \\
+INT32 & Any & $> 80$ & $= 0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{itemize}
-    \item \textbf{Element-wise operations}: SNR $>$ 100 dB, MaxAbs $<$ $10^{-6}$ for single-precision floating-point
-    \item \textbf{Reduction operations}: SNR $>$ 60 dB, MaxAbs $<$ $10^{-4}$ (allowing for accumulation of rounding errors)
-    \item \textbf{Complex multi-stage operations}: SNR $>$ 40 dB, MaxAbs $<$ $10^{-3}$ (accounting for multiple transformation stages)
-\end{itemize}
+These thresholds account for the inherent numerical precision limitations of different data types as well as the accumulation of rounding errors in complex operations such as matrix multiplications or multi-stage computation pipelines.
+
