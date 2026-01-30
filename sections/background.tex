@@ -2,7 +2,7 @@
 
 \subsection{RISC-V Architecture Overview}
 
-RISC-V (pronounced ``risk-five'') is an open-source instruction set architecture (ISA) that has revolutionized processor design by providing a free, extensible alternative to proprietary architectures. Developed at the University of California, Berkeley, beginning in 2010, RISC-V was created to address fundamental limitations in the processor industry, particularly the dominance of proprietary ISAs that created barriers to innovation and increased costs for processor development.
+RISC-V (pronounced ``risk-five'') is an open-source instruction set architecture (ISA) that has revolutionized processor design by providing a free, extensible alternative to proprietary architectures. Developed at the University of California, Berkeley, beginning in 2010 \cite{riscv-v-spec}, RISC-V was created to address fundamental limitations in the processor industry, particularly the dominance of proprietary ISAs that created barriers to innovation and increased costs for processor development.
 
 The development of RISC-V was motivated by several critical issues in the computing industry that had become increasingly problematic for AI and DSP applications. Traditional proprietary ISAs, such as x86 and ARM, require expensive licensing agreements that can be prohibitive for companies developing specialized processors for AI and DSP workloads. These licensing costs are particularly burdensome for startups and research institutions that want to experiment with novel architectural approaches.
 
@@ -10,18 +10,16 @@ RISC-V addresses these challenges through several fundamental design principles 
 
 \textbf{Open Source Philosophy:} RISC-V specifications are freely available under Creative Commons licenses, and anyone can implement, modify, or extend RISC-V processors without paying royalties or obtaining permission. This openness eliminates one of the major barriers to innovation in processor design and enables a diverse ecosystem of implementations tailored for specific applications.
 
-\textbf{Modular Architecture:} RISC-V follows a modular design philosophy where a minimal base integer instruction set is supplemented by optional standard extensions. This modularity is particularly valuable for AI and DSP processors, which can include only the extensions needed for their specific applications, reducing implementation complexity and cost.
-
+\textbf{Modular Architecture:} RISC-V follows a modular design philosophy where a minimal base integer instruction set is supplemented by optional standard extensions \cite{riscv-v-spec}. This modularity is particularly valuable for AI and DSP processors, which can include only the extensions needed for their specific applications, reducing implementation complexity and cost.
 
 \textbf{Scalability Across Application Domains:} RISC-V supports multiple data widths (32-bit, 64-bit, and 128-bit) and can scale from microcontrollers to high-performance processors. This scalability is crucial for AI and DSP applications, which span a wide range of computing environments from embedded edge devices to high-performance computing clusters.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/growth.png}
-    \caption{RISC-V ecosystem growth. Source: RISC-V International}
-    \label{ RISC-V ecosystem growth. Source: RISC-V International}
+    \caption{RISC-V ecosystem growth. Source: RISC-V International \cite{riscv-v-spec}}
+    \label{fig:growth}
 \end{figure}    
-
 
 \subsection{RISC-V Extensions for Machine Learning}
 
@@ -29,13 +27,17 @@ The extensible nature of RISC-V is fundamental to its success in AI and DSP appl
 
 \subsubsection{Standard Extensions}
 
-\textbf{M Extension (Integer Multiplication and Division):} The M extension adds integer multiplication, division, and remainder operations that are fundamental for many AI and DSP algorithms. In AI applications, integer multiplication is crucial for quantized neural networks that use integer arithmetic instead of floating-point operations to reduce power consumption and increase performance.
+The modular nature of RISC-V allows the base integer ISA to be supplemented with standard extensions to meet the requirements of specific application domains \cite{riscv-v-spec}:
 
-\textbf{F Extension (Single-Precision Floating-Point):} The F extension provides IEEE 754 single-precision (32-bit) floating-point arithmetic, which is the most commonly used precision for AI training and many DSP applications. The extension includes fused multiply-add (FMA) instructions that are particularly important for AI and DSP workloads, as convolution operations in neural networks consist primarily of multiply-accumulate patterns that can be efficiently implemented using FMA instructions.
-
-\textbf{D Extension (Double-Precision Floating-Point):} The D extension adds IEEE 754 double-precision (64-bit) floating-point arithmetic, which is important for AI training applications that require higher numerical precision and certain DSP applications that need extended dynamic range.
-
-\textbf{V Extension (Vector Operations):} The V extension is the most significant addition to RISC-V for AI and DSP applications, providing comprehensive support for data-parallel vector operations. This extension represents a fundamental advancement in vector processing architecture and is the primary focus of this work.
+\begin{itemize}
+    \item \textbf{M Extension (Integer Multiplication and Division):} Adds hardware support for integer multiplication and division. This is essential for quantized neural networks and DSP algorithms where integer arithmetic is used to minimize power consumption.
+    
+    \item \textbf{F Extension (Single-Precision Floating-Point):} Provides IEEE 754 32-bit floating-point arithmetic. It introduces Fused Multiply-Add (FMA) instructions, which are critical for the multiply-accumulate (MAC) patterns dominant in convolution operations.
+    
+    \item \textbf{D Extension (Double-Precision Floating-Point):} Adds 64-bit floating-point support, necessary for AI training phases requiring high numerical stability and DSP applications with extended dynamic range requirements.
+    
+    \item \textbf{V Extension (Vector Operations):} The primary focus of this research, providing comprehensive support for data-parallel operations through a vector-length agnostic architecture. It enables high-throughput execution for the tensor and matrix operations found in modern AI workloads \cite{riscv-v-spec}.
+\end{itemize}
 
 \subsection{The RISC-V Vector Extension}
 
@@ -43,7 +45,7 @@ The RISC-V Vector (RVV) Extension stands out as one of the most consequential de
 
 \subsubsection{Architectural Principles}
 
-\textbf{Vector Registers and Configuration:} The V extension introduces 32 vector registers (\texttt{v0}--\texttt{v31}). The core architectural parameter is VLEN (Vector Length), which specifies the length of these registers in bits. VLEN is an implementation-defined choice, not fixed by the specification, and can range from small values (e.g., 128 bits) for embedded systems to very large values (e.g., 4096 bits or more) for supercomputers. Another key parameter is ELEN (Element Length), which is the maximum size of a single data element that can be processed.
+\textbf{Vector Registers and Configuration:} The V extension introduces 32 vector registers (\texttt{v0}--\texttt{v31}). The core architectural parameter is VLEN (Vector Length), which specifies the length of these registers in bits. VLEN is an implementation-defined choice, not fixed by the specification, and can range from small values (e.g., 128 bits) for embedded systems to very large values (e.g., 4096 bits or more) for supercomputers. Another key parameter is ELEN (Element Length), which is the maximum size of a single data element that can be processed.\\
 
 \textbf{Vector Control and Status Registers (CSRs):} The power and flexibility of the V extension are managed through key Control and Status Registers:
 
@@ -64,7 +66,7 @@ The typical execution flow follows a ``strip-mining'' pattern:
     \item The loop continues, processing chunks of data until all N elements are complete
 \end{enumerate}
 
-This approach means a single compiled binary can run with optimal efficiency on both a low-power microcontroller with VLEN=128 and a high-performance compute node with VLEN=4096, without requiring recompilation or code modification.
+This approach means a single compiled binary can run with optimal efficiency on both a low-power microcontroller with VLEN=128 and a high-performance compute node with VLEN=4096, without requiring recompilation or code modification.\\
 
 \textbf{Rich and Orthogonal Instruction Set:} The V extension provides a comprehensive set of instructions orthogonal to data types, allowing the same opcodes to work on integers and floats of different widths as configured by \texttt{vtype}. Key instruction categories include:
 
@@ -78,9 +80,9 @@ This approach means a single compiled binary can run with optimal efficiency on 
 
 \subsubsection{Programming with RISC-V Vector Intrinsics}
 
-While assembly language provides direct control over vector instructions, RISC-V vector intrinsics offer a more maintainable and portable approach to vectorized programming. Intrinsics are C/C++ functions that map directly to vector instructions, providing the performance benefits of assembly with the readability and toolchain integration of high-level languages.
+While assembly language provides direct control over vector instructions, RISC-V vector intrinsics offer a more maintainable and portable approach to vectorized programming. Intrinsics are C/C++ functions that map directly to vector instructions, providing the performance benefits of assembly with the readability and toolchain integration of high-level languages.\\
 
-\textbf{Advantages of Intrinsics:}
+\noindent \textbf{Advantages of Intrinsics:}
 \begin{itemize}
     \item \textbf{Compiler Integration:} Intrinsics work seamlessly with standard C/C++ compilers, enabling better optimization, register allocation, and instruction scheduling
     \item \textbf{Type Safety:} Unlike inline assembly, intrinsics are type-checked by the compiler, catching errors at compile time
@@ -88,7 +90,9 @@ While assembly language provides direct control over vector instructions, RISC-V
     \item \textbf{Maintainability:} Intrinsic-based code is more readable and easier to debug than raw assembly
 \end{itemize}
 
-\textbf{Common Intrinsic Patterns:}
+\vspace{3pt}
+\noindent \textbf{Common Intrinsic Patterns:}
+\vspace{3pt}
 
 \textit{Setting Vector Length:}
 \begin{lstlisting}[language=C++]
