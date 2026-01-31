@@ -1,7 +1,7 @@
 % !TEX root = ../Thesis.tex
 \subsection{Validation Results}
 
-This section presents a comprehensive performance evaluation of the RVV64\_Library kernels executed on the Ara vector coprocessor using a cycle-accurate RTL simulation environment. The benchmarking suite targets fundamental operations essential for modern deep learning workloads. Within the scope of this thesis, we focus exclusively on kernels that have been successfully validated using our current infrastructure; more complex operations—such as those involving transcendental functions or highly non-linear reductions—are deferred to future work, as their accurate characterization requires more advanced benchmarking methodologies and architectural insight.
+This section presents a comprehensive performance evaluation of the RaiVeX Library kernels executed on the Ara vector coprocessor using a cycle-accurate RTL simulation environment. The benchmarking suite targets fundamental operations essential for modern deep learning workloads. Within the scope of this thesis, we focus exclusively on kernels that have been successfully validated using our current infrastructure; more complex operations—such as those involving transcendental functions or highly non-linear reductions—are deferred to future work, as their accurate characterization requires more advanced benchmarking methodologies and architectural insight.
 
 Unless otherwise noted, all reported speedups are relative to an optimized scalar C baseline compiled for the same RISC-V core without vector extensions enabled. The scalar baseline was compiled using Clang/LLVM (from the riscv-llvm toolchain) with the following key flags to ensure high optimization while explicitly preventing any automatic vectorization:
 
@@ -21,7 +21,7 @@ The benchmarked kernels are categorized into three distinct classes based on the
 
 \begin{table}[H]
 \centering
-\caption{Peak speedup across all evaluated configurations for each RVV64\_Library kernel.}
+\caption{Peak speedup across all evaluated configurations for each RaiVeX Library kernel.}
 \label{tab:peak_speedups}
 \vspace{1em}
 \begin{tabular}{l l r}

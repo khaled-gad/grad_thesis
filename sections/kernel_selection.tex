@@ -1,11 +1,11 @@
 % !TEX root = ../Thesis.tex
 \subsection{Deep Learning Kernel Selection and Justification}
 
-The development of the RVV64\_Library begins with careful selection of computational kernels that represent fundamental building blocks for machine learning inference and digital signal processing applications. The kernels chosen for the RVV64\_Library are grouped into six categories. Each category reflects a selection criterion emphasizing compute intensity, data-parallel structure, predictable memory access, composability, and representativeness for typical inference pipelines.
+The development of the RaiVeX Library begins with careful selection of computational kernels that represent fundamental building blocks for machine learning inference and digital signal processing applications. The kernels chosen for the RaiVeX Library are grouped into six categories. Each category reflects a selection criterion emphasizing compute intensity, data-parallel structure, predictable memory access, composability, and representativeness for typical inference pipelines.
 
 \subsubsection{Selection Criteria Categories}
 
-The six categories of kernels selected for the RVV64\_Library are as follows:
+The six categories of kernels selected for the RaiVeX Library are as follows:
 
 \begin{enumerate}
     \item \textbf{Compute-intensive FMA Operations}: These kernels operate on dense arrays with regular, unit-stride memory access and nested loop structure. Implementations typically use blocking/tiling to expose long inner loops and maximize register reuse, while the inner-most operations are sequences of fused multiply-adds. Such structure yields high arithmetic intensity and sustained use of vector functional units.
@@ -40,7 +40,7 @@ The six categories of kernels selected for the RVV64\_Library are as follows:
 This subsection describes how each category maps to the RISC-V Vector (RVV) architectural features and the expected performance advantages. The RISC-V Vector Extension provides length-agnostic vector execution, flexible element widths, predicated operations for handling tails, and strided/indexed memory instructions that are central to the mappings below (RISC-V Vector Extension specification).
 
 \begin{enumerate}
-    \item \textbf{Compute-intensive FMA Operations}: GEMM and dot-product kernels have high arithmetic intensity and regular, unit-stride access to dense matrices. RVV benefits include long, chained vector multiply-accumulate sequences using floating-point vector instructions, efficient use of register grouping (LMUL) to increase effective vector width, and hardware-supported reductions for dot-products. Vectorized blocking and inner-loop unrolling map well to RVV's vsetvl-driven VL tuning, enabling near-peak use of available vector functional units.
+    \item \textbf{Compute-intensive FMA Operations}: General Matrix Multiply (GEMM) and dot-product kernels have high arithmetic intensity and regular, unit-stride access to dense matrices. RVV benefits include long, chained vector multiply-accumulate sequences using floating-point vector instructions, efficient use of register grouping (LMUL) to increase effective vector width, and hardware-supported reductions for dot-products. Vectorized blocking and inner-loop unrolling map well to RVV's vsetvl-driven VL tuning, enabling near-peak use of available vector functional units.
 
     \item \textbf{Sliding-window kernels}: Convolutions can be transformed to matrix-multiply-like inner loops (im2col) or implemented directly with sliding-window inner loops. RVV's strided and indexed loads allow efficient loading of kernel windows without expensive scalar gathers; predicated vector operations handle border and padding conditions without branch mispredictions. Data reuse across windows benefits from vector registers holding multiple channel or kernel elements, reducing memory traffic and improving arithmetic-to-memory ratio.
 
