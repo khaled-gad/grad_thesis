@@ -22,7 +22,7 @@ The validation process is organized into discrete testbench projects for each ke
 
 \subsubsection{Cycle-Accurate Measurement Logic}
 
-To evaluate the efficiency of the RVV implementations, precise timing measurement is required. This is achieved through instrumentation functions interfacing with the RISC-V \texttt{mcycle} CSR.
+To evaluate the efficiency of the RVV implementations, precise timing measurement is required. This is achieved through instrumentation functions interfacing with the RISC-V \texttt{mcycle} Control and Status Register (CSR).
 
 \begin{lstlisting}[language=C++, caption={Timing and Cycle Count Functions}]
 // Start and stop the counter

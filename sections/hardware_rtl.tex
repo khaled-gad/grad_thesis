@@ -7,7 +7,7 @@ In the rigorous domain of computer architecture research, particularly within th
 
 For a graduation thesis focused on the benchmarking of RISC-V vector architectures, relying solely on functional simulation would obscure critical bottlenecks such as pipeline hazards, register file banking conflicts, memory interconnect contention, and the latency costs associated with control flow divergence. Register Transfer Level (RTL) cores, therefore, play an indispensable role. They offer a bit-accurate and cycle-accurate representation of the hardware, synthesized from languages such as System Verilog.
 
-Simulation at this level allows the researcher to observe the precise interaction between the scalar host processor and the vector accelerator, capturing the ``handshake'' overheads that are often idealized in abstract models. Furthermore, RTL simulation is the only methodology capable of generating credible Power, Performance, and Area (PPA) metrics. By simulating the actual hardware description that would eventually be mapped to silicon or Field-Programmable Gate Arrays (FPGAs), researchers can derive energy efficiency numbers (e.g., FLOPS/Watt) and area utilization statistics (e.g., gate counts or LUT usage) that are grounded in physical reality rather than theoretical estimation.
+Simulation at this level allows the researcher to observe the precise interaction between the scalar host processor and the vector accelerator, capturing the ``handshake'' overheads that are often idealized in abstract models. Furthermore, RTL simulation is the only methodology capable of generating credible Power, Performance, and Area (PPA) metrics. By simulating the actual hardware description that would eventually be mapped to silicon or Field-Programmable Gate Arrays (FPGAs), researchers can derive energy efficiency numbers (e.g., FLOPS/Watt) and area utilization statistics (e.g., gate counts or Look-Up Table (LUT) usage) that are grounded in physical reality rather than theoretical estimation.
 
 \subsubsection{Importance of Cycle-Accurate Simulation}
 
@@ -17,7 +17,7 @@ Cycle-accurate simulation is paramount for evaluating these kernels because it e
 
 \subsubsection{Evolution of Core Selection: From Vicuna to Ara}
 
-The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight FPGA implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
+The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight Field-Programmable Gate Array (FPGA) implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
 
 While Vicuna served as a robust baseline for integer-only quantized kernels, it lacked the Vector Floating-Point Units ($VFPU$) necessary for modern inference and training benchmarks. This necessitated a transition to \textbf{Ara} \cite{ara}, a significantly more powerful and flexible architecture. Unlike the embedded constraints of Vicuna, Ara supports the full $64$-bit floating-point spectrum and provides a much more sophisticated RTL simulation environment, offering higher temporal fidelity and parametric scalability.
 
@@ -31,7 +31,7 @@ Due to these architectural requirements, the methodology for the performance val
 
 \subsubsection{Overview and Design Motivation}
 
-Vicuna is a 32-bit vector coprocessor designed to fill a distinct niche in the RISC-V ecosystem: timing predictability. While most vector processors maximize average-case throughput using caches, out-of-order execution, and banking, these features introduce ``timing anomalies''—situations where a local speedup results in a global slowdown due to pipeline scheduling effects. Vicuna's primary purpose is to serve real-time systems (e.g., automotive ADAS, avionics) where the Worst-Case Execution Time (WCET) must be strictly bounded and analyzable.
+Vicuna is a 32-bit vector coprocessor designed to fill a distinct niche in the RISC-V ecosystem: timing predictability. While most vector processors maximize average-case throughput using caches, out-of-order execution, and banking, these features introduce ``timing anomalies''—situations where a local speedup results in a global slowdown due to pipeline scheduling effects. Vicuna's primary purpose is to serve real-time systems (e.g., automotive Advanced Driver Assistance Systems (ADAS), avionics) where the Worst-Case Execution Time (WCET) must be strictly bounded and analyzable.
 
 Despite its focus on predictability, Vicuna does not sacrifice scalability. It is designed to scale its performance linearly with the number of execution units while maintaining a simple, analyzable timing model. It specifically targets the Zve32x extension—a subset of RVV 1.0 intended for embedded processors that require vectorization for integer workloads (like quantized neural networks) but do not need 64-bit elements or floating-point support.
 
@@ -48,7 +48,7 @@ Vicuna is highly configurable, allowing for independent scaling of the architect
 \label{fig:vicuna_diagram}
 \end{figure}
 
-Vicuna executes vector instructions using a dedicated set of functional units: a Vector Load/Store Unit (VLSU) for memory traffic, a Vector ALU (VALU) for integer arithmetic and logic, a Vector Multiplier (VMUL) for integer multiplication, and Vector Slide (VSLD) and Element (VELEM) units for permutations and reductions. The control logic is designed to be monotonic, ensuring that the progress of an instruction is never hindered by a subsequent instruction—a key requirement for preventing timing anomalies.
+Vicuna executes vector instructions using a dedicated set of functional units: a Vector Load/Store Unit (VLSU) for memory traffic, a Vector ALU (VALU) for integer arithmetic and logic, a Vector Multiplier (VMUL) for integer multiplication, and Vector Slide (VSLD) and Vector Element Units (VELEM) for permutations and reductions. The control logic is designed to be monotonic, ensuring that the progress of an instruction is never hindered by a subsequent instruction—a key requirement for preventing timing anomalies.
 
 \subsubsection{RVV Implementation}
 
@@ -62,7 +62,7 @@ Parallelism in Vicuna is achieved through simultaneous and successive processing
 
 \subsubsection{Memory Subsystem}
 
-Vicuna supports the standard RVV memory access patterns: unit-stride, strided, and indexed (scatter/gather). Vicuna maintains memory predictability through a strict-ordering memory arbiter governing a shared 2-way LRU data cache. To prevent the scalar core from interfering with vector timing, the arbiter always grants precedence to vector accesses. Crucially, it prevents \textit{amplification timing anomalies} by delaying any scalar access following a cache miss until all pending vector load/store operations are completed. This mechanism ensures that the memory interface—typically a source of non-determinism—behaves in a strictly predictable manner, allowing the scalar core to stall only for a bounded, deterministic number of cycles during vector memory activity.
+Vicuna supports the standard RVV memory access patterns: unit-stride, strided, and indexed (scatter/gather). Vicuna maintains memory predictability through a strict-ordering memory arbiter governing a shared 2-way Least Recently Used (LRU) data cache. To prevent the scalar core from interfering with vector timing, the arbiter always grants precedence to vector accesses. Crucially, it prevents \textit{amplification timing anomalies} by delaying any scalar access following a cache miss until all pending vector load/store operations are completed. This mechanism ensures that the memory interface—typically a source of non-determinism—behaves in a strictly predictable manner, allowing the scalar core to stall only for a bounded, deterministic number of cycles during vector memory activity.
 
 \subsubsection{RTL Implementation}
 
@@ -111,7 +111,7 @@ For reduction operations, Ara employs a three-step algorithm: local partial redu
 
 \subsubsection{Memory Subsystem and Coherence}
 
-The Vector Load/Store Unit (VLSU) interfaces Ara with the high-bandwidth AXI memory system, supporting unit-stride, strided, and indexed (scatter/gather) accesses. A critical feature of this implementation is the robust hardware coherence mechanism: the CVA6 data cache operates in write-through mode, ensuring scalar stores are visible to Ara, while vector stores generate invalidation signals to the CVA6 cache to maintain a consistent memory view.
+The Vector Load/Store Unit (VLSU) interfaces Ara with the high-bandwidth Advanced Extensible Interface (AXI) memory system, supporting unit-stride, strided, and indexed (scatter/gather) accesses. A critical feature of this implementation is the robust hardware coherence mechanism: the CVA6 data cache operates in write-through mode, ensuring scalar stores are visible to Ara, while vector stores generate invalidation signals to the CVA6 cache to maintain a consistent memory view.
 
 \subsubsection{RTL Implementation and Scalability}
 
@@ -140,7 +140,7 @@ Table \ref{tab:core_comparison} synthesizes the key technical differences betwee
 \begin{tabular}{|l|p{5cm}|p{5cm}|}
 \hline
 \textbf{Feature} & \textbf{Vicuna (Architectural Baseline)} & \textbf{Ara (Benchmarking Vehicle)} \\ \hline
-ISA Profile & $Zve32x$ (Integer/Fixed-point) & \textbf{Full RVV 1.0 (DP Floating Point)} \\ \hline
+ISA Profile & $Zve32x$ (Integer/Fixed-point) & \textbf{Full RVV 1.0 (Double Precision Floating Point)} \\ \hline
 Arithmetic Units & Integer ALU, Multiplier & \textbf{VFPU (FMA), VALU, VMUL} \\ \hline
 Data Width & $32$-bit & $64$-bit \\ \hline
 Primary Limitation & No Floating-Point Support & Superlinear Interconnect Complexity \\ \hline

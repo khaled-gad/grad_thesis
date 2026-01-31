@@ -17,7 +17,7 @@ RISC-V addresses these challenges through several fundamental design principles 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/growth.png}
-    \caption{RISC-V ecosystem growth. Source: RISC-V International \cite{riscv-v-spec}}
+    \caption[RISC-V ecosystem growth]{RISC-V ecosystem growth. Source: Semico Research Corp. \cite{semico2023riscv}}
     \label{fig:growth}
 \end{figure}    
 
@@ -128,7 +128,7 @@ float sum = __riscv_vfmv_f_s_f32m1_f32(v_sum);
 
 \subsubsection*{Herdt et al.: Extensible and Configurable RISC-V Virtual Prototype}
 
-This paper \cite{herdt2018extensible} introduces the first open-source, extensible \textbf{Virtual Prototype (VP)} based on the RISC-V architecture, implemented using standard-compliant \textbf{SystemC and TLM-2.0}. The primary scientific contribution is the creation of a middle-ground simulation environment that bridges the gap between high-speed but inflexible \textbf{Instruction Set Simulators (ISSs)} and highly accurate but extremely slow \textbf{Register Transfer Level (RTL)} models.
+Herdt et al. \cite{herdt2018extensible} introduces the first open-source, extensible \textbf{Virtual Prototype (VP)} based on the RISC-V architecture, implemented using standard-compliant SystemC and Transaction-Level Modeling \textbf{(TLM-2.0)}.. The primary scientific contribution is the creation of a middle-ground simulation environment that bridges the gap between high-speed but inflexible \textbf{Instruction Set Simulators (ISSs)} and highly accurate but extremely slow \textbf{Register Transfer Level (RTL)} models.
 
 \subsubsection*{Schlägl et al.: Unlocking Vector Processing for System-Level Evaluation}
 
@@ -136,7 +136,7 @@ Schlägl et al. \cite{schlaegl2024riscv} present the first open-source SystemC T
 
 \subsubsection*{Quiroga et al.: Reusable Verification Environment for Vector Accelerators}
 
-Quiroga et al. \cite{quiroga2022reusable} propose a \textbf{UVM-based, interface-agnostic verification environment} for RISC-V vector accelerators, enabling reuse across heterogeneous projects such as EPI and eProcessor.
+Quiroga et al. \cite{quiroga2022reusable} propose a \textbf{Universal Verification Methodology (UVM)-based, interface-agnostic verification environment} for RISC-V vector accelerators, enabling reuse across heterogeneous projects such as EPI and eProcessor.
 
 \subsubsection*{Imianosky et al.: Reliability and Performance of Vector Multiplication Units}
 
@@ -152,7 +152,7 @@ Wang et al. propose \textbf{SPEED}, a scalable multi-precision DNN processor des
 
 \subsubsection*{Carpentieri et al.: Performance Analysis of Autovectorization on RVV Boards}
 
-Carpentieri et al. \cite{carpentieri2025performance} present an empirical evaluation of \textbf{compiler-driven autovectorization} on real RISC-V hardware, comparing GCC and LLVM across TSVC benchmarks and real-world applications. The study shows that careful tuning of \textbf{LMUL} can yield speedups of up to \textbf{3$\times$}.
+Carpentieri et al. \cite{carpentieri2025performance} present an empirical evaluation of \textbf{compiler-driven autovectorization} on real RISC-V hardware, comparing GCC and LLVM across Test Suite for Vectorizing Compilers (TSVC) benchmarks and real-world applications. The study shows that careful tuning of \textbf{LMUL} can yield speedups of up to \textbf{3$\times$}.
 
 \subsubsection*{Volokitin et al.: Memory-Bound Kernels on RISC-V CPUs}
 
