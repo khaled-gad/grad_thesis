@@ -46,7 +46,7 @@ QEMU was selected over alternative simulators due to its system-level completene
 
 \paragraph{Rationale for Using QEMU}
 
-While Spike is the official RISC-V ISA simulator, QEMU offers several advantages aligned with the goals of this project. QEMU supports full Linux execution environments, enabling realistic testing of vectorized kernels in the presence of system calls, memory management, and runtime libraries. Additionally, QEMU integrates seamlessly with GDB, allowing interactive debugging and inspection of vector register state.
+While Spike is the official RISC-V ISA simulator, QEMU offers several advantages aligned with the goals of this project. QEMU supports full Linux execution environments, enabling realistic testing of vectorized kernels in the presence of system calls, memory management, and runtime libraries. Additionally, QEMU integrates seamlessly with GNU Debugger (GDB), allowing interactive debugging and inspection of vector register state.
 
 QEMU employs dynamic binary translation, which significantly reduces simulation time compared to purely interpretive simulators. This improvement in execution speed enhances development productivity when validating functional correctness across a large number of test cases and kernel configurations. Furthermore, modern QEMU versions provide architecturally accurate support for RVV 1.0 instructions, enabling reliable ISA-level validation.
 
@@ -93,7 +93,7 @@ An ONNX model represents a machine learning computation as a directed computatio
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.2\textwidth]{figures/ONNX-GRAPH-EX.png}
-    \caption{ONNX Model Computational Graph example illustrating nodes (operators) and edges (tensor data flow).}
+    \caption[ONNX Model Computational Graph]{ONNX Model Computational Graph example illustrating nodes (operators) and edges (tensor data flow).}
     \label{fig:onnx_graph}
 \end{figure}
 

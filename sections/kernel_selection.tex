@@ -28,7 +28,7 @@ The six categories of kernels selected for the RVV64\_Library are as follows:
 
     Kernels in this category include: Batch Normalization (inference).
 
-    \item \textbf{Postprocessing (NMS)}: Postprocessing kernels perform selection, suppression, or decoding operations with irregular control flow and variable-sized outputs (for example, non-maximum suppression for object detection). Implementations often separate dense arithmetic (IoU, score comparisons) — which can be vectorized — from the final selection and compacting phases which may require scalar coordination or masked writes.
+    \item \textbf{Postprocessing (NMS)}: Postprocessing kernels perform selection, suppression, or decoding operations with irregular control flow and variable-sized outputs (for example, non-maximum suppression for object detection). Implementations often separate dense arithmetic (Intersection over Union (IoU), score comparisons) — which can be vectorized — from the final selection and compacting phases which may require scalar coordination or masked writes.
 
     Kernels in this category include: non-maximum suppression (NMS).
 \end{enumerate}
