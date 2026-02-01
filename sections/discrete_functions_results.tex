@@ -1,320 +1,177 @@
 % !TEX root = ../Thesis.tex
 \subsubsection{Discrete Functions Correctness Verification Results}
 
-This section presents the functional verification results for each implemented kernel. The results demonstrate that all kernels meet or exceed the established verification thresholds, confirming the functional correctness of the RVV implementations. A total of 13 kernel types were implemented and verified, covering fundamental operations for neural network inference including convolution, matrix operations, activation functions, pooling, normalization, and tensor manipulation operations.
+This section presents the functional verification results for each implemented kernel. The results demonstrate that all kernels meet or exceed the established verification thresholds, confirming the functional correctness of the RVV implementations. A total of 13 kernel types were verified across 115+ implementation variants, covering fundamental operations for neural network inference including convolution, matrix operations, activation functions, pooling, normalization, and tensor manipulation operations.
+
+All implementations were validated against ONNX Runtime golden references using the dual-path verification methodology described in Section 3.4.2. Table~\ref{tab:verification_summary} provides an overview of all verified kernels, showing universal success with a 100\% pass rate. \\
 
 \textbf{Note:} The detailed results for each kernel are available in the project repository at \url{https://github.com/OmarAly03/RaiVeX/tree/main/kernels}. Each kernel directory contains a \texttt{result.md} file with comprehensive test data.
 
-\paragraph{Convolution Kernels}
 
-The convolution operation is fundamental to convolutional neural networks (CNNs). Two variants were implemented: standard 2D convolution and transposed convolution (deconvolution). Multiple vectorization strategies were tested, including direct convolution and im2col-based GEMM approaches.
-
-\paragraph{Standard 2D Convolution}
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Small-scale test: Input $1 \times 3 \times 8 \times 8$ (NCHW format), Kernel $3 \times 3 \times 3 \times 3$ (OIHW format)
-    \item Medium-scale test: Input $1 \times 128 \times 26 \times 26$, Kernel $256 \times 128 \times 3 \times 3$
-    \item Optimized 3x3 kernel test: Input $128 \times 128$, Kernel $3 \times 3$
-    \item Stride: $(1,1)$, Padding: $(1,1)$
-    \item Data type: FP32
-    \item LMUL variants tested: m1, m2, m4, m8
-    \item Implementation variants: Direct convolution, im2col+GEMM, batched 3x3 specialization
-\end{itemize}
-
-% should not the results be in a table for all tests? and why configurations are listed?
-\textbf{Verification Results:}
-
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
-\caption{Conv2D verification results across different scales}
-\label{tab:conv_results}
-\begin{tabular}{@{}lcc@{}}
+\caption{Summary of kernel verification results across all implementations}
+\label{tab:verification_summary}
+\vspace{1em}
+\begin{tabular}{l c c c }
 \toprule
-\textbf{Configuration} & \textbf{Max Abs Error} & \textbf{SNR (dB)} \\ 
+\textbf{Kernel Type}  & \textbf{Max Abs Error} & \textbf{SNR (dB)} & \textbf{Status} \\ 
 \midrule
-Small ($8\times8$, 10.4K FLOPs) & $7.15 \times 10^{-7}$ & 139.9 \\
-Medium ($26\times26$, 398.7M FLOPs) & $3.81 \times 10^{-5}$ & 127.6 \\
-$3 \times 3$ Specialized ($128\times128$) & 0 & $\infty$ \\
+Conv2D                   & $6.48 \times 10^{-5}$ & 123.9 -- 139.9 & \textcolor{green}{ PASSED} \\
+Conv2D Transposed       & $1.19 \times 10^{-7}$ & 143.2 -- 146.7 & \textcolor{green}{ PASSED} \\
+Conv2D $3\times3$ Specialized  & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Matrix Multiplication   & $2.86 \times 10^{-6}$ & 135.8 -- $\infty$ & \textcolor{green}{ PASSED} \\
+Dense Layer              & $4.29 \times 10^{-6}$ & 132.7 -- 132.9 & \textcolor{green}{ PASSED} \\
+ReLU                    & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Leaky ReLU              & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Max Pooling             & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Batch Normalization     & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Tensor Addition          & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Bias Addition            & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Gather Elements         & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Scatter Elements        & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+NMS                      & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+\midrule
+\textbf{}          & & & \textbf{100\% Pass Rate} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-All vectorized implementations (m1 through m8) achieved identical accuracy, demonstrating that LMUL variations maintain numerical consistency. The specialized $3 \times 3$ batched implementation achieved perfect accuracy with zero error. The im2col+GEMM approach produced slightly higher errors ($6.29 \times 10^{-5}$) but remained well within acceptable thresholds. Verification Status: \textcolor{green}{\textbf{PASSED}}
+\textbf{1. Perfect Accuracy Kernels}
 
-\paragraph{Transposed Convolution}
+Nine kernel types achieved perfect bitwise accuracy with zero maximum absolute error and infinite SNR across all implementation variants: ReLU, Leaky ReLU, Max Pooling, Batch Normalization, Tensor Addition, Bias Addition, Gather Elements, Scatter Elements, NMS, and the specialized Conv2D $3\times3$ kernel. This represents approximately 85\% of all tested implementations. 
 
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Input: $4 \times 4$, Kernel: $3 \times 3$, Output: $6 \times 6$
-    \item Stride: 1, No padding, Single channel
-    \item Data type: FP32
-    \item Implementations: Scalar, RVV $3 \times 3$ specialized, RVV general-purpose
-\end{itemize}
+These kernels achieved perfect accuracy due to their computational characteristics—either involving only elementwise operations with minimal accumulation (activation functions, additive operations), comparison-based selection (pooling), or carefully controlled normalization and indexing operations. All LMUL configurations (m1, m2, m4, m8) and optimization strategies (tiled, non-tiled) produced identical results for these kernels.
 
-\textbf{Verification Results:}
-\begin{itemize}
-    \item RVV $3 \times 3$ specialized: Max Abs Error = $6.71 \times 10^{-8}$, SNR = 146.7 dB
-    \item RVV general: Max Abs Error = $1.19 \times 10^{-7}$, SNR = 143.9 dB
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
+\textbf{2. Convolution Kernels}
 
-The specialized $3 \times 3$ kernel achieved better accuracy than the general implementation, demonstrating the benefits of kernel-specific optimization while maintaining excellent numerical precision.
+Convolution operations showed varying accuracy depending on scale and implementation approach. Table~\ref{tab:conv_detailed} summarizes the results across different configurations.
 
-\paragraph{Matrix Multiplication (GEMM) Kernels}
-
-Matrix multiplication is the computational backbone of fully connected layers and serves as a building block for other operations. Both standalone GEMM and integrated dense layer implementations were verified.
-
-\paragraph{General Matrix Multiplication}
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Matrix dimensions: $64 \times 64$ ($K=64$)
-    \item Tile size: 8
-    \item Total operations: 524,288 FLOPs
-    \item Data type: FP32
-    \item Variants: Standard and unrolled versions with tiling
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All RVV implementations (m1--m8): Max Abs Error = 0, SNR = $\infty$
-    \item C Scalar: Max Abs Error = $1.91 \times 10^{-6}$, SNR = 139.0 dB
-    \item Tiled Scalar: Max Abs Error = $2.86 \times 10^{-6}$, SNR = 135.8 dB
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-Remarkably, all vectorized implementations achieved perfect bitwise accuracy with zero maximum absolute error, outperforming the scalar implementations. This demonstrates that the RVV reduction operations maintain superior numerical stability compared to scalar accumulation patterns.
-
-\paragraph{Dense (Fully Connected) Layer}
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Batch size: 1, Input features: 128, Output features: 128
-    \item Input range: $[-1.0, +1.0]$
-    \item Data type: FP32
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All RVV implementations: Max Abs Error = $4.29 \times 10^{-6}$, SNR = 132.9 dB
-    \item C Scalar: Max Abs Error = $2.86 \times 10^{-6}$, SNR = 132.7 dB
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-The dense layer results show consistent high accuracy across all implementations, with SNR values exceeding 130 dB, well above the 100 dB threshold for complex FP32 operations.
-
-\paragraph{Activation Function Kernels}
-
-Activation functions introduce non-linearity into neural networks. Two variants were implemented: ReLU (Rectified Linear Unit) and Leaky ReLU.
-
-\paragraph{ReLU}
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Input size: 65,536 elements
-    \item Input range: $[-2.0, +2.0]$
-    \item Data type: FP32
-    \item Implementations: Scalar, tiled scalar, vectorized (m1--m8), tiled vectorized (m1--m8)
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-\paragraph{Leaky ReLU}
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Input size: 1,024 elements
-    \item Input range: $[-2.0, +2.0]$
-    \item Alpha (negative slope): 0.01
-    \item Data type: FP32
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-Both activation functions achieved perfect accuracy across all implementations. The elementwise nature of these operations allows for exact representation in floating-point arithmetic when operating within the tested ranges, resulting in bitwise-identical outputs.
-
-\paragraph{Pooling Kernels}
-
-Max pooling performs spatial downsampling by selecting the maximum value in local neighborhoods, commonly used in CNNs for feature extraction and dimensionality reduction.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Input shape: $(16, 1, 4, 4)$ (NCHW format)
-    \item Kernel: $2 \times 2$, Stride: $1 \times 1$, Padding: $(0, 0)$
-    \item Output shape: $(16, 1, 3, 3)$
-    \item Data type: FP32
-    \item Implementations: Scalar reference, RVV (m1--m8), RVV tiled (m1--m8)
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-Max pooling achieved perfect accuracy as it involves only comparison operations, which are exact in floating-point arithmetic. All ten implementation variants (scalar, four LMUL values, and four tiled LMUL variants) produced identical results.
-
-\paragraph{Normalization Kernels}
-
-Batch normalization is essential for training stability and convergence in deep neural networks. It normalizes activations across mini-batches using learned scale and shift parameters.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Input tensor shape: $1 \times 64 \times 32 \times 32$ (NCHW format)
-    \item 64 channels with independent normalization parameters
-    \item Data type: FP32
-    \item Implementations: Scalar, tiled scalar, vectorized (m1--m8), tiled vectorized (m1--m8)
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-Despite involving division and square root operations that can introduce numerical errors, batch normalization achieved perfect accuracy across all implementations. This indicates careful handling of the normalization formula and proper use of vectorized arithmetic operations.
-
-\paragraph{Tensor Manipulation Kernels}
-
-Several tensor manipulation operations were implemented to support advanced neural network architectures and data processing pipelines.
-
-\paragraph{Tensor Addition}
-
-Element-wise tensor addition is a fundamental operation used extensively in residual connections and multi-branch architectures.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Tensor size: 16 elements
-    \item Data type: FP32
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations (scalar, m1--m8): Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-\paragraph{Bias Addition}
-
-Bias addition applies channel-wise bias terms to feature maps, commonly used after convolution and fully connected layers.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Input shape: $1 \times 16 \times 14 \times 14$ (NCHW format)
-    \item 16 bias values, one per channel
-    \item Data type: FP32
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-\paragraph{Gather Elements}
-
-Gather operations enable advanced indexing and are used in attention mechanisms, embeddings, and feature selection.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Data shape: $16 \times 16$
-    \item Tested axes: 0 and 1
-    \item Data type: FP32
-    \item Implementations: Scalar, tiled scalar, vectorized (m1--m8), tiled vectorized (m1--m8)
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations, both axes: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-\paragraph{Scatter Elements}
-
-Scatter operations perform inverse indexing, writing values to specified locations, used in sparse operations and gradient computation.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Data shape: $16 \times 16$
-    \item Tested axes: 0 and 1
-    \item Data type: FP32
-    \item Implementations: Scalar, tiled scalar, vectorized (m1--m8), tiled vectorized (m1--m8)
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations, both axes: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-\paragraph{Non-Maximum Suppression (NMS)}
-
-Non-maximum suppression is critical for object detection pipelines, filtering overlapping bounding boxes to retain only the most confident predictions.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Bounding box filtering with IoU threshold
-    \item Data type: FP32
-    \item Implementations: Scalar, vectorized (m1--m8)
-\end{itemize}
-
-\textbf{Verification Results:}
-\begin{itemize}
-    \item All implementations: Max Abs Error = 0, SNR = $\infty$
-    \item Verification Status: \textcolor{green}{\textbf{PASSED}}
-\end{itemize}
-
-NMS involves coordinate arithmetic and intersection-over-union calculations but achieved perfect accuracy, demonstrating robust implementation of the geometric computations.
-
-\paragraph{Verification Results: Summary}
-
-Table~\ref{tab:summary_results} provides a comprehensive overview of all kernel verification results. Out of 13 kernel types tested across 75+ implementation variants (different LMUL values, tiling strategies, and algorithmic approaches), all implementations passed verification with flying colors.
-
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
-\caption{Summary of kernel verification results}
-\label{tab:summary_results}
-\small
-\begin{tabular}{@{}lccc@{}}
+\caption{Conv2D verification results across scales and implementations}
+\label{tab:conv_detailed}
+\vspace{1em}
+\begin{tabular}{l l c c}
 \toprule
-\textbf{Kernel Type} & \textbf{Implementations} & \textbf{Best SNR (dB)} & \textbf{Status} \\ 
+\textbf{Configuration} & \textbf{Implementation} & \textbf{Max Abs Error} & \textbf{SNR (dB)} \\ 
 \midrule
-Conv2D & 6 variants & 139.9 -- $\infty$ & \textcolor{green}{PASSED} \\
-Conv2D Transposed & 10 variants & 143.9 -- 146.7 & \textcolor{green}{PASSED} \\
-Matrix Multiplication & 15 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Dense Layer & 5 variants & 132.7 -- 132.9 & \textcolor{green}{PASSED} \\
-ReLU & 11 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Leaky ReLU & 11 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Max Pooling & 10 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Batch Normalization & 11 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Tensor Addition & 5 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Bias Addition & 5 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Gather Elements & 11 variants & $\infty$ & \textcolor{green}{PASSED} \\
-Scatter Elements & 11 variants & $\infty$ & \textcolor{green}{PASSED} \\
-NMS & 5 variants & $\infty$ & \textcolor{green}{PASSED} \\
+\multirow{2}{*}{Small ($8\times8$)}     
+                & All RVV variants        & $7.15 \times 10^{-7}$ & 139.9 \\
+                & Scalar baseline         & $9.54 \times 10^{-7}$ & 139.0 \\
 \midrule
-\textbf{Total} & \textbf{115+ variants} & & \textbf{100\% Pass Rate} \\
+\multirow{3}{*}{Medium ($26\times26$)}
+                & All RVV variants        & $3.81 \times 10^{-5}$ & 127.6 \\
+                & IM2COL+GEMM            & $6.29 \times 10^{-5}$ & 124.0 \\
+                & Scalar baseline         & $6.48 \times 10^{-5}$ & 123.9 \\
+\midrule
+\multirow{1}{*}{$3\times3$ Specialized ($128\times128$)}
+                & All variants  & 0                     & $\infty$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% \paragraph{Discussion}
+All RVV vectorized implementations (m1 through m8) achieved identical accuracy within each configuration, demonstrating LMUL-independent numerical consistency. Notably, RVV implementations outperformed scalar baselines for both small and medium scales—at medium scale, RVV achieved errors 41\% lower than scalar ($3.81 \times 10^{-5}$ vs $6.48 \times 10^{-5}$) with 3.7 dB better SNR. The im2col+GEMM approach produced slightly higher errors than direct RVV convolution but remained well within acceptable thresholds.
 
-\paragraph{Numerical Accuracy Analysis}
+The specialized $3\times3$ kernel achieved perfect accuracy across all eight variants (m1/m2/m4/m8 in both batched and non-batched configurations), demonstrating the benefits of kernel-specific optimization.
+
+
+\textbf{3. Transposed Convolution}
+
+Transposed convolution showed excellent accuracy across three different input scales, with implementation performance varying by problem size. Table~\ref{tab:conv_transposed} summarizes the results.
+
+\begin{table}[H]
+\centering
+\caption{Transposed convolution verification across scales ($3\times3$ kernel, stride=1)}
+\label{tab:conv_transposed}
+\vspace{1em}
+\begin{tabular}{l l c c}
+\toprule
+\textbf{Scale} & \textbf{Implementation Type} & \textbf{Max Abs Error} & \textbf{SNR (dB)} \\ 
+\midrule
+\multirow{3}{*}{Small ($4\times4$)} 
+    & RVV $3\times3$ Specialized (m1--m8)  & $6.71 \times 10^{-8}$ & 146.7 \\
+    & RVV General Purpose (m1--m8)  & $1.19 \times 10^{-7}$ & 143.9 \\
+    & Scalar Baseline               & $1.19 \times 10^{-7}$ & 143.2 \\
+\midrule
+\multirow{3}{*}{Medium ($26\times26$)} 
+    & RVV General Purpose (m1--m8)  & $4.77 \times 10^{-7}$ & 141.6 \\
+    & RVV $3\times3$ Specialized (m1--m8)  & $4.77 \times 10^{-7}$ & 140.9--141.2 \\
+    & Scalar Baseline               & $4.77 \times 10^{-7}$ & 141.3 \\
+\midrule
+\multirow{3}{*}{Large ($128\times128$)} 
+    & RVV General Purpose (m1--m8)  & $7.15 \times 10^{-7}$ & 141.4 \\
+    & RVV $3\times3$ Specialized (m1--m8)  & $4.77 \times 10^{-7}$ & 141.2--141.3 \\
+    & Scalar Baseline               & $4.77 \times 10^{-7}$ & 141.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At small scale ($4\times4$ input), the specialized $3\times3$ kernel achieved 43\% lower error than both general RVV and scalar implementations ($6.71 \times 10^{-8}$ vs $1.19 \times 10^{-7}$) with 2.8--3.5 dB better SNR. However, this advantage diminishes at larger scales.
+
+For medium and large scales ($26\times26$ and $128\times128$), all implementations converged to similar accuracy levels, with maximum absolute errors ranging from $4.77 \times 10^{-7}$ to $7.15 \times 10^{-7}$ and SNR values between 140.9--141.6 dB. At these scales, scalar baseline performed comparably to or slightly better than RVV implementations, though all variants remained well above the 80 dB threshold for complex FP32 operations.
+
+All four LMUL variants (m1--m8) within each implementation type produced nearly identical results, with SNR variations under 0.5 dB at medium/large scales—indicating LMUL choice affects performance but not accuracy.
+
+\textbf{4. Matrix Multiplication and Dense Layer}
+
+Matrix multiplication demonstrated remarkable numerical properties, with RVV implementations achieving superior accuracy to scalar baselines.
+
+\begin{table}[H]
+\centering
+\caption{Matrix multiplication verification ($64\times64$)}
+\label{tab:matmul_detailed}
+\vspace{1em}
+\begin{tabular}{l c c}
+\toprule
+\textbf{Implementation Type} & \textbf{Max Abs Error} & \textbf{SNR (dB)} \\ 
+\midrule
+All RVV Variants & 0 & $\infty$ \\
+Scalar Baseline   & $1.91 \times 10^{-6}$ & 139.0 \\
+Tiled Scalar  & $2.86 \times 10^{-6}$ & 135.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All twelve RVV implementations achieved perfect bitwise accuracy with zero error, significantly outperforming scalar implementations. This superior performance suggests that RVV reduction instructions employ hardware-optimized compensated summation at the microarchitectural level. All LMUL values (m1--m8) and optimization strategies (standard, unrolled, tiled) produced identical perfect results.
+
+Dense layer (fully connected) operations showed consistent high accuracy across implementations.
+
+\begin{table}[H]
+\centering
+\caption{Dense layer verification (batch=1, $128\times128$)}
+\label{tab:dense_detailed}
+\vspace{1em}
+\begin{tabular}{l c c}
+\toprule
+\textbf{Implementation Type} & \textbf{Max Abs Error} & \textbf{SNR (dB)} \\ 
+\midrule
+All RVV Variants (m1--m8, 4 total) & $4.29 \times 10^{-6}$ & 132.9 \\
+Scalar Baseline                     & $2.86 \times 10^{-6}$ & 132.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Both scalar and RVV implementations achieved SNR $>$ 132 dB, well above the 100 dB threshold. All LMUL variants produced identical results, with RVV showing slightly higher error than scalar but maintaining excellent accuracy for this matrix-vector multiplication pattern.\\
+
+
+\textbf{5. Numerical Accuracy Analysis}
 
 The verification results demonstrate exceptional numerical accuracy across all RVV-vectorized kernels, significantly exceeding the established thresholds. Out of 115+ implementation variants tested across 13 kernel types, the observed performance can be categorized into three accuracy tiers:
 
-\textbf{Perfect Accuracy (Tier 1):} The majority of kernels---including all activation functions (ReLU, Leaky ReLU), pooling operations (MaxPool), normalization (BatchNorm), tensor manipulation operations (addition, bias addition, gather, scatter), and NMS---achieved perfect bitwise accuracy with zero maximum absolute error and infinite SNR. This represents approximately 85\% of all tested implementations.
+\paragraph{Perfect Accuracy (Tier 1):} The majority of kernels---including all activation functions (ReLU, Leaky ReLU), pooling operations (MaxPool), normalization (BatchNorm), tensor manipulation operations (addition, bias addition, gather, scatter), and NMS---achieved perfect bitwise accuracy with zero maximum absolute error and infinite SNR. This represents approximately 85\% of all tested implementations. The perfect accuracy results from the elementwise or comparison-based nature of these operations, where each output depends on a small, fixed number of inputs, avoiding error accumulation.
 
-\textbf{Excellent Accuracy (Tier 2):} Matrix multiplication and dense layer operations achieved SNR values ranging from 132.7 to 139.0 dB, with maximum absolute errors on the order of $10^{-6}$. These results significantly exceed the 100 dB threshold for complex FP32 operations, with errors remaining within 2--3 units in the last place (ULPs) for single-precision arithmetic.
+\paragraph{Excellent Accuracy (Tier 2):} Matrix multiplication achieved zero error for all RVV implementations while scalar implementations showed errors up to $2.86 \times 10^{-6}$ (SNR = 135.8 dB). This superior RVV performance suggests that hardware-optimized reduction instructions employ compensated summation techniques at the microarchitectural level. Dense layers achieved SNR values of 132.7--132.9 dB with errors on the order of $10^{-6}$. These results significantly exceed the 100 dB threshold for complex FP32 operations, with errors remaining within 2--3 units in the last place (ULPs) for single-precision arithmetic.
 
+<<<<<<< HEAD
 \textbf{Very High Accuracy (Tier 3):} Convolution operations, the most computationally complex kernels, achieved SNR values between 123.9 and 146.7 dB. While showing slightly higher errors than simpler operations due to the substantial number of accumulations (up to 398 million FLOPs in the largest test), all convolution variants remained well above the 80 dB threshold for complex operations. The specialized $3\times3$ convolution implementation achieved perfect accuracy, demonstrating the effectiveness of kernel-specific optimizations.
+=======
+\paragraph{Very High Accuracy (Tier 3):} Convolution operations, the most computationally complex kernels, achieved SNR values between 123.9 and 146.7 dB. While showing slightly higher errors than simpler operations due to the substantial number of accumulations (up to 398 million FLOPs in the largest test), all convolution variants remained well above the 80 dB threshold for complex operations. The im2col+GEMM approach produced slightly higher errors than direct convolution but remained well within acceptable bounds; whereas the specialized $3\times3$ convolution implementation achieved perfect accuracy, demonstrating the effectiveness of kernel-specific optimizations.
+
+A critical finding is the \textbf{LMUL-independent accuracy}: all LMUL configurations (m1, m2, m4, m8) produced numerically identical results within each kernel. This demonstrates that vector register grouping affects only performance, not correctness, allowing developers to optimize for throughput without accuracy concerns.
+
+% what is this textbf trying to add? is this placement appropriate?
+% \textbf{Comparison with ONNX Runtime}
+
+% The selection of ONNX Runtime as the golden reference was based on several considerations. ONNX Runtime is widely recognized as a high-performance, production-grade inference engine that implements the ONNX specification accurately and is extensively tested across various platforms, hardware accelerators (CPU, GPU, NPU), and deployment scenarios. It serves as a de facto standard for cross-platform ML inference. By comparing against ONNX Runtime, we ensure that our implementations conform to industry-standard ML operator semantics and produce results compatible with models trained using popular frameworks (PyTorch, TensorFlow, etc.).
+>>>>>>> 36729cf39c271108fc4ed8511120044d8bdc153f
