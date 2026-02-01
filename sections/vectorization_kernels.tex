@@ -12,6 +12,9 @@ At the core of these operations lies the FMA, where we accumulate multiple produ
 
 These kernels also exhibit regular, predictable structure. Data dependencies are minimal and well-defined, memory access patterns follow sequential or strided layouts, and control flow remains simple. This regularity plays to the strengths of SIMD architectures, where we can fill vector registers densely with minimal overhead.
 
+% ------------------------------------------------------------
+% Matrix Multiplication (GEMM)
+% ------------------------------------------------------------
 \paragraph{Matrix Multiplication (GEMM)}
 
 \subparagraph{Kernel Description}
@@ -28,53 +31,61 @@ This operation underlies virtually all linear algebra in machine learning, from 
 
 The straightforward scalar approach uses three nested loops. For each row in $A$ and column in $B$, we accumulate a dot product by iterating through $K$ elements, multiplying corresponding pairs and summing results:
 
-\begin{verbatim}
-FOR each row i in matrix A
-    FOR each column j in matrix B
-        sum ← 0
-        FOR k = 0 to K-1
-            sum ← sum + A[i][k] × B[k][j]
-        C[i][j] ← sum
-\end{verbatim}
+\begin{lstlisting}[language=Python, caption={Scalar GEMM pseudo-code}]
+for each row i in matrix A:
+    for each column j in matrix B:
+        sum = 0
+        for k from 0 to K - 1:
+            sum = sum + A[i][k] * B[k][j]
+        C[i][j] = sum
+\end{lstlisting}
 
 This processes one output element at a time. Each multiply-add depends on the previous accumulation, preventing any overlap of operations. The deeply nested loops add control overhead, and we completely ignore the wide vector registers sitting idle in the processor. Modern CPUs with pipelined FMA units spend most of their time stalled, waiting for data dependencies to resolve.
 
 \subparagraph{Vectorization Strategy}
 
-Rather than computing output elements sequentially, we can process multiple columns of the output simultaneously. Instead of accumulating into a single scalar, we maintain $\textit{vl}$ parallel accumulators in a vector register, where $\textit{vl}$ represents the number of elements that fit in one vector based on available hardware width.
+Rather than computing output elements sequentially, we can process multiple columns of the output simultaneously. Instead of accumulating into a single scalar, we maintain $vl$ parallel accumulators in a vector register, where $vl$ represents the number of elements that fit in one vector based on available hardware width.
 
-This reorganization transforms the inner loop structure. For each element $A[i][k]$ in the current row, we broadcast that single value across all lanes of a vector register. We then load $\textit{vl}$ consecutive elements from row $k$ of matrix $B$ and multiply the broadcast value with this vector. The result updates all $\textit{vl}$ accumulators in parallel.
+This reorganization transforms the inner loop structure. For each element $A[i][k]$ in the current row, we broadcast that single value across all lanes of a vector register. We then load $vl$ consecutive elements from row $k$ of matrix $B$ and multiply the broadcast value with this vector. The result updates all $vl$ accumulators in parallel.
 
-This approach delivers several advantages. We exploit the full width of vector functional units, executing $\textit{vl}$ FMAs per cycle instead of one. Memory access to matrix $B$ becomes sequential and cache-friendly, since we load contiguous elements. Loop overhead drops because we process $\textit{vl}$ outputs per iteration instead of one.
+This approach delivers several advantages. We exploit the full width of vector functional units, executing $vl$ FMAs per cycle instead of one. Memory access to matrix $B$ becomes sequential and cache-friendly, since we load contiguous elements. Loop overhead drops because we process $vl$ outputs per iteration instead of one.
 
 \subparagraph{Implementation}
 
-The vectorized code replaces the innermost column loop with a while loop that processes columns in chunks. We track how many columns remain to be processed and handle them in groups of $\textit{vl}$:
+The vectorized code replaces the innermost column loop with a while loop that processes columns in chunks. We track how many columns remain to be processed and handle them in groups of $vl$:
 
-\begin{verbatim}
-FOR each row i in matrix A
-    remaining_columns ← N
-    WHILE remaining_columns > 0
-        vl ← number of cols processed in parallel
-        j ← N - remaining_columns
-        acc_vector ← 0
-        FOR k = 0 to K-1
-            a_vector ← broadcast A[i][k]
-            b_vector ← load B[k][j : j+vl]
-            acc_vector ← acc_vector + (a_vector × b_vector)
-        END FOR
-        store acc_vector into C[i][j : j+vl]
-        remaining_columns ← remaining_columns - vl
-    END WHILE
-END FOR
-\end{verbatim}
+\begin{lstlisting}[language=Python, caption={Vectorized GEMM pseudo-code}]
+for each row i in matrix A:
+    remaining_columns = N
+    while remaining_columns > 0:
+        vl = set_vector_length(remaining_columns)
+        j = N - remaining_columns
+        
+        acc_vector = broadcast(0, vl)
+        for k from 0 to K - 1:
+            # Broadcast scalar from A to all vector lanes
+            a_scalar = A[i][k]
+            # Load vl contiguous elements from B
+            b_vector = load_vector(B[k][j], vl)
+            
+            # Vector-Scalar Fused Multiply-Add
+            acc_vector = fma(acc_vector, a_scalar, b_vector)
+            
+        store_vector(C[i][j], acc_vector, vl)
+        remaining_columns -= vl
+\end{lstlisting}
 
-For each chunk of columns, we initialize a vector accumulator to zero. The inner loop over $k$ performs the dot product computation: we broadcast each element from row $i$ of matrix $A$ across all lanes, load $\textit{vl}$ consecutive elements from the corresponding row of $B$, multiply them element-wise, and accumulate the results. After completing the dot product across all $K$ elements, we store the vector of results to the output matrix.
 
-The broadcast operation is crucial here. It takes a single scalar value $A[i][k]$ and replicates it across every lane of a vector register, allowing that single value to be multiplied with $\textit{vl}$ different elements from $B$ simultaneously. The load from $B$ is sequential, fetching consecutive memory locations, which aligns perfectly with cache line sizes and enables efficient prefetching.
 
-The RISC-V vector extension determines $\textit{vl}$ dynamically at runtime based on the hardware's vector register width and the element size. When the number of remaining columns isn't evenly divisible by the maximum vector length, the hardware automatically reduces $\textit{vl}$ for the final iteration, processing exactly the remaining elements without any special-case code.
+For each chunk of columns, we initialize a vector accumulator to zero. The inner loop over $k$ performs the dot product computation: we broadcast each element from row $i$ of matrix $A$ across all lanes, load $vl$ consecutive elements from the corresponding row of $B$, multiply them element-wise, and accumulate the results. After completing the dot product across all $K$ elements, we store the vector of results to the output matrix.
 
+The broadcast operation is crucial here. It takes a single scalar value $A[i][k]$ and replicates it across every lane of a vector register, allowing that single value to be multiplied with $vl$ different elements from $B$ simultaneously. The load from $B$ is sequential, fetching consecutive memory locations, which aligns perfectly with cache line sizes and enables efficient prefetching.
+
+The RISC-V vector extension determines $vl$ dynamically at runtime based on the hardware's vector register width and the element size. When the number of remaining columns isn't evenly divisible by the maximum vector length, the hardware automatically reduces $vl$ for the final iteration, processing exactly the remaining elements without any special-case code.
+
+% ------------------------------------------------------------
+% Dense Layer (Fully Connected)
+% ------------------------------------------------------------
 \paragraph{Dense Layer (Fully Connected)}
 
 \subparagraph{Kernel Description}
@@ -91,23 +102,23 @@ This is essentially matrix-vector multiplication with bias addition. While conce
 
 The scalar code processes one output neuron at a time. We initialize each accumulator with its corresponding bias, then iterate through all input features, multiplying each by its weight and accumulating:
 
-\begin{verbatim}
-FOR each output neuron j = 0 to N-1
-    acc ← bias[j]
-    FOR each input feature k = 0 to K-1
-        acc ← acc + input[k] × weights[j][k]
-    output[j] ← acc
-\end{verbatim}
+\begin{lstlisting}[language=Python, caption={Scalar Dense Layer pseudo-code}]
+for each output neuron j from 0 to N - 1:
+    acc = bias[j]
+    for each input feature k from 0 to K - 1:
+        acc = acc + input[k] * weights[j][k]
+    output[j] = acc
+\end{lstlisting}
 
-By initializing with the bias value, we avoid a separate bias addition pass after computing the weighted sum. Each output neuron is computed independently with a sequential accumulation across all input features.
-
-Like scalar GEMM, this serializes all operations. Each accumulation depends on the previous one, and we process only a single output at a time. Vector units remain completely unutilized.
+By initializing with the bias value, we avoid a separate bias addition pass after computing the weighted sum. Each output neuron is computed independently with a sequential accumulation across all input features. Like scalar GEMM, this serializes all operations. Each accumulation depends on the previous one, and we process only a single output at a time. Vector units remain completely unutilized.
 
 \subparagraph{Vectorization Strategy}
 
-We parallelize across output neurons, computing $\textit{vl}$ neurons simultaneously. The key insight is that for each input feature, we can broadcast that feature value and multiply it with weights from multiple neurons in parallel.
+We parallelize across output neurons, computing $vl$ neurons simultaneously. The key insight is that for each input feature, we can broadcast that feature value and multiply it with weights from multiple neurons in parallel.
 
 The memory access pattern differs from GEMM in an important way. In GEMM, consecutive output columns correspond to consecutive elements in memory (sequential access to $B$). Here, to compute multiple neurons in parallel, we need to load weights for the same input feature across different neurons. These weights are not contiguous in memory because the weight matrix is stored in row-major order, with each row representing one neuron's complete set of weights.
+
+
 
 For input feature $k$, the weights we need are at positions $\text{weights}[j][k]$, $\text{weights}[j+1][k]$, $\text{weights}[j+2][k]$, etc. These addresses are separated by $K$ elements (the stride of one row), making this a strided memory access pattern rather than a sequential one.
 
@@ -115,30 +126,33 @@ For input feature $k$, the weights we need are at positions $\text{weights}[j][k
 
 The vectorized implementation processes output neurons in chunks, initializing accumulators directly with bias values:
 
-\begin{verbatim}
-j ← 0
-WHILE j < N
-    vl ← number of outputs processed in parallel
-    acc_vector ← load bias[j : j+vl]
-    FOR each input feature k = 0 to K-1
-        weight_vector ← load weights[j : j+vl][k]        
-                                          (strided)
-        input_vector ← broadcast input[k]
-        acc_vector ← acc_vector + 
-            (input_vector × weight_vector)
-    END FOR
-    store acc_vector into output[j : j+vl]
-    j ← j + vl
-END WHILE
-\end{verbatim}
+\begin{lstlisting}[language=Python, caption={Vectorized Dense Layer pseudo-code}]
+j = 0
+while j < N:
+    vl = set_vector_length(N - j)
+    # Sequential load of bias values
+    acc_vector = load_vector(bias + j, vl)
+    
+    for each input feature k from 0 to K - 1:
+        # Load weights for vl different neurons (strided access)
+        # Stride is equal to the row width K
+        weight_vector = strided_load(weights + (j * K) + k, stride=K, vl)
+        
+        # Broadcast the scalar input feature
+        input_val = input[k]
+        
+        # Vector-Scalar Fused Multiply-Add
+        acc_vector = fma(acc_vector, input_val, weight_vector)
+        
+    store_vector(output + j, acc_vector, vl)
+    j += vl
+\end{lstlisting}
 
-We start by loading $\textit{vl}$ bias values into the accumulator vector. This is a sequential load since bias values are stored contiguously. Then, for each input feature, we perform two key operations:
+We start by loading $vl$ bias values into the accumulator vector. This is a sequential load since bias values are stored contiguously. Then, for each input feature, we perform two key operations:
 
 First, we load weights using strided access. The notation $\text{weights}[j:j+vl][k]$ means we're loading element $k$ from rows $j$ through $j+vl-1$. These elements are separated by $K$ positions in memory (one full row), so we use a strided load instruction with stride equal to $K \times \text{element\_size}$. The RISC-V vector ISA provides efficient strided load instructions that handle this pattern in hardware, fetching non-contiguous elements without manual gathering.
 
-Second, we broadcast the input feature value across all vector lanes. This replicated value multiplies with the vector of weights, producing $\textit{vl}$ partial products that update the accumulators in parallel.
-
-After processing all $K$ input features, each lane of the accumulator vector contains the complete output for one neuron (weighted sum plus bias), ready to be stored to memory.
+Second, we broadcast the input feature value across all vector lanes. This replicated value multiplies with the vector of weights, producing $vl$ partial products that update the accumulators in parallel. After processing all $K$ input features, each lane of the accumulator vector contains the complete output for one neuron (weighted sum plus bias), ready to be stored to memory.
 
 The key advantage of initializing with bias values rather than zero is efficiency: we fold the bias addition into the initial load rather than performing a separate addition pass after the main computation. This saves both instructions and a complete pass over the output array.
 
@@ -153,6 +167,9 @@ The defining characteristic is local spatial dependency: each output depends onl
 
 Optimization strategies differ from dense matrix operations. While GEMM benefits from vectorizing across output dimensions, sliding window kernels often benefit more from vectorizing across output width or channels, combined with careful register blocking to exploit spatial locality.
 
+% ------------------------------------------------------------
+% 2D Convolution
+% ------------------------------------------------------------
 \paragraph{2D Convolution}
 
 \subparagraph{Kernel Description}
@@ -175,23 +192,22 @@ ih = oh \times \text{stride}_h - \text{pad}_h + kh, \quad iw = ow \times \text{s
 
 The scalar approach iterates over every dimension: batch, output channel, output position, input channel, and kernel position. For each kernel element, we compute the corresponding input coordinates, verify they're within bounds (handling padding), and accumulate the product:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Python, caption={Scalar 2D Convolution pseudo-code}]
 Compute output height and width
 Initialize output to zero
 
-FOR each batch b
-    FOR each output channel oc, output row oh, output column ow
-        sum ← 0
-        FOR each input channel ic
-            FOR each kernel row kh
-                FOR each kernel column kw
-                    ih ← oh × stride_h - pad_h + kh
-                    iw ← ow × stride_w - pad_w + kw
-                    IF ih, iw inside input bounds
-                        sum ← sum + input[b][ic][ih][iw] 
-                                  × kernel[oc][ic][kh][kw]
-        output[b][oc][oh][ow] ← sum
-\end{verbatim}
+for each batch b:
+    for each output channel oc, output row oh, output column ow:
+        sum = 0
+        for each input channel ic:
+            for each kernel row kh:
+                for each kernel column kw:
+                    ih = oh * stride_h - pad_h + kh
+                    iw = ow * stride_w - pad_w + kw
+                    if ih, iw inside input bounds:
+                        sum += input[b][ic][ih][iw] * kernel[oc][ic][kh][kw]
+        output[b][oc][oh][ow] = sum
+\end{lstlisting}
 
 The output is initialized to zero at the start, then we accumulate contributions from all input channels and kernel positions. The innermost loops compute coordinate mappings and perform boundary checks to handle padding. When an input coordinate falls outside the valid range, we skip that multiply-accumulate, effectively treating out-of-bounds regions as zero (zero-padding).
 
@@ -203,37 +219,46 @@ The general vectorization strategy has two phases: kernel repacking followed by 
 
 In the original layout, kernel weights are organized as $\text{kernel}[oc][ic][kh][kw]$. To access weights for output channels $oc$, $oc+1$, $oc+2$, etc., for a fixed input channel and kernel position, we'd need to stride through memory with large jumps. By repacking into $\text{packed\_kernel}[ic][kh][kw][oc]$, we make weights for consecutive output channels adjacent in memory, enabling efficient sequential vector loads.
 
-During computation, we process $\textit{vl}$ output channels simultaneously. For each output position, we maintain $\textit{vl}$ parallel accumulators. As we iterate through input channels and kernel positions, we broadcast each input value and multiply it with a vector of repacked weights, updating all accumulators in parallel.
+During computation, we process $vl$ output channels simultaneously. For each output position, we maintain $vl$ parallel accumulators. As we iterate through input channels and kernel positions, we broadcast each input value and multiply it with a vector of repacked weights, updating all accumulators in parallel.
 
 \subparagraph{Implementation}
 
 The implementation starts with kernel repacking, then executes the vectorized convolution:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Python, caption={Vectorized 2D Convolution pseudo-code}]
 Repack kernel so output channels are contiguous
 Initialize output to zero
 
-FOR each batch b
-    FOR output channels oc in vector chunks
-        FOR each output row oh, output column ow
-            acc_vector ← output[b][oc:oc+vl][oh][ow]
-            FOR each input channel ic
-                FOR each kernel row kh
-                    FOR each kernel column kw
-                        ih ← oh × stride_h - pad_h + kh
-                        iw ← ow × stride_w - pad_w + kw
-                        IF ih, iw inside input bounds
-                            input_val ← input[b][ic][ih][iw]
-                            weight_vector ← packed_w[ic][kh][kw][oc:oc+vl]
-                            acc_vector ← acc_vector + input_val × weight_vector
-            store acc_vector to output
-\end{verbatim}
+for each batch b:
+    for output channels oc in vector chunks:
+        vl = set_vector_length(remaining_channels)
+        for each output row oh, output column ow:
+            # Load initial accumulators for vl channels
+            acc_vector = load_vector(output[b][oc][oh][ow], vl)
+            
+            for each input channel ic:
+                for each kernel row kh:
+                    for each kernel column kw:
+                        ih = oh * stride_h - pad_h + kh
+                        iw = ow * stride_w - pad_w + kw
+                        
+                        if ih, iw inside input bounds:
+                            input_val = input[b][ic][ih][iw]
+                            # Load weights for vl consecutive output channels
+                            weight_vec = load_vector(packed_w[ic][kh][kw][oc], vl)
+                            # Fused Multiply-Add (Scalar * Vector)
+                            acc_vector = fma(acc_vector, input_val, weight_vec)
+            
+            store_vector(output[b][oc][oh][ow], acc_vector, vl)
+\end{lstlisting}
+
+
 
 We initialize the output to zero before the main computation begins. For each output position, we load the current accumulator state (which starts at zero) from the output array. This might seem redundant for the first iteration, but it allows us to accumulate contributions from multiple input channels consistently.
 
-The key operations happen in the innermost loops. For each valid input position, we load a single scalar input value. We then load a vector of $\textit{vl}$ consecutive kernel weights from the repacked array. The scalar input value is implicitly broadcast across all lanes when multiplied with the weight vector, producing $\textit{vl}$ partial products. These accumulate into the vector register holding our parallel output channel computations.
+The key operations happen in the innermost loops. For each valid input position, we load a single scalar input value. We then load a vector of $vl$ consecutive kernel weights from the repacked array. The scalar input value is implicitly broadcast across all lanes when multiplied with the weight vector, producing $vl$ partial products. These accumulate into the vector register holding our parallel output channel computations.
 
-After processing all input channels and kernel positions for a given output location, the accumulator vector contains the complete output values for $\textit{vl}$ channels at that spatial position. We store this vector back to the output array.
+After processing all input channels and kernel positions for a given output location, the accumulator vector contains the complete output values for $vl$ channels at that spatial position. We store this vector back to the output array.
 
 The repacking cost is paid once during initialization and amortized across potentially thousands of forward passes. The memory layout transformation converts strided access (which would require expensive gather operations or multiple scalar loads) into efficient sequential loads.
 
@@ -245,28 +270,29 @@ An alternative approach transforms convolution into standard matrix multiplicati
 
 This transformation works for any kernel size and allows us to leverage highly optimized matrix multiplication algorithms.
 
-\begin{verbatim}
+\begin{lstlisting}[language=Python, caption={Im2Col Transformation pseudo-code}]
 Compute output height and width
 
-// Step 1: Im2Col transformation
-FOR each output position (oh, ow)
-    FOR each input channel ic
-        FOR each kernel position kh, kw
-            col[K_index][oh×OW + ow] ← input value or 0 (padding)
-        END FOR
-    END FOR
-END FOR
+# Step 1: Im2Col transformation
+for each output position (oh, ow):
+    for each input channel ic:
+        for each kernel position kh, kw:
+            input_val = get_input_with_padding(b, ic, oh, ow, kh, kw)
+            col[K_index][oh * out_w + ow] = input_val
 
-// Step 2: GEMM
-gemm_output ← kernel_matrix × col_matrix
+# Step 2: GEMM
+gemm_output = matrix_multiply(kernel_matrix, col_matrix)
 
-// Step 3: Bias Add
-FOR each output channel oc
-    FOR each output position
-        output[oc][pos] ← gemm_output[oc][pos] + bias[oc]
-    END FOR
-END FOR
-\end{verbatim}
+# Step 3: Bias Add
+for each output channel oc:
+    bias_vec = broadcast(bias[oc])
+    for each output position in chunks:
+        out_vec = load_vector(gemm_output[oc][pos])
+        out_vec = out_vec + bias_vec
+        store_vector(output[oc][pos], out_vec)
+\end{lstlisting}
+
+
 
 The Im2Col step unfolds the input into a 2D matrix. Each column of this matrix represents one output position's receptive field: all input values that contribute to that output, flattened into a 1D vector. The row index $K\_index$ combines the input channel and kernel position indices into a single linear index.
 
@@ -282,44 +308,59 @@ The disadvantage is memory overhead. The column matrix can be quite large: for a
 
 The transformation is particularly effective when the same input will be convolved with multiple different kernels (as in neural network layers with many output channels), since the Im2Col cost is paid once and amortized across many GEMM operations.
 
-\subparagraph{Specialized 3×3 Vectorization}
+\subparagraph{Specialized 3x3 Vectorization}
 
-The 3×3 kernel size deserves special attention because it dominates modern CNN architectures. When we know the kernel size is fixed at 3×3, we can apply optimizations that wouldn't be practical for variable-size kernels.
+The 3x3 kernel size deserves special attention because it dominates modern CNN architectures. When we know the kernel size is fixed at 3x3, we can apply optimizations that wouldn't be practical for variable-size kernels.
 
 The key insight is that we can preload three consecutive input rows and keep them in registers across multiple output column computations. For a given output row, the input data from rows $oh$, $oh+1$, and $oh+2$ will be reused across all output columns in that row (assuming stride 1). By loading these rows once and reusing them, we dramatically reduce memory traffic.
 
-\begin{verbatim}
-FOR each output row oh
-    row0 ← input row oh
-    row1 ← input row oh+1
-    row2 ← input row oh+2
-    FOR output columns ow in vector chunks
-        Load vectors:
-            v00, v01, v02 from row0
-            v10, v11, v12 from row1
-            v20, v21, v22 from row2
-        acc ← v00 × k00
-        acc ← acc + v01 × k01
-        acc ← acc + v02 × k02
-        ...
-        acc ← acc + v22 × k22
-        store acc to output
-    END FOR
-END FOR
-\end{verbatim}
+\begin{lstlisting}[language=Python, caption={Specialized 3x3 Convolution pseudo-code}]
+for each output row oh:
+    # Preload input rows for the current sliding window set
+    row0 = input[b][ic][oh]
+    row1 = input[b][ic][oh+1]
+    row2 = input[b][ic][oh+2]
+    
+    ow = 0
+    while ow < output_width:
+        vl = set_vector_length(output_width - ow)
+        # Load vectors from preloaded rows at different horizontal offsets
+        v00 = load_vector(row0 + ow, vl)
+        v01 = load_vector(row0 + ow + 1, vl)
+        v02 = load_vector(row0 + ow + 2, vl)
+        
+        v10 = load_vector(row1 + ow, vl)
+        v11 = load_vector(row1 + ow + 1, vl)
+        v12 = load_vector(row1 + ow + 2, vl)
+        
+        v20 = load_vector(row2 + ow, vl)
+        v21 = load_vector(row2 + ow + 1, vl)
+        v22 = load_vector(row2 + ow + 2, vl)
+        
+        # Accumulate 9 FMA operations for the 3x3 window
+        acc = v00 * k00 + v01 * k01 + v02 * k02
+        acc = acc + v10 * k10 + v11 * k11 + v12 * k12
+        acc = acc + v20 * k20 + v21 * k21 + v22 * k22
+        
+        store_vector(output[oc][oh][ow], acc, vl)
+        ow += vl
+\end{lstlisting}
 
 We load three input rows into temporary storage outside the column loop. These represent the three rows of input that contribute to the current output row. Then, for each chunk of output columns, we load nine vector variables: three vectors from each of the three rows.
 
-Each vector contains $\textit{vl}$ consecutive elements from an input row. The notation $v01$ means "vector from row 0, offset by 1 position" this captures the three horizontal positions of the kernel across multiple output columns simultaneously.
+Each vector contains $vl$ consecutive elements from an input row. The notation $v01$ means "vector from row 0, offset by 1 position" this captures the three horizontal positions of the kernel across multiple output columns simultaneously.
 
-We then perform nine multiply-accumulate operations, one for each kernel position. Each operation multiplies one input vector with the corresponding kernel weight (broadcast to match the vector length) and accumulates into the result. After all nine operations, we have $\textit{vl}$ complete output values for consecutive output columns.
+We then perform nine multiply-accumulate operations, one for each kernel position. Each operation multiplies one input vector with the corresponding kernel weight (broadcast to match the vector length) and accumulates into the result. After all nine operations, we have $vl$ complete output values for consecutive output columns.
 
 This approach avoids the coordinate computation overhead of the general vectorization. We don't recalculate $ih$ and $iw$ for each kernel position; instead, we directly reference preloaded vectors. The overlapping window pattern means that $v01$ for the current output column becomes $v00$ for the next, creating register reuse opportunities that a smart compiler or hand-written assembly can exploit.
 
 Compared to Im2Col, this method uses minimal extra memory (just three row buffers) and avoids the unfolding step entirely. It's most effective for stride-1 convolutions where the input window overlap is maximal. For larger strides, the reuse benefits diminish, and Im2Col may become more attractive.
 
-The trade-off is specificity: this approach is hard-coded for 3×3 kernels. Generalizing it to other sizes would require different loop structures and vector load patterns, whereas Im2Col works uniformly for any kernel size.
+The trade-off is specificity: this approach is hard-coded for 3x3 kernels. Generalizing it to other sizes would require different loop structures and vector load patterns, whereas Im2Col works uniformly for any kernel size.
 
+% ------------------------------------------------------------
+% Max Pooling
+% ------------------------------------------------------------
 \paragraph{Max Pooling}
 
 \subparagraph{Kernel Description}
@@ -336,26 +377,27 @@ where $(ih, iw)$ are determined by output position, stride, and padding. Unlike 
 
 The scalar code processes one output position at a time. For each position, we compute the valid window boundaries (accounting for padding), initialize a maximum value to negative infinity, and scan all values within the window to find the maximum:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Python, caption={Scalar Max Pooling pseudo-code}]
 Compute output height and width
 
-FOR each batch b
-    FOR each channel c
-        FOR each output row oh
-            FOR each output column ow
-                h_start ← oh × stride_h - pad_h
-                w_start ← ow × stride_w - pad_w
-                h_end ← min(h_start + k_h, input_height)
-                w_end ← min(w_start + k_w, input_width)
-                h_start ← max(h_start, 0)
-                w_start ← max(w_start, 0)
-                max_val ← -(inf)
-                FOR h = h_start to h_end-1
-                    FOR w = w_start to w_end-1
-                        max_val ← max(max_val, input[b][c][h][w])
-                output[b][c][oh][ow] ← max_val
-
-\end{verbatim}
+for each batch b:
+    for each channel c:
+        for each output row oh:
+            for each output column ow:
+                h_start = oh * stride_h - pad_h
+                w_start = ow * stride_w - pad_w
+                h_end = min(h_start + k_h, input_height)
+                w_end = min(w_start + k_w, input_width)
+                h_start = max(h_start, 0)
+                w_start = max(w_start, 0)
+                
+                max_val = -infinity
+                for h from h_start to h_end - 1:
+                    for w from w_start to w_end - 1:
+                        max_val = max(max_val, input[b][c][h][w])
+                
+                output[b][c][oh][ow] = max_val
+\end{lstlisting}
 
 We calculate the window boundaries explicitly, clamping them to the valid input range. This handles padding by simply restricting the region we scan. We initialize the maximum to negative infinity, ensuring any actual input value will be larger.
 
@@ -365,7 +407,7 @@ Though conceptually simple, this scalar implementation can still bottleneck shal
 
 \subparagraph{Vectorization Strategy}
 
-We vectorize across output columns, computing $\textit{vl}$ output positions simultaneously. Each vector lane maintains an independent maximum accumulator. As we scan the pooling window, we load vectors of input values and compute element-wise maximums, updating all lanes in parallel.
+We vectorize across output columns, computing $vl$ output positions simultaneously. Each vector lane maintains an independent maximum accumulator. As we scan the pooling window, we load vectors of input values and compute element-wise maximums, updating all lanes in parallel.
 
 The key insight is that maximum operations are inherently parallelizable: tracking maxima for multiple output positions requires no inter-lane communication. Each lane independently compares and updates its maximum value. The vector maximum instruction compares corresponding elements in two vectors and produces a result vector containing the element-wise maxima.
 
@@ -373,43 +415,49 @@ The key insight is that maximum operations are inherently parallelizable: tracki
 
 The vectorized implementation processes output columns in chunks:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Python, caption={Vectorized Max Pooling pseudo-code}]
 Compute output height and width
 
-FOR each batch b
-    FOR each channel c
-        FOR each output row oh
-            ih_start ← oh × stride_h - pad_h
-            ow ← 0
-            WHILE ow < out_w
-                vl ← number of columns processed in parallel
-                max_vector ← -(inf)
-                FOR kh = 0 to k_h-1
-                    ih ← ih_start + kh
-                    IF ih out of bounds: continuez
-                    FOR kw = 0 to k_w-1
-                        iw ← ow × stride_w - pad_w + kw
-                        input_vector ← load input values
-                        max_vector ← max(max_vector, input_vector)
-                store max_vector to output
-                ow ← ow + vl
-\end{verbatim}
+for each batch b:
+    for each channel c:
+        for each output row oh:
+            ih_start = oh * stride_h - pad_h
+            ow = 0
+            while ow < output_width:
+                vl = set_vector_length(output_width - ow)
+                max_vector = broadcast(-infinity, vl)
+                
+                for kh from 0 to k_h - 1:
+                    ih = ih_start + kh
+                    if ih < 0 or ih >= input_height:
+                        continue
+                        
+                    for kw from 0 to k_w - 1:
+                        # Input positions are separated by stride_w
+                        iw_start = ow * stride_w - pad_w + kw
+                        input_vector = strided_load(input_ptr + iw_start, stride_w, vl)
+                        max_vector = max(max_vector, input_vector)
+                
+                store_vector(output_ptr + ow, max_vector, vl)
+                ow += vl
+\end{lstlisting}
+
 
 We compute the starting input row position once per output row, outside the column loop. This row start is the same for all output columns in this row, so computing it once saves redundant arithmetic.
 
-For each chunk of $\textit{vl}$ output columns, we initialize a vector of maximum values to negative infinity. This initialization broadcasts the scalar value $-\infty$ across all vector lanes, giving each lane its own independent maximum tracker.
+For each chunk of $vl$ output columns, we initialize a vector of maximum values to negative infinity. This initialization broadcasts the scalar value $-\infty$ across all vector lanes, giving each lane its own independent maximum tracker.
 
-The inner loops iterate through the pooling window. For each kernel row, we check if the corresponding input row is within bounds. If not, we skip this entire row (the \texttt{continue} statement). For each kernel column, we compute the starting input column position and load $\textit{vl}$ consecutive input values.
+The inner loops iterate through the pooling window. For each kernel row, we check if the corresponding input row is within bounds. If not, we skip this entire row (the \texttt{continue} statement). For each kernel column, we compute the starting input column position and load $vl$ consecutive input values.
 
-This load is crucial: for output column $ow$, we need input at position $ow \times \text{stride}_w - \text{pad}_w + kw$. For the next output column $ow+1$, we need input at position $(ow+1) \times \text{stride}_w - \text{pad}_w + kw$. These positions are separated by \texttt{stride\_w} in the input. So when stride is 1, we load consecutive elements; when stride is 2, we load every other element; and so on.
+This load is crucial: for output column $ow$, we need input at position $ow \times \text{stride}_w - \text{pad}_w + kh$. For the next output column $ow+1$, we need input at position $(ow+1) \times \text{stride}_w - \text{pad}_w + kh$. These positions are separated by \texttt{stride\_w} in the input. So when stride is 1, we load consecutive elements; when stride is 2, we load every other element; and so on.
 
-The RISC-V vector ISA can handle this through either strided loads (when stride more than 1) or indexed loads. The notation $\text{load input values}$ abstracts this detail, but the actual implementation would use the appropriate load instruction variant.
+The RISC-V vector ISA can handle this through either strided loads (when stride more than 1) or indexed loads. The notation \texttt{strided\_load} abstracts this detail, but the actual implementation would use the appropriate load instruction variant.
 
 After loading input values, we compute the element-wise maximum with the current maximum vector. Each lane compares its input value against its current maximum and keeps whichever is larger. This process continues through all kernel positions.
 
-Once we've scanned the entire window, the maximum vector contains the final maximum values for $\textit{vl}$ output positions. We store this vector to the output array and advance to the next chunk of columns.
+Once we've scanned the entire window, the maximum vector contains the final maximum values for $vl$ output positions. We store this vector to the output array and advance to the next chunk of columns.
 
-The vectorization achieves significant speedup by computing $\textit{vl}$ output elements in parallel, with nearly the same work per output position as the scalar version, but amortized across $\textit{vl}$ lanes. The comparison-based nature of max pooling maps naturally to SIMD operations, making this one of the more straightforward kernels to vectorize effectively.
+The vectorization achieves significant speedup by computing $vl$ output elements in parallel, with nearly the same work per output position as the scalar version, but amortized across $vl$ lanes. The comparison-based nature of max pooling maps naturally to SIMD operations, making this one of the more straightforward kernels to vectorize effectively.
 
 % ============================================================
 % PATTERN 3: Pointwise/Elementwise Kernels
@@ -582,9 +630,203 @@ end while
 The vector-length agnostic programming model ensures these implementations automatically adapt to different hardware vector widths without modification.
 
 % ============================================================
-% PATTERN 4: Post-Processing Kernels (NMS)
+% PATTERN 4: Tensor Indexing and Data Movement
 % ============================================================
-\subsubsection{Pattern 4: Post-Processing Kernels - Non-Maximum Suppression}
+\subsubsection{Pattern 4: Tensor Indexing and Data Movement}
+
+Tensor indexing operations, such as gather and scatter, are essential for handling sparse data, embedding lookups, and dynamic tensor reshaping. Unlike pointwise operations that access memory linearly, indexing kernels rely on a set of indices to determine which elements to read or write. This introduces irregular memory access patterns that traditionally cause significant performance bottlenecks in scalar architectures due to address calculation overhead and cache misses.
+
+The RISC-V Vector Extension addresses these challenges through indexed load and store instructions. These instructions allow the processor to process multiple non-contiguous memory locations in a single vector operation. By calculating a vector of addresses (or offsets) and passing it to the hardware, we can amortize the cost of irregular memory transactions and exploit available memory bandwidth more effectively than sequential scalar code.
+
+% ------------------------------------------------------------
+% Gather and Gather Elements
+% ------------------------------------------------------------
+\paragraph{Gather and Gather Elements}
+
+\subparagraph{Kernel Description}
+
+Gather operations collect data from an input tensor based on a provided index tensor. While a standard Gather typically selects entire slices along an axis, GatherElements performs a more granular, element-wise selection. For a 2D tensor along $axis=1$, the operation is defined as:
+\[ \text{output}[i][j] = \text{data}[i][\text{indices}[i][j]] \]
+
+\subparagraph{Scalar Implementation}
+
+The scalar approach requires nested loops to resolve indices one by one. For each output position, the processor must calculate a new memory address, perform a load, and then store the result, often leading to pipeline stalls during the address resolution phase:
+
+\begin{lstlisting}[language=Python, caption={Scalar Gather Elements (Axis 1) pseudo-code}]
+for i from 0 to indices_rows - 1:
+    for j from 0 to indices_cols - 1:
+        # Resolve index for the target axis
+        target_col = indices[i][j]
+        output[i][j] = data[i][target_col]
+\end{lstlisting}
+
+\subparagraph{Vectorization Strategy}
+
+Vectorization is achieved by processing a chunk of indices simultaneously. The key challenge in RVV is that indices are often provided as 64-bit integers, while data elements (like floats) are 32-bit. We utilize narrowing operations to convert 64-bit indices into 32-bit offsets. For axis-based gathers, we calculate byte offsets by scaling the indices by the data stride. These are then passed to a vector indexed-load instruction (\texttt{vluxei}), which fetches non-contiguous data into a single vector register.
+
+\subparagraph{Implementation}
+
+The vectorized implementation leverages \texttt{vsetvli} to handle index chunks and narrowing wrappers to align data types:
+
+\begin{lstlisting}[language=Python, caption={Vectorized Gather Elements pseudo-code}]
+for i from 0 to indices_rows - 1:
+    j = 0
+    while j < indices_cols:
+        vl = set_vector_length(indices_cols - j)
+        
+        # Load 64-bit indices and narrow to 32-bit
+        v_idx64 = load_vector(indices[i * indices_cols + j], vl)
+        v_idx32 = narrow_to_32bit(v_idx64, vl)
+        
+        # Calculate byte offsets (index * element_size)
+        v_offsets = v_idx32 << 2  # Shift left by 2 for float32 (4 bytes)
+        
+        # Indexed load and contiguous store
+        v_vals = indexed_load(data_row_ptr, v_offsets, vl)
+        store_vector(output[i * indices_cols + j], v_vals, vl)
+        
+        j += vl
+\end{lstlisting}
+
+
+
+% ------------------------------------------------------------
+% Scatter Elements
+% ------------------------------------------------------------
+\paragraph{Scatter Elements}
+
+\subparagraph{Kernel Description}
+
+Scatter is the inverse of gather; it writes values from an updates tensor into a data tensor at positions specified by indices. For $axis=0$ (rows), the output is updated as:
+\[ \text{output}[\text{indices}[i][j]][j] = \text{updates}[i][j] \]
+
+\subparagraph{Scalar Implementation}
+
+The scalar approach requires a full copy of the original data followed by individual updates. This involves heavy branching and individual store instructions that cannot be pipelined easily, as each store address is potentially in a completely different memory bank.
+
+\begin{lstlisting}[language=Python, caption={Scalar Scatter Elements pseudo-code}]
+output = copy(data) # Initial pass to preserve un-updated elements
+
+for i from 0 to indices_rows - 1:
+    for j from 0 to indices_cols - 1:
+        target_row = indices[i][j]
+        output[target_row][j] = updates[i][j]
+\end{lstlisting}
+
+\subparagraph{Vectorization Strategy}
+
+Similar to Gather, we vectorize the update loop. When scattering along rows ($axis=0$), the target addresses are separated by the row stride ($W \times \text{sizeof(float)}$). We compute absolute byte offsets by combining the narrowed indices with a Vector ID (\texttt{vid}) multiplied by the element size to account for the current column position. This allows us to perform an unordered indexed store (\texttt{vsuxei}) for the entire vector chunk.
+
+\subparagraph{Implementation}
+
+The vectorized implementation focuses on efficient address generation for the scattered writes:
+
+\begin{lstlisting}[language=Python, caption={Vectorized Scatter Elements (Axis 0) pseudo-code}]
+output = copy(data)
+
+for i from 0 to indices_rows - 1:
+    j = 0
+    while j < indices_cols:
+        vl = set_vector_length(indices_cols - j)
+        
+        v_idx64 = load_vector(indices[i * indices_cols + j], vl)
+        v_updates = load_vector(updates[i * indices_cols + j], vl)
+        v_idx32 = narrow_to_32bit(v_idx64, vl)
+        
+        # Calculate row-stride offsets: (index * data_cols * 4)
+        v_row_byte = v_idx32 * (data_cols * 4)
+        
+        # Add column-wise byte offsets: (j + vector_id) * 4
+        v_col_idx = get_vector_id() + j
+        v_col_byte = v_col_idx * 4
+        v_final_off = v_row_byte + v_col_byte
+        
+        # Vector indexed store (Scatter)
+        indexed_store(output, v_final_off, v_updates, vl)
+        
+        j += vl
+\end{lstlisting}
+
+The use of indexed stores significantly reduces the cycles spent on address arithmetic. By using RVV narrowing and indexed store instructions, we avoid the scalar bottleneck of repeatedly calculating complex indices for every single update, allowing the hardware to dispatch multiple memory writes in parallel.
+
+% ============================================================
+% PATTERN 5: Batch Normalization
+% ============================================================
+\subsubsection{Pattern 5: Batch Normalization}
+
+Batch Normalization is a critical regularizing operation that stabilizes the learning process by normalizing the distribution of layer activations. It is characterized as a memory-bound, unit-stride operation that applies a per-channel set of parameters across large spatial and batch dimensions. Because the same transformation is applied to every pixel in a feature map, it is an ideal candidate for high-bandwidth vectorization.
+
+The core computational challenge is not arithmetic complexity, but rather memory throughput. The operation requires fetching a contiguous segment of the input tensor, performing a fused multiply-add (FMA) using channel-specific constants, and storing the result back to memory. RVV accelerates this pattern by loading the normalization parameters into registers and processing the spatial data in long, continuous vector segments.
+
+% ------------------------------------------------------------
+% Batch Normalization
+% ------------------------------------------------------------
+\paragraph{Batch Normalization}
+
+\subparagraph{Kernel Description}
+
+For each channel $c$, Batch Normalization transforms the input $x$ using the learned mean ($\mu$), variance ($\sigma^2$), scale ($\gamma$), and shift ($\beta$) parameters:
+
+\[
+\text{output} = \gamma \cdot \left( \frac{\text{input} - \mu}{\sqrt{\sigma^2 + \epsilon}} \right) + \beta
+\]
+
+To optimize this for inference, we pre-calculate two channel-specific constants:
+\[ \alpha = \frac{\gamma}{\sqrt{\sigma^2 + \epsilon}}, \quad \beta' = \beta - \mu \cdot \alpha \]
+The operation then simplifies to a linear transformation: $\text{output} = \text{input} \cdot \alpha + \beta'$.
+
+\subparagraph{Scalar Implementation}
+
+The scalar approach processes the spatial dimensions sequentially for each channel. This results in significant overhead as the processor must manage loop counters and individual memory requests for every pixel, failing to exploit the contiguous nature of the data:
+
+\begin{lstlisting}[language=Python, caption={Scalar Batch Normalization pseudo-code}]
+for c from 0 to channels - 1:
+    # Pre-calculate constants for the current channel
+    alpha = scale[c] / sqrt(variance[c] + epsilon)
+    beta_prime = bias[c] - mean[c] * alpha
+    
+    for i from 0 to spatial_dim - 1:
+        output[c][i] = input[c][i] * alpha + beta_prime
+\end{lstlisting}
+
+\subparagraph{Vectorization Strategy}
+
+We vectorize across the spatial dimensions ($H \times W$) for each channel. Since the data within a channel is stored contiguously in memory (unit-stride), we can maximize memory bus utilization. For each channel, we broadcast the pre-calculated $\alpha$ and $\beta'$ values across all vector lanes. We then iterate through the spatial data in chunks of $vl$, performing a vector-scalar FMA. This approach amortizes the cost of the channel-specific parameter calculations over thousands of spatial elements.
+
+\subparagraph{Implementation}
+
+The vectorized implementation utilizes unit-stride loads and stores, combined with vector-scalar arithmetic to achieve near-peak memory bandwidth:
+
+\begin{lstlisting}[language=Python, caption={Vectorized Batch Normalization pseudo-code}]
+spatial_dim = height * width
+
+for c from 0 to channels - 1:
+    # Calculate transformation constants per channel
+    alpha = scale[c] / sqrt(variance[c] + epsilon)
+    beta_prime = bias[c] - mean[c] * alpha
+    
+    i = 0
+    while i < spatial_dim:
+        vl = set_vector_length(spatial_dim - i)
+        
+        # Load contiguous input segment
+        v_in = load_vector(input_ptr + (c * spatial_dim) + i, vl)
+        
+        # Vector-Scalar Fused Multiply-Add: (v_in * alpha) + beta_prime
+        v_out = fma(v_in, alpha, beta_prime, vl)
+        
+        # Unit-stride store
+        store_vector(output_ptr + (c * spatial_dim) + i, v_out, vl)
+        
+        i += vl
+\end{lstlisting}
+
+By hoisting the $\alpha$ and $\beta'$ calculations outside the inner loop, we reduce the computational cost to a single FMA per element. The use of \texttt{vsetvli} ensures that the kernel remains efficient regardless of the feature map size, handling the final "tail" of the spatial dimension without the need for manual scalar cleanup loops.
+
+% ============================================================
+% PATTERN 6: Post-Processing Kernels (NMS)
+% ============================================================
+\subsubsection{Pattern 6: Post-Processing Kernels - Non-Maximum Suppression}
 
 Non-Maximum Suppression (NMS) is a critical post-processing step in object detection pipelines that eliminates redundant overlapping bounding boxes. Unlike the previous patterns, NMS presents unique vectorization challenges:
 

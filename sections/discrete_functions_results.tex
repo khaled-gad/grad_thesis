@@ -3,7 +3,7 @@
 
 This section presents the functional verification results for each implemented kernel. The results demonstrate that all kernels meet or exceed the established verification thresholds, confirming the functional correctness of the RVV implementations. A total of 13 kernel types were implemented and verified, covering fundamental operations for neural network inference including convolution, matrix operations, activation functions, pooling, normalization, and tensor manipulation operations.
 
-\textbf{Note:} The detailed results for each kernel are available in the project repository at \url{https://github.com/OmarAly03/RVV64_Library/tree/main/kernels}. Each kernel directory contains a \texttt{result.md} file with comprehensive test data.
+\textbf{Note:} The detailed results for each kernel are available in the project repository at \url{https://github.com/OmarAly03/RaiVeX/tree/main/kernels}. Each kernel directory contains a \texttt{result.md} file with comprehensive test data.
 
 \paragraph{Convolution Kernels}
 
@@ -318,8 +318,3 @@ The verification results demonstrate exceptional numerical accuracy across all R
 \textbf{Excellent Accuracy (Tier 2):} Matrix multiplication and dense layer operations achieved SNR values ranging from 132.7 to 139.0 dB, with maximum absolute errors on the order of $10^{-6}$. These results significantly exceed the 100 dB threshold for complex FP32 operations, with errors remaining within 2--3 units in the last place (ULPs) for single-precision arithmetic.
 
 \textbf{Very High Accuracy (Tier 3):} Convolution operations, the most computationally complex kernels, achieved SNR values between 123.9 and 146.7 dB. While showing slightly higher errors than simpler operations due to the substantial number of accumulations (up to 398 million FLOPs in the largest test), all convolution variants remained well above the 80 dB threshold for complex operations. The specialized $3\times3$ convolution implementation achieved perfect accuracy, demonstrating the effectiveness of kernel-specific optimizations.
-
-% what is this paragraph trying to add? is this placement appropriate?
-\paragraph{Comparison with ONNX Runtime}
-
-The selection of ONNX Runtime as the golden reference was based on several considerations. ONNX Runtime is widely recognized as a high-performance, production-grade inference engine that implements the ONNX specification accurately and is extensively tested across various platforms, hardware accelerators (CPU, GPU, NPU), and deployment scenarios. It serves as a de facto standard for cross-platform ML inference. By comparing against ONNX Runtime, we ensure that our implementations conform to industry-standard ML operator semantics and produce results compatible with models trained using popular frameworks (PyTorch, TensorFlow, etc.).

@@ -27,7 +27,7 @@ The six categories of kernels selected for the RaiVeX Library are as follows:
 
     \item \textbf{Statistical and normalization layers}: Normalization kernels typically have a two-phase structure: a reduction phase that computes statistics (sum, mean, variance, or max) over one or more axes, followed by an elementwise normalization and optional affine rescale. Softmax similarly computes a max and exponentials followed by a sum reduction and normalization. Implementations target numerically stable reductions and exploit partial in-register reductions to minimize memory traffic.
 
-    Kernels in this category include: Batch Normalization (inference).
+    Kernels in this category include: Batch Normalization.
 
     \item \textbf{Postprocessing (NMS)}: Postprocessing kernels perform selection, suppression, or decoding operations with irregular control flow and variable-sized outputs (for example, non-maximum suppression for object detection). Implementations often separate dense arithmetic (Intersection over Union (IoU), score comparisons) — which can be vectorized — from the final selection and compacting phases which may require scalar coordination or masked writes.
 
@@ -49,7 +49,7 @@ This subsection describes how each category maps to the RISC-V Vector (RVV) arch
 
     \item \textbf{Tensor indexing and data movement}: Gather/scatter and permutation kernels rely on RVV's indexed load/store capabilities. While irregular accesses are generally memory-bandwidth bound, RVV's indexed operations can process multiple index entries per vector instruction, amortizing the cost of address calculation. When indices are contiguous or have simple strides, strided loads provide near-unit-stride efficiency. Vector-based layout transforms also allow in-register rearrangement to avoid extra memory passes.
 
-    \item \textbf{Batch Normalization (inference)}: The Batch normalization kernel is a memory-bound, unit-stride pass that applies the same small parameter set across spatial and batch dimensions. RVV accelerates this pattern by loading per-channel parameters into vector registers or scalar registers and applying vectorized multiply-add sequences across long contiguous segments of data; masked operations handle tails and fused implementations can combine scale+shift with an activation to reduce memory traffic.
+    \item \textbf{Batch Normalization}: The Batch normalization kernel is a memory-bound, unit-stride pass that applies the same small parameter set across spatial and batch dimensions. RVV accelerates this pattern by loading per-channel parameters into vector registers or scalar registers and applying vectorized multiply-add sequences across long contiguous segments of data; masked operations handle tails and fused implementations can combine scale+shift with an activation to reduce memory traffic.
 
     \item \textbf{Non-maximum suppression (NMS)}: NMS iteratively selects high-scoring bounding boxes and suppresses overlapping boxes whose IoU exceeds a threshold. The computationally intensive portion is the pairwise IoU and score-thresholding work which can be expressed as many parallel box-pair comparisons. RVV benefits by computing IoU numerators/denominators and threshold predicates across many candidate boxes per vector instruction, using masks to mark suppressed elements. The remaining selection/compaction step typically requires scalar coordination or masked compress-store operations, but the heavy arithmetic and comparisons are offloaded to vector units for measurable speedups.
 \end{enumerate}

@@ -106,29 +106,3 @@ In this project, ONNX models are used as golden references for the functional va
 The RVV-based kernel outputs are compared directly against the corresponding outputs generated from ONNX models executed using a validated ONNX runtime. Since ONNX provides a standardized and hardware-agnostic format with deterministic operator behavior, it serves as a reliable baseline for correctness verification. This approach ensures that discrepancies in output can be attributed to kernel implementation issues rather than ambiguities in operator definitions or execution semantics.
 
 By adopting ONNX as the functional reference, the project achieves reproducible and framework-independent validation, strengthening confidence that the optimized vectorized kernels preserve the intended computational behavior while improving performance.
-
-%%%%%%%%%%%%%%%%%% RTL CORES SECTION %%%%%%%%%%%%%%%%%
-
-\subsubsection{RTL Cores and Hardware Simulation}
-
-Hardware simulation using Register Transfer Level (RTL) cores plays a critical role in the development and evaluation of vectorized machine learning kernels. While functional simulators are sufficient for validating instruction set compliance, they lack the temporal accuracy required to capture microarchitectural effects such as pipeline behavior, memory contention, and vector execution overheads. For this reason, this project employs cycle-accurate RTL cores to provide a realistic evaluation environment for RISC-V Vector Extension (RVV)-based kernel development.
-
-Two RTL vector processors are used in this work: the \textit{Vicuna} vector coprocessor and the \textit{Ara} vector processor. Together, they represent complementary points in the RISC-V vector design space and provide a robust simulation foundation for functional and performance-oriented analysis.
-
-\paragraph{Vicuna RISC-V Vector Coprocessor}
-
-Vicuna is a 32-bit RISC-V vector coprocessor designed with a primary emphasis on timing predictability and deterministic execution. It targets the \texttt{Zve32x} subset of the RVV 1.0 specification, making it well-suited for embedded and edge-class workloads that rely on integer and fixed-point vector operations, such as quantized neural networks.
-
-The architecture prioritizes worst-case execution time (WCET) analyzability by avoiding microarchitectural features that introduce timing variability, such as out-of-order execution or banked register files. As a result, Vicuna provides a cycle-accurate and bit-accurate simulation environment in which vector instruction latency is a deterministic function of vector length and hardware configuration. In this project, Vicuna serves as a baseline RTL platform for evaluating vector execution behavior in predictable embedded-class systems.
-
-\paragraph{Ara Vector Processor}
-
-Ara is a 64-bit, application-class RISC-V vector processor designed to maximize throughput and floating-point utilization for high-performance computing and machine learning workloads. It implements the full RVV 1.0 specification, supporting a wide range of data types, including IEEE-754 single- and double-precision floating-point formats.
-
-Ara employs a lane-based vector architecture with scalable parallelism and supports advanced features such as vector chaining, masked execution, and high-bandwidth vector memory operations. Its tight integration with a scalar host core enables efficient amortization of instruction overhead across long vector sequences, making it particularly well-suited for compute-intensive kernels such as matrix multiplication, convolution, and activation functions.
-
-In this project, Ara provides a high-fidelity RTL simulation environment for evaluating the performance and correctness of vectorized machine learning kernels under realistic architectural constraints.
-
-
-
-\subparagraph{\textbf{A detailed architectural analysis, execution model discussion, and performance evaluation of both the Vicuna and Ara cores are presented in Section~4 of this thesis.}}
