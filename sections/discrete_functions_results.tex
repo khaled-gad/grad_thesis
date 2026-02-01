@@ -37,13 +37,13 @@ NMS                      & 0                     & $\infty$        & \textcolor{
 \end{tabular}
 \end{table}
 
-\textbf{Perfect Accuracy Kernels} \\
+\textbf{1. Perfect Accuracy Kernels}
 
 Nine kernel types achieved perfect bitwise accuracy with zero maximum absolute error and infinite SNR across all implementation variants: ReLU, Leaky ReLU, Max Pooling, Batch Normalization, Tensor Addition, Bias Addition, Gather Elements, Scatter Elements, NMS, and the specialized Conv2D $3\times3$ kernel. This represents approximately 85\% of all tested implementations. 
 
 These kernels achieved perfect accuracy due to their computational characteristics—either involving only elementwise operations with minimal accumulation (activation functions, additive operations), comparison-based selection (pooling), or carefully controlled normalization and indexing operations. All LMUL configurations (m1, m2, m4, m8) and optimization strategies (tiled, non-tiled) produced identical results for these kernels.
 
-\textbf{Convolution Kernels}
+\textbf{2. Convolution Kernels}
 
 Convolution operations showed varying accuracy depending on scale and implementation approach. Table~\ref{tab:conv_detailed} summarizes the results across different configurations.
 
@@ -76,7 +76,7 @@ All RVV vectorized implementations (m1 through m8) achieved identical accuracy w
 The specialized $3\times3$ kernel achieved perfect accuracy across all eight variants (m1/m2/m4/m8 in both batched and non-batched configurations), demonstrating the benefits of kernel-specific optimization.
 
 
-\textbf{Transposed Convolution} \\
+\textbf{3. Transposed Convolution}
 
 Transposed convolution showed excellent accuracy across three different input scales, with implementation performance varying by problem size. Table~\ref{tab:conv_transposed} summarizes the results.
 
@@ -113,7 +113,7 @@ For medium and large scales ($26\times26$ and $128\times128$), all implementatio
 
 All four LMUL variants (m1--m8) within each implementation type produced nearly identical results, with SNR variations under 0.5 dB at medium/large scales—indicating LMUL choice affects performance but not accuracy.
 
-\textbf{Matrix Multiplication and Dense Layer} \\
+\textbf{4. Matrix Multiplication and Dense Layer}
 
 Matrix multiplication demonstrated remarkable numerical properties, with RVV implementations achieving superior accuracy to scalar baselines.
 
@@ -154,8 +154,8 @@ Scalar Baseline                     & $2.86 \times 10^{-6}$ & 132.7 \\
 
 Both scalar and RVV implementations achieved SNR $>$ 132 dB, well above the 100 dB threshold. All LMUL variants produced identical results, with RVV showing slightly higher error than scalar but maintaining excellent accuracy for this matrix-vector multiplication pattern.
 
-
-\textbf{Numerical Accuracy Analysis} \\
+\\
+{\textbf{5. Numerical Accuracy Analysis}}
 
 The verification results demonstrate exceptional numerical accuracy across all RVV-vectorized kernels, significantly exceeding the established thresholds. Out of 115+ implementation variants tested across 13 kernel types, the observed performance can be categorized into three accuracy tiers:
 
