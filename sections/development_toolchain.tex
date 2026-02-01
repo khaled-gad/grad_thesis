@@ -47,7 +47,7 @@ QEMU was selected over alternative simulators due to its system-level completene
 \paragraph{Rationale for Using QEMU}
 
 While Spike is the official RISC-V ISA simulator, QEMU offers several advantages aligned with the goals of this project. QEMU supports full Linux execution environments, enabling realistic testing of vectorized kernels in the presence of system calls, memory management, and runtime libraries. Additionally, QEMU integrates seamlessly with GNU Debugger (GDB), allowing interactive debugging and inspection of vector register state.
-
+% did we ever make use of this? should this ever be mentioned? ISA-level validation?
 QEMU employs dynamic binary translation, which significantly reduces simulation time compared to purely interpretive simulators. This improvement in execution speed enhances development productivity when validating functional correctness across a large number of test cases and kernel configurations. Furthermore, modern QEMU versions provide architecturally accurate support for RVV 1.0 instructions, enabling reliable ISA-level validation.
 
 \paragraph{QEMU User-Mode Emulation}

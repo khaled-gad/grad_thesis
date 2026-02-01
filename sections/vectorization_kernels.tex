@@ -425,8 +425,8 @@ Pointwise (elementwise) operations represent the most straightforward vectorizat
     \item \textbf{High execution frequency}: Common operations in ML inference pipelines
     \item \textbf{Immediate cost amortization}: Vector setup overhead paid back instantly
 \end{itemize}
-
-These properties make pointwise kernels the ``lowest-risk, highest-payoff'' RVV optimization targets. The kernels in this category include ReLU, Leaky ReLU, Bias Add, and Tensor Add operations.
+% It is left in parancethes? should not be just low-risk, high-payoff 
+These properties make pointwise kernels the low-risk, high-payoff RVV optimization targets. The kernels in this category include ReLU, Leaky ReLU, Bias Add, and Tensor Add operations.
 
 % ------------------------------------------------------------
 % ReLU and Leaky ReLU

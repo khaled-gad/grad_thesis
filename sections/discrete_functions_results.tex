@@ -22,6 +22,7 @@ The convolution operation is fundamental to convolutional neural networks (CNNs)
     \item Implementation variants: Direct convolution, im2col+GEMM, batched 3x3 specialization
 \end{itemize}
 
+% should not the results be in a table for all tests? and why configurations are listed?
 \textbf{Verification Results:}
 
 \begin{table}[htbp]
@@ -274,7 +275,7 @@ Non-maximum suppression is critical for object detection pipelines, filtering ov
 
 NMS involves coordinate arithmetic and intersection-over-union calculations but achieved perfect accuracy, demonstrating robust implementation of the geometric computations.
 
-\paragraph{Summary of Verification Results}
+\paragraph{Verification Results: Summary}
 
 Table~\ref{tab:summary_results} provides a comprehensive overview of all kernel verification results. Out of 13 kernel types tested across 75+ implementation variants (different LMUL values, tiling strategies, and algorithmic approaches), all implementations passed verification with flying colors.
 
@@ -306,7 +307,7 @@ NMS & 5 variants & $\infty$ & \textcolor{green}{PASSED} \\
 \end{tabular}
 \end{table}
 
-\paragraph{Discussion}
+% \paragraph{Discussion}
 
 \paragraph{Numerical Accuracy Analysis}
 
@@ -318,6 +319,7 @@ The verification results demonstrate exceptional numerical accuracy across all R
 
 \textbf{Very High Accuracy (Tier 3):} Convolution operations, the most computationally complex kernels, achieved SNR values between 123.9 and 146.7 dB. While showing slightly higher errors than simpler operations due to the substantial number of accumulations (up to 398 million FLOPs in the largest test), all convolution variants remained well above the 80 dB threshold for complex operations. The specialized $3\times3$ convolution implementation achieved perfect accuracy, demonstrating the effectiveness of kernel-specific optimizations.
 
+% what is this paragraph trying to add? is this placement appropriate?
 \paragraph{Comparison with ONNX Runtime}
 
 The selection of ONNX Runtime as the golden reference was based on several considerations. ONNX Runtime is widely recognized as a high-performance, production-grade inference engine that implements the ONNX specification accurately and is extensively tested across various platforms, hardware accelerators (CPU, GPU, NPU), and deployment scenarios. It serves as a de facto standard for cross-platform ML inference. By comparing against ONNX Runtime, we ensure that our implementations conform to industry-standard ML operator semantics and produce results compatible with models trained using popular frameworks (PyTorch, TensorFlow, etc.).

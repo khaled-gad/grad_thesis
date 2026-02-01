@@ -1,149 +1,170 @@
-\contentsline {section}{Abstract}{3}{section*.2}%
-\contentsline {section}{\numberline {1}Introduction}{4}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Motivation}{4}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Limitations of Current Solutions}{4}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}The RISC-V Vector Extension as a Solution}{5}{subsection.1.3}%
-\contentsline {subsection}{\numberline {1.4}Problem Statement}{5}{subsection.1.4}%
-\contentsline {subsection}{\numberline {1.5}Research Objectives}{6}{subsection.1.5}%
-\contentsline {subsection}{\numberline {1.6}Research Contributions}{6}{subsection.1.6}%
-\contentsline {subsection}{\numberline {1.7}Thesis Organization}{7}{subsection.1.7}%
-\contentsline {section}{\numberline {2}Background \& Related Work}{8}{section.2}%
-\contentsline {subsection}{\numberline {2.1}RISC-V Architecture Overview}{8}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}RISC-V Extensions for Machine Learning}{8}{subsection.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.1}Standard Extensions}{9}{subsubsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.3}The RISC-V Vector Extension}{9}{subsection.2.3}%
-\contentsline {subsubsection}{\numberline {2.3.1}Architectural Principles}{9}{subsubsection.2.3.1}%
-\contentsline {subsubsection}{\numberline {2.3.2}Programming with RISC-V Vector Intrinsics}{10}{subsubsection.2.3.2}%
-\contentsline {subsection}{\numberline {2.4}Ara RISC-V Vector Coprocessor}{11}{subsection.2.4}%
-\contentsline {subsubsection}{\numberline {2.4.1}Architecture Components}{11}{subsubsection.2.4.1}%
-\contentsline {subsubsection}{\numberline {2.4.2}Ara as a Performance Reference}{12}{subsubsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.5}Related Work: The RISC-V landscape for Vector Computing}{12}{subsection.2.5}%
-\contentsline {paragraph}{System-Level Infrastructure for RISC-V Vector Design}{12}{section*.3}%
-\contentsline {paragraph}{Compiler, Application, and System-Level Performance Evaluation}{13}{section*.8}%
-\contentsline {section}{\numberline {3}Methodology: Architecture \& Implementations}{14}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Deep Learning Kernel Selection and Justification}{14}{subsection.3.1}%
-\contentsline {subsubsection}{\numberline {3.1.1}Selection Criteria}{15}{subsubsection.3.1.1}%
-\contentsline {subsubsection}{\numberline {3.1.2}Prioritized Kernel Categories}{15}{subsubsection.3.1.2}%
-\contentsline {subsection}{\numberline {3.2}Development Toolchain}{15}{subsection.3.2}%
-\contentsline {subsubsection}{\numberline {3.2.1}RISC-V GNU Toolchain}{15}{subsubsection.3.2.1}%
-\contentsline {paragraph}{Toolchain Components}{15}{section*.14}%
-\contentsline {subsubsection}{\numberline {3.2.2}QEMU Emulator}{16}{subsubsection.3.2.2}%
-\contentsline {paragraph}{Why QEMU Over Spike}{16}{section*.15}%
-\contentsline {paragraph}{QEMU User Mode Execution}{16}{section*.16}%
-\contentsline {subsubsection}{\numberline {3.2.3}Ara RTL Compilation and Simulation}{16}{subsubsection.3.2.3}%
-\contentsline {paragraph}{Ara Simulation Environment}{16}{section*.17}%
-\contentsline {subsubsection}{\numberline {3.2.4}Docker Development Environment}{17}{subsubsection.3.2.4}%
-\contentsline {paragraph}{Docker Advantages}{17}{section*.18}%
-\contentsline {paragraph}{Docker Workflow}{18}{section*.19}%
-\contentsline {subsubsection}{\numberline {3.2.5}ONNX Framework Integration}{18}{subsubsection.3.2.5}%
-\contentsline {subsection}{\numberline {3.3}RISC-V Vectorization Kernels Design}{18}{subsection.3.3}%
-\contentsline {subsubsection}{\numberline {3.3.1}Pattern 1: Compute-Bound FMA Operations}{18}{subsubsection.3.3.1}%
-\contentsline {subsubsection}{\numberline {3.3.2}Pattern 2: Sliding Window Kernels}{18}{subsubsection.3.3.2}%
-\contentsline {subsubsection}{\numberline {3.3.3}Pattern 3: Pointwise/Elementwise Kernels}{18}{subsubsection.3.3.3}%
-\contentsline {paragraph}{ReLU and Leaky ReLU Activation Functions}{19}{section*.20}%
-\contentsline {paragraph}{Bias Add and Tensor Add Operations}{20}{section*.21}%
-\contentsline {subsubsection}{\numberline {3.3.4}Pattern 4: Post-Processing Kernels - Non-Maximum Suppression}{21}{subsubsection.3.3.4}%
-\contentsline {paragraph}{Scalar NMS Algorithm}{21}{section*.22}%
-\contentsline {paragraph}{Vectorized NMS Implementation}{21}{section*.23}%
-\contentsline {paragraph}{Vectorized IoU Computation}{22}{section*.24}%
-\contentsline {subsubsection}{\numberline {3.3.5}Compute-Bound FMA Operations}{23}{subsubsection.3.3.5}%
-\contentsline {paragraph}{Matrix Multiplication (GEMM)}{23}{section*.25}%
-\contentsline {subparagraph}{Kernel Description}{23}{section*.26}%
-\contentsline {subparagraph}{Scalar Implementation}{24}{section*.27}%
-\contentsline {subparagraph}{Vectorization Strategy}{24}{section*.28}%
-\contentsline {subparagraph}{Implementation}{24}{section*.29}%
-\contentsline {paragraph}{Dense Layer (Fully Connected)}{25}{section*.30}%
-\contentsline {subparagraph}{Kernel Description}{25}{section*.31}%
-\contentsline {subparagraph}{Scalar Implementation}{25}{section*.32}%
-\contentsline {subparagraph}{Vectorization Strategy}{25}{section*.33}%
-\contentsline {subparagraph}{Implementation}{25}{section*.34}%
-\contentsline {subsubsection}{\numberline {3.3.6}Sliding Window Kernels}{26}{subsubsection.3.3.6}%
-\contentsline {paragraph}{2D Convolution}{26}{section*.35}%
-\contentsline {subparagraph}{Kernel Description}{26}{section*.36}%
-\contentsline {subparagraph}{Scalar Implementation}{26}{section*.37}%
-\contentsline {subparagraph}{General Vectorization}{27}{section*.38}%
-\contentsline {subparagraph}{Implementation}{27}{section*.39}%
-\contentsline {subparagraph}{Convolution as Matrix Multiplication (Im2Col)}{28}{section*.40}%
-\contentsline {subparagraph}{Specialized 3×3 Vectorization}{29}{section*.41}%
-\contentsline {paragraph}{Max Pooling}{29}{section*.42}%
-\contentsline {subparagraph}{Kernel Description}{30}{section*.43}%
-\contentsline {subparagraph}{Scalar Implementation}{30}{section*.44}%
-\contentsline {subparagraph}{Vectorization Strategy}{30}{section*.45}%
-\contentsline {subparagraph}{Implementation}{30}{section*.46}%
-\contentsline {subsection}{\numberline {3.4}Functional Verification Results}{31}{subsection.3.4}%
-\contentsline {subsubsection}{\numberline {3.4.1}ONNX Golden Reference Framework}{31}{subsubsection.3.4.1}%
-\contentsline {subsubsection}{\numberline {3.4.2}Test Data Generation Strategy}{32}{subsubsection.3.4.2}%
-\contentsline {subsubsection}{\numberline {3.4.3}Numerical Verification Metrics}{32}{subsubsection.3.4.3}%
-\contentsline {subsubsection}{\numberline {3.4.4}Verification Threshold Definition}{32}{subsubsection.3.4.4}%
-\contentsline {subsubsection}{\numberline {3.4.5}Discrete Functions Correctness Results}{33}{subsubsection.3.4.5}%
-\contentsline {subsubsection}{\numberline {3.4.6}Models}{33}{subsubsection.3.4.6}%
-\contentsline {paragraph}{Model Selection Rationale:}{33}{section*.47}%
-\contentsline {paragraph}{LeNet-5 Architecture and Implementation:}{33}{section*.48}%
-\contentsline {paragraph}{Tiny-YOLOv2 Architecture and Implementation:}{34}{section*.49}%
-\contentsline {paragraph}{Verification Methodology and Results:}{35}{section*.50}%
-\contentsline {section}{\numberline {4}Methodology: Performance Validation}{36}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Hardware (RTL Cores)}{36}{subsection.4.1}%
-\contentsline {subsubsection}{\numberline {4.1.1}Role of RTL Cores in Architectural Research}{36}{subsubsection.4.1.1}%
-\contentsline {subsubsection}{\numberline {4.1.2}Importance of Cycle-Accurate Simulation}{36}{subsubsection.4.1.2}%
-\contentsline {subsubsection}{\numberline {4.1.3}Evolution of Core Selection: From Vicuna to Ara}{37}{subsubsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.2}Vicuna RISC-V Vector Coprocessor}{37}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Overview and Design Motivation}{37}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Architectural Organization}{37}{subsubsection.4.2.2}%
-\contentsline {subsubsection}{\numberline {4.2.3}RVV Implementation}{38}{subsubsection.4.2.3}%
-\contentsline {subsubsection}{\numberline {4.2.4}Execution Model}{38}{subsubsection.4.2.4}%
-\contentsline {subsubsection}{\numberline {4.2.5}Memory Subsystem}{39}{subsubsection.4.2.5}%
-\contentsline {subsubsection}{\numberline {4.2.6}RTL Implementation}{39}{subsubsection.4.2.6}%
-\contentsline {subsubsection}{\numberline {4.2.7}Benchmarking Suitability}{39}{subsubsection.4.2.7}%
-\contentsline {subsection}{\numberline {4.3}Ara Vector Processor}{39}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Overview and Design Motivation}{39}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Architectural Organization}{39}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}RVV Implementation}{40}{subsubsection.4.3.3}%
-\contentsline {subsubsection}{\numberline {4.3.4}Vector Execution Model}{41}{subsubsection.4.3.4}%
-\contentsline {subsubsection}{\numberline {4.3.5}Memory Subsystem}{41}{subsubsection.4.3.5}%
-\contentsline {subsubsection}{\numberline {4.3.6}RTL Implementation}{41}{subsubsection.4.3.6}%
-\contentsline {subsubsection}{\numberline {4.3.7}Benchmarking Suitability}{41}{subsubsection.4.3.7}%
-\contentsline {subsection}{\numberline {4.4}Comparative Analysis and Core Selection Rationale}{42}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Architectural Trade-offs}{42}{subsubsection.4.4.1}%
-\contentsline {subsubsection}{\numberline {4.4.2}Rationale for Benchmarking on Ara}{42}{subsubsection.4.4.2}%
-\contentsline {subsubsection}{\numberline {4.4.3}Summary of Methodology Pivot}{42}{subsubsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.5}Validation Strategy}{42}{subsection.4.5}%
-\contentsline {subsubsection}{\numberline {4.5.1}Testbench Structure and Workflow}{43}{subsubsection.4.5.1}%
-\contentsline {subsubsection}{\numberline {4.5.2}Cycle-Accurate Measurement Logic}{43}{subsubsection.4.5.2}%
-\contentsline {subsubsection}{\numberline {4.5.3}Hardware Configuration and Leaky ReLU Case Study}{44}{subsubsection.4.5.3}%
-\contentsline {subsection}{\numberline {4.6}Validation Results}{45}{subsection.4.6}%
-\contentsline {subsubsection}{\numberline {4.6.1}Performance Overview}{46}{subsubsection.4.6.1}%
-\contentsline {subsubsection}{\numberline {4.6.2}Compute-Bound FMA Operations}{46}{subsubsection.4.6.2}%
-\contentsline {subsubsection}{\numberline {4.6.3}Sliding Window \& Filters}{46}{subsubsection.4.6.3}%
-\contentsline {subsubsection}{\numberline {4.6.4}Pointwise \& Elementwise Operations}{47}{subsubsection.4.6.4}%
-\contentsline {subsubsection}{\numberline {4.6.5}Results Discussion}{48}{subsubsection.4.6.5}%
-\contentsline {paragraph}{Compute-Bound Operations (MatMul \& Dense Layers)}{48}{section*.51}%
-\contentsline {paragraph}{Sliding Window Operations (Convolution \& Max Pooling)}{49}{section*.52}%
-\contentsline {paragraph}{Pointwise and Elementwise Operations (Activation \& Additive Kernels)}{49}{section*.53}%
-\contentsline {paragraph}{Overall Analysis}{50}{section*.54}%
-\contentsline {section}{\numberline {5}Open Source Library Architecture (To be named)}{50}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Design Philosophy and Importance}{50}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Library Structure}{50}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Available Kernel Wrappers}{51}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}ReLU Activation}{51}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}Leaky ReLU Activation}{51}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Matrix Multiplication}{52}{subsubsection.5.3.3}%
-\contentsline {subsubsection}{\numberline {5.3.4}Tensor Addition}{52}{subsubsection.5.3.4}%
-\contentsline {subsubsection}{\numberline {5.3.5}Batch Normalization}{52}{subsubsection.5.3.5}%
-\contentsline {subsubsection}{\numberline {5.3.6}Bias Addition}{53}{subsubsection.5.3.6}%
-\contentsline {subsubsection}{\numberline {5.3.7}2D Convolution}{53}{subsubsection.5.3.7}%
-\contentsline {subsubsection}{\numberline {5.3.8}2D Transposed Convolution}{53}{subsubsection.5.3.8}%
-\contentsline {subsubsection}{\numberline {5.3.9}Dense (Fully Connected) Layer}{54}{subsubsection.5.3.9}%
-\contentsline {subsubsection}{\numberline {5.3.10}Max Pooling}{54}{subsubsection.5.3.10}%
-\contentsline {subsubsection}{\numberline {5.3.11}Softmax}{55}{subsubsection.5.3.11}%
-\contentsline {subsection}{\numberline {5.4}LMUL Configuration Guidelines}{55}{subsection.5.4}%
-\contentsline {subsection}{\numberline {5.5}Backend Utilities}{55}{subsection.5.5}%
-\contentsline {section}{\numberline {6}Conclusion and Future Work}{55}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Conclusion}{55}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Future Work}{56}{subsection.6.2}%
-\contentsline {subsubsection}{\numberline {6.2.1}Extension to Additional Workload Domains}{56}{subsubsection.6.2.1}%
-\contentsline {subsubsection}{\numberline {6.2.2}Deployment on Physical RISC-V Hardware}{56}{subsubsection.6.2.2}%
-\contentsline {subsubsection}{\numberline {6.2.3}Enhancement of the Python Interface and Abstraction Layer}{56}{subsubsection.6.2.3}%
-\contentsline {subsubsection}{\numberline {6.2.4}Kernel Optimization and Algorithmic Improvements}{57}{subsubsection.6.2.4}%
-\contentsline {subsubsection}{\numberline {6.2.5}Expanded Neural Network Model Support}{57}{subsubsection.6.2.5}%
-\contentsline {section}{\numberline {7}Acknowledgment}{57}{section.7}%
-\contentsline {section}{\numberline {8}Code Listings}{57}{section.8}%
+\contentsline {section}{Abstract}{5}{section*.4}%
+\contentsline {section}{Acknowledgment}{6}{section*.5}%
+\contentsline {section}{List of Abbreviations}{7}{section*.6}%
+\contentsline {section}{\numberline {1}Introduction}{8}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Motivation}{8}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Limitations of Current Solutions}{9}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}The RISC-V Vector Extension as a Solution}{9}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Problem Statement}{10}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Project Objectives}{10}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Project Contributions}{11}{subsection.1.6}%
+\contentsline {subsection}{\numberline {1.7}Thesis Organization}{12}{subsection.1.7}%
+\contentsline {section}{\numberline {2}Background \& Related Work}{13}{section.2}%
+\contentsline {subsection}{\numberline {2.1}RISC-V Architecture Overview}{13}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}RISC-V Extensions for Machine Learning}{14}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Standard Extensions}{14}{subsubsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.3}The RISC-V Vector Extension}{15}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Architectural Principles}{15}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Programming with RISC-V Vector Intrinsics}{16}{subsubsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.4}Related Work: The RISC-V landscape for Vector Computing}{17}{subsection.2.4}%
+\contentsline {paragraph}{System-Level Infrastructure for RISC-V Vector Design}{17}{section*.7}%
+\contentsline {paragraph}{Compiler, Application, and System-Level Performance Evaluation}{17}{section*.12}%
+\contentsline {section}{\numberline {3}Methodology: Architecture \& Implementations}{19}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Deep Learning Kernel Selection and Justification}{19}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1}Selection Criteria Categories}{19}{subsubsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.2}RVV Vectorization Benefits by Category}{20}{subsubsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.2}Development Toolchain}{21}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}RISC-V GNU Toolchain}{21}{subsubsection.3.2.1}%
+\contentsline {paragraph}{Toolchain Components}{21}{section*.18}%
+\contentsline {subsubsection}{\numberline {3.2.2}QEMU Emulator}{22}{subsubsection.3.2.2}%
+\contentsline {paragraph}{Rationale for Using QEMU}{22}{section*.19}%
+\contentsline {paragraph}{QEMU User-Mode Emulation}{22}{section*.20}%
+\contentsline {paragraph}{QEMU System-Mode Emulation}{22}{section*.21}%
+\contentsline {paragraph}{Role in the Verification Workflow}{23}{section*.22}%
+\contentsline {subsubsection}{\numberline {3.2.3}ONNX: Open Neural Network Exchange}{23}{subsubsection.3.2.3}%
+\contentsline {paragraph}{Components of ONNX and Their Role in the Project}{23}{section*.23}%
+\contentsline {subparagraph}{ONNX Model Components}{23}{section*.24}%
+\contentsline {subparagraph}{Role of ONNX in the Project}{24}{section*.25}%
+\contentsline {subsubsection}{\numberline {3.2.4}RTL Cores and Hardware Simulation}{24}{subsubsection.3.2.4}%
+\contentsline {paragraph}{Vicuna RISC-V Vector Coprocessor}{25}{section*.26}%
+\contentsline {paragraph}{Ara Vector Processor}{25}{section*.27}%
+\contentsline {subparagraph}{\textbf {A detailed architectural analysis, execution model discussion, and performance evaluation of both the Vicuna and Ara cores are presented in Section~4 of this thesis.}}{25}{section*.28}%
+\contentsline {subsection}{\numberline {3.3}RISC-V Vectorization Kernels Design}{25}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Pattern 1: Compute-Bound FMA Operations}{25}{subsubsection.3.3.1}%
+\contentsline {paragraph}{Matrix Multiplication (GEMM)}{26}{section*.29}%
+\contentsline {subparagraph}{Kernel Description}{26}{section*.30}%
+\contentsline {subparagraph}{Scalar Implementation}{26}{section*.31}%
+\contentsline {subparagraph}{Vectorization Strategy}{26}{section*.32}%
+\contentsline {subparagraph}{Implementation}{27}{section*.33}%
+\contentsline {paragraph}{Dense Layer (Fully Connected)}{27}{section*.34}%
+\contentsline {subparagraph}{Kernel Description}{27}{section*.35}%
+\contentsline {subparagraph}{Scalar Implementation}{28}{section*.36}%
+\contentsline {subparagraph}{Vectorization Strategy}{28}{section*.37}%
+\contentsline {subparagraph}{Implementation}{28}{section*.38}%
+\contentsline {subsubsection}{\numberline {3.3.2}Pattern 2: Sliding Window Kernels}{29}{subsubsection.3.3.2}%
+\contentsline {paragraph}{2D Convolution}{29}{section*.39}%
+\contentsline {subparagraph}{Kernel Description}{29}{section*.40}%
+\contentsline {subparagraph}{Scalar Implementation}{29}{section*.41}%
+\contentsline {subparagraph}{General Vectorization}{30}{section*.42}%
+\contentsline {subparagraph}{Implementation}{30}{section*.43}%
+\contentsline {subparagraph}{Convolution as Matrix Multiplication (Im2Col)}{31}{section*.44}%
+\contentsline {subparagraph}{Specialized 3×3 Vectorization}{32}{section*.45}%
+\contentsline {paragraph}{Max Pooling}{33}{section*.46}%
+\contentsline {subparagraph}{Kernel Description}{33}{section*.47}%
+\contentsline {subparagraph}{Scalar Implementation}{33}{section*.48}%
+\contentsline {subparagraph}{Vectorization Strategy}{34}{section*.49}%
+\contentsline {subparagraph}{Implementation}{34}{section*.50}%
+\contentsline {subsubsection}{\numberline {3.3.3}Pattern 3: Pointwise/Elementwise Kernels}{35}{subsubsection.3.3.3}%
+\contentsline {paragraph}{ReLU and Leaky ReLU Activation Functions}{36}{section*.51}%
+\contentsline {paragraph}{Bias Add and Tensor Add Operations}{37}{section*.52}%
+\contentsline {subsubsection}{\numberline {3.3.4}Pattern 4: Post-Processing Kernels - Non-Maximum Suppression}{38}{subsubsection.3.3.4}%
+\contentsline {paragraph}{Scalar NMS Algorithm}{39}{section*.53}%
+\contentsline {paragraph}{Vectorized NMS Implementation}{39}{section*.54}%
+\contentsline {paragraph}{Vectorized IoU Computation}{40}{section*.55}%
+\contentsline {subsection}{\numberline {3.4}Functional Verification Results and Discussion}{42}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Test Setup and Verification Flow}{42}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Verification Architecture}{42}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.3}Verification Metrics}{42}{subsubsection.3.4.3}%
+\contentsline {paragraph}{Signal-to-Noise Ratio (SNR)}{42}{section*.56}%
+\contentsline {paragraph}{Maximum Absolute Error}{43}{section*.57}%
+\contentsline {subsubsection}{\numberline {3.4.4}Verification Thresholds}{44}{subsubsection.3.4.4}%
+\contentsline {subsubsection}{\numberline {3.4.5}Discrete Functions Correctness Verification Results}{44}{subsubsection.3.4.5}%
+\contentsline {paragraph}{Convolution Kernels}{44}{section*.58}%
+\contentsline {paragraph}{Standard 2D Convolution}{44}{section*.59}%
+\contentsline {paragraph}{Transposed Convolution}{45}{section*.60}%
+\contentsline {paragraph}{Matrix Multiplication (GEMM) Kernels}{45}{section*.61}%
+\contentsline {paragraph}{General Matrix Multiplication}{45}{section*.62}%
+\contentsline {paragraph}{Dense (Fully Connected) Layer}{46}{section*.63}%
+\contentsline {paragraph}{Activation Function Kernels}{46}{section*.64}%
+\contentsline {paragraph}{ReLU}{46}{section*.65}%
+\contentsline {paragraph}{Leaky ReLU}{47}{section*.66}%
+\contentsline {paragraph}{Pooling Kernels}{47}{section*.67}%
+\contentsline {paragraph}{Normalization Kernels}{47}{section*.68}%
+\contentsline {paragraph}{Tensor Manipulation Kernels}{48}{section*.69}%
+\contentsline {paragraph}{Tensor Addition}{48}{section*.70}%
+\contentsline {paragraph}{Bias Addition}{48}{section*.71}%
+\contentsline {paragraph}{Gather Elements}{49}{section*.72}%
+\contentsline {paragraph}{Scatter Elements}{49}{section*.73}%
+\contentsline {paragraph}{Non-Maximum Suppression (NMS)}{49}{section*.74}%
+\contentsline {paragraph}{Verification Results: Summary}{50}{section*.75}%
+\contentsline {paragraph}{Numerical Accuracy Analysis}{50}{section*.76}%
+\contentsline {paragraph}{Comparison with ONNX Runtime}{50}{section*.77}%
+\contentsline {subsubsection}{\numberline {3.4.6}Models}{51}{subsubsection.3.4.6}%
+\contentsline {paragraph}{Model Selection Rationale:}{51}{section*.78}%
+\contentsline {paragraph}{LeNet-5 Architecture and Implementation:}{51}{section*.79}%
+\contentsline {paragraph}{Tiny-YOLOv2 Architecture and Implementation:}{52}{section*.80}%
+\contentsline {paragraph}{Verification Methodology and Results:}{54}{section*.81}%
+\contentsline {section}{\numberline {4}Methodology: Performance Validation}{56}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Hardware (RTL Cores)}{56}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}Role of RTL Cores in Architectural Research}{56}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}Importance of Cycle-Accurate Simulation}{56}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3}Evolution of Core Selection: From Vicuna to Ara}{57}{subsubsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.2}Vicuna RISC-V Vector Coprocessor}{57}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Overview and Design Motivation}{57}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Architectural Organization}{57}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}RVV Implementation}{58}{subsubsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {4.2.4}Execution Model}{58}{subsubsection.4.2.4}%
+\contentsline {subsubsection}{\numberline {4.2.5}Memory Subsystem}{59}{subsubsection.4.2.5}%
+\contentsline {subsubsection}{\numberline {4.2.6}RTL Implementation}{59}{subsubsection.4.2.6}%
+\contentsline {subsubsection}{\numberline {4.2.7}Benchmarking Suitability}{59}{subsubsection.4.2.7}%
+\contentsline {subsection}{\numberline {4.3}Ara Vector Processor}{60}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Overview and Design Motivation}{60}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Architectural Organization}{60}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Vector Execution Model}{61}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}Memory Subsystem and Coherence}{61}{subsubsection.4.3.4}%
+\contentsline {subsubsection}{\numberline {4.3.5}RTL Implementation and Scalability}{62}{subsubsection.4.3.5}%
+\contentsline {subsubsection}{\numberline {4.3.6}Benchmarking Suitability}{62}{subsubsection.4.3.6}%
+\contentsline {subsection}{\numberline {4.4}Comparative Analysis and Core Selection Rationale}{62}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Architectural Trade-offs}{62}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Rationale for Benchmarking on Ara}{62}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}Summary of Methodology Pivot}{63}{subsubsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.5}Validation Strategy}{63}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}Testbench Structure and Workflow}{63}{subsubsection.4.5.1}%
+\contentsline {subsubsection}{\numberline {4.5.2}Cycle-Accurate Measurement Logic}{64}{subsubsection.4.5.2}%
+\contentsline {subsubsection}{\numberline {4.5.3}Hardware Configuration and Leaky ReLU Case Study}{65}{subsubsection.4.5.3}%
+\contentsline {subsection}{\numberline {4.6}Validation Results}{66}{subsection.4.6}%
+\contentsline {subsubsection}{\numberline {4.6.1}Performance Overview}{67}{subsubsection.4.6.1}%
+\contentsline {subsubsection}{\numberline {4.6.2}Compute-Bound FMA Operations}{67}{subsubsection.4.6.2}%
+\contentsline {subsubsection}{\numberline {4.6.3}Sliding Window \& Filters}{68}{subsubsection.4.6.3}%
+\contentsline {subsubsection}{\numberline {4.6.4}Pointwise \& Elementwise Operations}{69}{subsubsection.4.6.4}%
+\contentsline {subsubsection}{\numberline {4.6.5}Results Discussion}{70}{subsubsection.4.6.5}%
+\contentsline {paragraph}{Compute-Bound Operations (MatMul \& Dense Layers)}{70}{section*.82}%
+\contentsline {paragraph}{Sliding Window Operations (Convolution \& Max Pooling)}{71}{section*.83}%
+\contentsline {paragraph}{Pointwise and Elementwise Operations (Activation \& Additive Kernels)}{71}{section*.84}%
+\contentsline {paragraph}{Overall Analysis}{72}{section*.85}%
+\contentsline {section}{\numberline {5}Open Source Library Architecture (To be named)}{73}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Design Philosophy and Importance}{73}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Library Structure}{73}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Available Kernel Wrappers}{73}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}ReLU Activation}{74}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Leaky ReLU Activation}{74}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Matrix Multiplication}{75}{subsubsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.4}Tensor Addition}{75}{subsubsection.5.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.5}Batch Normalization}{76}{subsubsection.5.3.5}%
+\contentsline {subsubsection}{\numberline {5.3.6}Bias Addition}{76}{subsubsection.5.3.6}%
+\contentsline {subsubsection}{\numberline {5.3.7}2D Convolution}{77}{subsubsection.5.3.7}%
+\contentsline {subsubsection}{\numberline {5.3.8}2D Transposed Convolution}{77}{subsubsection.5.3.8}%
+\contentsline {subsubsection}{\numberline {5.3.9}Dense (Fully Connected) Layer}{78}{subsubsection.5.3.9}%
+\contentsline {subsubsection}{\numberline {5.3.10}Max Pooling}{78}{subsubsection.5.3.10}%
+\contentsline {subsubsection}{\numberline {5.3.11}Softmax}{79}{subsubsection.5.3.11}%
+\contentsline {subsection}{\numberline {5.4}LMUL Configuration Guidelines}{79}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Backend Utilities}{79}{subsection.5.5}%
+\contentsline {section}{\numberline {6}Conclusion and Future Work}{81}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Conclusion}{81}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Future Work}{81}{subsection.6.2}%
+\contentsline {subsubsection}{\numberline {6.2.1}Extension to Additional Workload Domains}{81}{subsubsection.6.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.2}Deployment on Physical RISC-V Hardware}{82}{subsubsection.6.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.3}Enhancement of the Python Interface and Abstraction Layer}{82}{subsubsection.6.2.3}%
+\contentsline {subsubsection}{\numberline {6.2.4}Kernel Optimization and Algorithmic Improvements}{82}{subsubsection.6.2.4}%
+\contentsline {subsubsection}{\numberline {6.2.5}Expanded Neural Network Model Support}{82}{subsubsection.6.2.5}%
+\contentsline {section}{\numberline {7}Code Listings}{86}{section.7}%
