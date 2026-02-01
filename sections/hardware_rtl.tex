@@ -1,7 +1,7 @@
 % !TEX root = ../Thesis.tex
 \subsection{Hardware (RTL Cores)}
 
-In the rigorous domain of computer architecture research, particularly within the context of next-generation machine learning (ML) workload acceleration, the simulation environment serves as the foundational bedrock for all performance claims and design space explorations. While high-level functional simulators—such as Spike \cite{spike-simulator} or QEMU \cite{qemu-riscv}—provide a mechanism for validating instruction set architecture (ISA) compliance and functional correctness, they fundamentally lack the temporal fidelity required to model complex microarchitectural phenomena.
+In the rigorous domain of computer architecture research, particularly within the context of next-generation machine learning (ML) workload acceleration, the simulation environment serves as the foundational bedrock for all performance claims and design space explorations. While high-level functional simulators—such as Spike \cite{spike-simulator} or QEMU \cite{qemu-riscv}—provide a mechanism for validating ISA compliance and functional correctness, they fundamentally lack the temporal fidelity required to model complex microarchitectural phenomena.
 
 \subsubsection{Role of RTL Cores in Architectural Research}
 
@@ -17,7 +17,7 @@ Cycle-accurate simulation is paramount for evaluating these kernels because it e
 
 \subsubsection{Evolution of Core Selection: From Vicuna to Ara}
 
-The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight Field-Programmable Gate Array (FPGA) implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
+The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight FPGA implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
 
 While Vicuna served as a robust baseline for integer-only quantized kernels, it lacked the Vector Floating-Point Units ($VFPU$) necessary for modern inference and training benchmarks. This necessitated a transition to \textbf{Ara} \cite{ara}, a significantly more powerful and flexible architecture. Unlike the embedded constraints of Vicuna, Ara supports the full $64$-bit floating-point spectrum and provides a much more sophisticated RTL simulation environment, offering higher temporal fidelity and parametric scalability.
 

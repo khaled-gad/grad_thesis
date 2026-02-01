@@ -344,7 +344,7 @@ probs = softmax(logits)  # Sum to 1.0
 
 \subsection{LMUL Configuration Guidelines}
 
-The LMUL (Length MULtiplier) parameter in RISC-V Vector Extension determines how many vector registers are grouped together for operations. Selecting the appropriate LMUL involves trade-offs:
+The LMUL parameter in RISC-V Vector Extension determines how many vector registers are grouped together for operations. Selecting the appropriate LMUL involves trade-offs:
 
 \begin{itemize}
     \item \textbf{M1}: Uses single registers, maximum flexibility but lower throughput per instruction.

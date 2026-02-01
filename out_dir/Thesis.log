@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.23)  1 FEB 2026 03:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.23)  1 FEB 2026 03:45
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -705,17 +705,17 @@ Overfull \hbox (27.51346pt too wide) in alignment at lines 17--23
  []
 
 
-Underfull \hbox (badness 6575) in paragraph at lines 39--40
+Underfull \hbox (badness 6575) in paragraph at lines 34--34
 []|\OT1/cmr/m/n/10.95 Open Neu-ral Net-work Ex-
  []
 
 
-Underfull \hbox (badness 5741) in paragraph at lines 42--43
+Underfull \hbox (badness 5741) in paragraph at lines 37--37
 []|\OT1/cmr/m/n/10.95 Single In-struc-tion, Mul-ti-ple
  []
 
 
-Overfull \hbox (27.51346pt too wide) in alignment at lines 23--51
+Overfull \hbox (27.51346pt too wide) in alignment at lines 23--45
  [] [] [] [] 
  []
 
@@ -730,36 +730,13 @@ Overfull \hbox (8.24533pt too wide) in paragraph at lines 90--91
 []\OT1/cmr/bx/n/10.95 A re-pro-ducible three-step frame-work \OT1/cmr/m/n/10.95 in-te-grat-ing ker-nel de-sign us-ing RVV C-intrinsics,
  []
 
-[11]
-
-LaTeX Warning: Citation `lecun1998' on page 12 undefined on input line 107.
-
-
-LaTeX Warning: Citation `yolo2016' on page 12 undefined on input line 107.
-
-
-LaTeX Warning: Citation `perotti2022' on page 12 undefined on input line 109.
-
-
-LaTeX Warning: Citation `platzer2021' on page 12 undefined on input line 109.
-
-)
-Overfull \hbox (1.21744pt too wide) in paragraph at lines 117--100
-\OT1/cmr/m/n/10.95 and a link to the of-fi-cial GitHub repos-i-tory con-tain-ing the full source code for the RVV64[]Library.
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 117--100
-
- []
-
-[12] (./sections/background.tex
-<figures/growth.png, id=665, 1463.4675pt x 867.24pt>
+[11]) [12] (./sections/background.tex
+<figures/growth.png, id=671, 1463.4675pt x 867.24pt>
 File: figures/growth.png Graphic file (type png)
 <use figures/growth.png>
 Package pdftex.def Info: figures/growth.png  used on input line 19.
 (pdftex.def)             Requested size: 362.37569pt x 214.73189pt.
- [13] [14 <./figures/growth.png>]
+ [13 <./figures/growth.png>] [14]
 Overfull \hbox (4.68184pt too wide) in paragraph at lines 69--70
 \OT1/cmr/m/n/10.95 power mi-cro-con-troller with VLEN=128 and a high-performance com-pute node with VLEN=4096,
  []
@@ -784,7 +761,7 @@ File: lstlang1.sty 2023/02/27 1.9 listings language file
 ) (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2023/02/27 1.9 listings language file
 ) [22]
-<figures/ONNX-GRAPH-EX.png, id=778, 508.90125pt x 764.8575pt>
+<figures/ONNX-GRAPH-EX.png, id=784, 508.90125pt x 764.8575pt>
 File: figures/ONNX-GRAPH-EX.png Graphic file (type png)
 <use figures/ONNX-GRAPH-EX.png>
 Package pdftex.def Info: figures/ONNX-GRAPH-EX.png  used on input line 95.
@@ -813,7 +790,7 @@ Overfull \hbox (0.87672pt too wide) in paragraph at lines 592--593
  []
 
 [38] [39] [40]) (./sections/functional_verification.tex [41]
-<figures/func verification flow.png, id=1103, 2112.89375pt x 2664.95625pt>
+<figures/func verification flow.png, id=1109, 2112.89375pt x 2664.95625pt>
 File: figures/func verification flow.png Graphic file (type png)
 <use figures/func verification flow.png>
 Package pdftex.def Info: figures/func verification flow.png  used on input line 32.
@@ -829,65 +806,65 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has 
                    \relax 
 l.77 ...ent data types and operation complexities}
                                                   ) (./sections/discrete_functions_results.tex [44] [45] [46] [47] [48] [49]) [50] (./sections/models_results.tex [51]
-<figures/lenet5_prediction_0.png, id=1187, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_0.png, id=1191, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_0.png Graphic file (type png)
 <use figures/lenet5_prediction_0.png>
 Package pdftex.def Info: figures/lenet5_prediction_0.png  used on input line 38.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_3.png, id=1188, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_3.png, id=1192, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_3.png Graphic file (type png)
 <use figures/lenet5_prediction_3.png>
 Package pdftex.def Info: figures/lenet5_prediction_3.png  used on input line 45.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_4.png, id=1189, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_4.png, id=1193, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_4.png Graphic file (type png)
 <use figures/lenet5_prediction_4.png>
 Package pdftex.def Info: figures/lenet5_prediction_4.png  used on input line 55.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_6.png, id=1190, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_6.png, id=1194, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_6.png Graphic file (type png)
 <use figures/lenet5_prediction_6.png>
 Package pdftex.def Info: figures/lenet5_prediction_6.png  used on input line 62.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_8.png, id=1191, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_8.png, id=1195, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_8.png Graphic file (type png)
 <use figures/lenet5_prediction_8.png>
 Package pdftex.def Info: figures/lenet5_prediction_8.png  used on input line 72.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
  [52 <./figures/lenet5_prediction_0.png> <./figures/lenet5_prediction_3.png> <./figures/lenet5_prediction_4.png> <./figures/lenet5_prediction_6.png> <./figures/lenet5_prediction_8.png>]
-<figures/output_detected_1.jpg, id=1202, 501.875pt x 376.40625pt>
+<figures/output_detected_1.jpg, id=1206, 501.875pt x 376.40625pt>
 File: figures/output_detected_1.jpg Graphic file (type jpg)
 <use figures/output_detected_1.jpg>
 Package pdftex.def Info: figures/output_detected_1.jpg  used on input line 107.
 (pdftex.def)             Requested size: 217.42265pt x 163.06914pt.
-<figures/output_detected_2.jpg, id=1203, 752.8125pt x 564.1075pt>
+<figures/output_detected_2.jpg, id=1207, 752.8125pt x 564.1075pt>
 File: figures/output_detected_2.jpg Graphic file (type jpg)
 <use figures/output_detected_2.jpg>
 Package pdftex.def Info: figures/output_detected_2.jpg  used on input line 114.
 (pdftex.def)             Requested size: 217.42265pt x 162.9242pt.
-<figures/output_detected_3.jpg, id=1204, 1003.75pt x 669.50125pt>
+<figures/output_detected_3.jpg, id=1208, 1003.75pt x 669.50125pt>
 File: figures/output_detected_3.jpg Graphic file (type jpg)
 <use figures/output_detected_3.jpg>
 Package pdftex.def Info: figures/output_detected_3.jpg  used on input line 124.
 (pdftex.def)             Requested size: 217.42265pt x 145.01262pt.
-<figures/output_detected_4.jpg, id=1205, 501.875pt x 334.24875pt>
+<figures/output_detected_4.jpg, id=1209, 501.875pt x 334.24875pt>
 File: figures/output_detected_4.jpg Graphic file (type jpg)
 <use figures/output_detected_4.jpg>
 Package pdftex.def Info: figures/output_detected_4.jpg  used on input line 131.
 (pdftex.def)             Requested size: 217.42265pt x 144.8054pt.
-<figures/output_detected_5.jpg, id=1206, 501.875pt x 342.27875pt>
+<figures/output_detected_5.jpg, id=1210, 501.875pt x 342.27875pt>
 File: figures/output_detected_5.jpg Graphic file (type jpg)
 <use figures/output_detected_5.jpg>
 Package pdftex.def Info: figures/output_detected_5.jpg  used on input line 141.
 (pdftex.def)             Requested size: 217.42265pt x 148.2842pt.
- [53] [54 <./figures/output_detected_1.jpg> <./figures/output_detected_2.jpg> <./figures/output_detected_3.jpg> <./figures/output_detected_4.jpg> <./figures/output_detected_5.jpg>]) [55] (./sections/hardware_rtl.tex [56] [57]
-<figures/Vicuna.jpg, id=1240, 851.43094pt x 470.50781pt>
+ [53] [54 <./figures/output_detected_1.jpg> <./figures/output_detected_2.jpg> <./figures/output_detected_3.jpg> <./figures/output_detected_4.jpg> <./figures/output_detected_5.jpg>]) [55] (./sections/hardware_rtl.tex [56]
+<figures/Vicuna.jpg, id=1239, 851.43094pt x 470.50781pt>
 File: figures/Vicuna.jpg Graphic file (type jpg)
 <use figures/Vicuna.jpg>
 Package pdftex.def Info: figures/Vicuna.jpg  used on input line 46.
 (pdftex.def)             Requested size: 452.9679pt x 250.31561pt.
- [58 <./figures/Vicuna.jpg>] [59]
-<figures/ara.jpg, id=1251, 779.16093pt x 569.87906pt>
+ [57] [58 <./figures/Vicuna.jpg>] [59]
+<figures/ara.jpg, id=1255, 779.16093pt x 569.87906pt>
 File: figures/ara.jpg Graphic file (type jpg)
 <use figures/ara.jpg>
 Package pdftex.def Info: figures/ara.jpg  used on input line 101.
@@ -928,7 +905,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 147--147
  []
 
 [62]) (./sections/validation_strategy.tex
-<figures/hardware_validation_strategy.png, id=1269, 3467.95625pt x 1962.33125pt>
+<figures/hardware_validation_strategy.png, id=1273, 3467.95625pt x 1962.33125pt>
 File: figures/hardware_validation_strategy.png Graphic file (type png)
 <use figures/hardware_validation_strategy.png>
 Package pdftex.def Info: figures/hardware_validation_strategy.png  used on input line 20.
@@ -959,12 +936,12 @@ Overfull \hbox (2.43282pt too wide) in paragraph at lines 258--259
  []
 
 [71]) [72] (./sections/library_architecture.tex [73] [74] [75] [76] [77] [78]) [79] [80] (./sections/conclusion_future_work.tex [81]) [82] [83] (./sections/references.tex
-Underfull \hbox (badness 1331) in paragraph at lines 49--50
+Underfull \hbox (badness 1331) in paragraph at lines 55--56
 []\OT1/cmr/m/n/10.95 M. Schl^^?agl, M. Stockinger and D. Gro^^Ye, "A RISC-V \V" VP: Un-lock-ing Vec-
  []
 
 [84]
-Underfull \hbox (badness 1184) in paragraph at lines 70--71
+Underfull \hbox (badness 1184) in paragraph at lines 76--77
 []\OT1/cmr/m/n/10.95 N. Brown, "Is RISC-V ready for High Per-for-mance Com-put-ing? An eval-u-a-tion
  []
 
@@ -973,26 +950,22 @@ Underfull \hbox (badness 1184) in paragraph at lines 70--71
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
 (rerunfilecheck)             Checksum: F3161B7073B659243B411F798BF067FF;20785.
  ) 
 Here is how much of TeX's memory you used:
  34924 strings out of 476182
  788358 string characters out of 5795595
- 2218975 words of memory out of 5000000
+ 2225975 words of memory out of 5000000
  55694 multiletter control sequences out of 15000+600000
  570414 words of font info for 82 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  84i,11n,87p,3227b,2070s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/ffroct/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcbx1200.600pk> </home/ffroct/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tctt1095.600pk> </home/ffroct/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on out_dir/Thesis.pdf (87 pages, 2825121 bytes).
+Output written on out_dir/Thesis.pdf (87 pages, 2824009 bytes).
 PDF statistics:
- 1724 PDF objects out of 1728 (max. 8388607)
- 1548 compressed objects within 16 object streams
+ 1728 PDF objects out of 1728 (max. 8388607)
+ 1552 compressed objects within 16 object streams
  664 named destinations out of 1000 (max. 500000)
  909 words of extra memory for PDF output out of 10000 (max. 10000000)
 

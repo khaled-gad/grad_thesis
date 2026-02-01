@@ -8,7 +8,7 @@ This section presents the design and implementation of optimized RISC-V vector k
 
 Neural network workloads are dominated by matrix multiplication and fully connected layers. These operations form the computational backbone of both inference and training pipelines. Their defining characteristic is extremely high arithmetic intensity: we perform massive volumes of floating-point operations relative to the amount of data moved from memory. This makes them ideal candidates for vectorization.
 
-At the core of these operations lies the fused multiply-add (FMA), where we accumulate multiple products into a single result. Modern processors can execute FMAs in a single pipelined cycle, but scalar code wastes this potential by processing one operation at a time. Vector instructions let us pack multiple FMAs into each cycle, multiplying our computational throughput.
+At the core of these operations lies the FMA, where we accumulate multiple products into a single result. Modern processors can execute FMAs in a single pipelined cycle, but scalar code wastes this potential by processing one operation at a time. Vector instructions let us pack multiple FMAs into each cycle, multiplying our computational throughput.
 
 These kernels also exhibit regular, predictable structure. Data dependencies are minimal and well-defined, memory access patterns follow sequential or strided layouts, and control flow remains simple. This regularity plays to the strengths of SIMD architectures, where we can fill vector registers densely with minimal overhead.
 
@@ -16,7 +16,7 @@ These kernels also exhibit regular, predictable structure. Data dependencies are
 
 \subparagraph{Kernel Description}
 
-General Matrix Multiply (GEMM) computes $C = A \times B$, where $A$ is $M \times K$, $B$ is $K \times N$, and the result $C$ is $M \times N$. Each output element represents a dot product:
+GEMM computes $C = A \times B$, where $A$ is $M \times K$, $B$ is $K \times N$, and the result $C$ is $M \times N$. Each output element represents a dot product:
 
 \[
 C[i][j] = \sum_{k=0}^{K-1} A[i][k] \cdot B[k][j]
@@ -692,7 +692,7 @@ end for
 
 \paragraph{Vectorized IoU Computation}
 
-The Intersection over Union (IoU) calculation benefits significantly from vectorization when computing IoU between one box and multiple candidate boxes simultaneously:
+The IoU calculation benefits significantly from vectorization when computing IoU between one box and multiple candidate boxes simultaneously:
 
 \begin{lstlisting}[language=Python, caption={Vectorized IoU computation pseudo-code}]
 # current_box: [x1, y1, x2, y2]
