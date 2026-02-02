@@ -63,10 +63,10 @@ The library employs two types of wrappers to abstract RVV intrinsics for differe
 
 \subsubsection{Intrinsic Wrappers}
 
-Intrinsic wrappers are implemented in C/C++ functions that abstract RVV intrinsics to improve readability and maintainability. These wrappers are defined in the \texttt{lib/} directory, such as \texttt{lib/rvv.h} and \texttt{lib/rvv\_math.h}. For example, a wrapper for vector addition might be implemented as:
+Intrinsic wrappers are implemented in C/C++ functions that abstract RVV intrinsics to improve readability and maintainability. These wrappers are defined in the \texttt{lib/} directory, such as \texttt{lib/RVV.HPP} and \texttt{lib/rvv\_ARTHEMETIC.hpp}. For example, a wrapper for vector addition might be implemented as:
 
 \begin{lstlisting}[language=C++]
-inline vfloat32m1_t vadd(vfloat32m1_t a, vfloat32m1_t b, size_t vl) {
+inline vfloat32m1_t VECTOR_ADD_VV(vfloat32m1_t a, vfloat32m1_t b, size_t vl) {
     return __riscv_vfadd_vv_f32m1(a, b, vl);
 }
 \end{lstlisting}
