@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.23)  1 FEB 2026 23:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.23)  2 FEB 2026 17:16
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -649,7 +649,7 @@ Package pgfplots Warning: running in backwards compatibility mode (unsuitable ti
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-<figures/ejustlogo.png, id=400, 1405.4106pt x 1003.8303pt>
+<figures/ejustlogo.png, id=380, 1405.4106pt x 1003.8303pt>
 File: figures/ejustlogo.png Graphic file (type png)
 <use figures/ejustlogo.png>
 Package pdftex.def Info: figures/ejustlogo.png  used on input line 46.
@@ -662,7 +662,7 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 53.
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<figures/logo_si-vision_v3.png, id=403, 4183.63pt x 1308.89pt>
+<figures/logo_si-vision_v3.png, id=383, 4183.63pt x 1308.89pt>
 File: figures/logo_si-vision_v3.png Graphic file (type png)
 <use figures/logo_si-vision_v3.png>
 Package pdftex.def Info: figures/logo_si-vision_v3.png  used on input line 67.
@@ -732,7 +732,7 @@ Overfull \hbox (27.51346pt too wide) in alignment at lines 23--45
  []
 
 ) [7] (./sections/introduction.tex
-<figures/Flops.png, id=603, 3412.75pt x 2655.9225pt>
+<figures/Flops.png, id=578, 3412.75pt x 2655.9225pt>
 File: figures/Flops.png Graphic file (type png)
 <use figures/Flops.png>
 Package pdftex.def Info: figures/Flops.png  used on input line 11.
@@ -743,7 +743,7 @@ Overfull \hbox (8.24533pt too wide) in paragraph at lines 90--91
  []
 
 [11]) [12] (./sections/background.tex
-<figures/growth.png, id=671, 1463.4675pt x 867.24pt>
+<figures/growth.png, id=645, 1463.4675pt x 867.24pt>
 File: figures/growth.png Graphic file (type png)
 <use figures/growth.png>
 Package pdftex.def Info: figures/growth.png  used on input line 19.
@@ -773,7 +773,7 @@ File: lstlang1.sty 2023/02/27 1.9 listings language file
 ) (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2023/02/27 1.9 listings language file
 ) [22]
-<figures/ONNX-GRAPH-EX.png, id=784, 508.90125pt x 764.8575pt>
+<figures/ONNX-GRAPH-EX.png, id=758, 508.90125pt x 764.8575pt>
 File: figures/ONNX-GRAPH-EX.png Graphic file (type png)
 <use figures/ONNX-GRAPH-EX.png>
 Package pdftex.def Info: figures/ONNX-GRAPH-EX.png  used on input line 95.
@@ -793,7 +793,7 @@ Overfull \hbox (0.87672pt too wide) in paragraph at lines 834--835
  []
 
 [43] [44] [45]) (./sections/functional_verification.tex
-<figures/func verification flow.png, id=1408, 2112.89375pt x 2664.95625pt>
+<figures/func verification flow.png, id=1382, 2112.89375pt x 2664.95625pt>
 File: figures/func verification flow.png Graphic file (type png)
 <use figures/func verification flow.png>
 Package pdftex.def Info: figures/func verification flow.png  used on input line 32.
@@ -829,65 +829,65 @@ Underfull \hbox (badness 10000) in paragraph at lines 155--156
  []
 
 [51]) (./sections/models_results.tex [52]
-<figures/lenet5_prediction_0.png, id=1464, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_0.png, id=1439, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_0.png Graphic file (type png)
 <use figures/lenet5_prediction_0.png>
 Package pdftex.def Info: figures/lenet5_prediction_0.png  used on input line 38.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_3.png, id=1465, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_3.png, id=1440, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_3.png Graphic file (type png)
 <use figures/lenet5_prediction_3.png>
 Package pdftex.def Info: figures/lenet5_prediction_3.png  used on input line 45.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_4.png, id=1466, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_4.png, id=1441, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_4.png Graphic file (type png)
 <use figures/lenet5_prediction_4.png>
 Package pdftex.def Info: figures/lenet5_prediction_4.png  used on input line 55.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_6.png, id=1467, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_6.png, id=1442, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_6.png Graphic file (type png)
 <use figures/lenet5_prediction_6.png>
 Package pdftex.def Info: figures/lenet5_prediction_6.png  used on input line 62.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
-<figures/lenet5_prediction_8.png, id=1468, 722.7pt x 289.08pt>
+<figures/lenet5_prediction_8.png, id=1443, 722.7pt x 289.08pt>
 File: figures/lenet5_prediction_8.png Graphic file (type png)
 <use figures/lenet5_prediction_8.png>
 Package pdftex.def Info: figures/lenet5_prediction_8.png  used on input line 72.
 (pdftex.def)             Requested size: 217.42265pt x 86.96727pt.
  [53] [54 <./figures/lenet5_prediction_0.png> <./figures/lenet5_prediction_3.png> <./figures/lenet5_prediction_4.png> <./figures/lenet5_prediction_6.png> <./figures/lenet5_prediction_8.png>]
-<figures/output_detected_1.jpg, id=1485, 501.875pt x 376.40625pt>
+<figures/output_detected_1.jpg, id=1460, 501.875pt x 376.40625pt>
 File: figures/output_detected_1.jpg Graphic file (type jpg)
 <use figures/output_detected_1.jpg>
 Package pdftex.def Info: figures/output_detected_1.jpg  used on input line 107.
 (pdftex.def)             Requested size: 217.42265pt x 163.06914pt.
-<figures/output_detected_2.jpg, id=1486, 752.8125pt x 564.1075pt>
+<figures/output_detected_2.jpg, id=1461, 752.8125pt x 564.1075pt>
 File: figures/output_detected_2.jpg Graphic file (type jpg)
 <use figures/output_detected_2.jpg>
 Package pdftex.def Info: figures/output_detected_2.jpg  used on input line 114.
 (pdftex.def)             Requested size: 217.42265pt x 162.9242pt.
-<figures/output_detected_3.jpg, id=1487, 1003.75pt x 669.50125pt>
+<figures/output_detected_3.jpg, id=1462, 1003.75pt x 669.50125pt>
 File: figures/output_detected_3.jpg Graphic file (type jpg)
 <use figures/output_detected_3.jpg>
 Package pdftex.def Info: figures/output_detected_3.jpg  used on input line 124.
 (pdftex.def)             Requested size: 217.42265pt x 145.01262pt.
-<figures/output_detected_4.jpg, id=1488, 501.875pt x 334.24875pt>
+<figures/output_detected_4.jpg, id=1463, 501.875pt x 334.24875pt>
 File: figures/output_detected_4.jpg Graphic file (type jpg)
 <use figures/output_detected_4.jpg>
 Package pdftex.def Info: figures/output_detected_4.jpg  used on input line 131.
 (pdftex.def)             Requested size: 217.42265pt x 144.8054pt.
-<figures/output_detected_5.jpg, id=1489, 501.875pt x 342.27875pt>
+<figures/output_detected_5.jpg, id=1464, 501.875pt x 342.27875pt>
 File: figures/output_detected_5.jpg Graphic file (type jpg)
 <use figures/output_detected_5.jpg>
 Package pdftex.def Info: figures/output_detected_5.jpg  used on input line 141.
 (pdftex.def)             Requested size: 217.42265pt x 148.2842pt.
  [55] [56 <./figures/output_detected_1.jpg> <./figures/output_detected_2.jpg> <./figures/output_detected_3.jpg> <./figures/output_detected_4.jpg> <./figures/output_detected_5.jpg>]) [57] (./sections/hardware_rtl.tex [58]
-<figures/Vicuna.jpg, id=1516, 851.43094pt x 470.50781pt>
+<figures/Vicuna.jpg, id=1491, 851.43094pt x 470.50781pt>
 File: figures/Vicuna.jpg Graphic file (type jpg)
 <use figures/Vicuna.jpg>
 Package pdftex.def Info: figures/Vicuna.jpg  used on input line 46.
 (pdftex.def)             Requested size: 452.9679pt x 250.31561pt.
  [59] [60 <./figures/Vicuna.jpg>] [61]
-<figures/ara.jpg, id=1534, 779.16093pt x 569.87906pt>
+<figures/ara.jpg, id=1509, 779.16093pt x 569.87906pt>
 File: figures/ara.jpg Graphic file (type jpg)
 <use figures/ara.jpg>
 Package pdftex.def Info: figures/ara.jpg  used on input line 101.
@@ -928,7 +928,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 147--147
  []
 
 [64]) (./sections/validation_strategy.tex
-<figures/hardware_validation_strategy.png, id=1551, 3467.95625pt x 1962.33125pt>
+<figures/hardware_validation_strategy.png, id=1526, 3467.95625pt x 1962.33125pt>
 File: figures/hardware_validation_strategy.png Graphic file (type png)
 <use figures/hardware_validation_strategy.png>
 Package pdftex.def Info: figures/hardware_validation_strategy.png  used on input line 20.
@@ -958,37 +958,42 @@ Overfull \hbox (2.43282pt too wide) in paragraph at lines 258--259
  []\OT1/cmr/bx/n/12 Pointwise and El-e-men-t-wise Op-er-a-tions (Ac-ti-va-tion & Ad-di-tive Ker-nels)[] \OT1/cmr/m/n/10.95 Point-
  []
 
-[73]) [74] (./sections/library_architecture.tex [75] [76] [77] [78]) [79] (./sections/conclusion_future_work.tex [80]) [81] [82] (./sections/references.tex
+[73]) [74] (./sections/library_architecture.tex [75] [76]
+Overfull \hbox (38.26059pt too wide) in paragraph at lines 109--111
+\OT1/cmr/m/n/10.95 Performance mea-sure-ments of the best per-form-ing RVV ker-nels are doc-u-mented in the RaiVeX/BENCH-
+ []
+
+[77]) [78] (./sections/conclusion_future_work.tex [79]) [80] [81] (./sections/references.tex
 Underfull \hbox (badness 1331) in paragraph at lines 55--56
 []\OT1/cmr/m/n/10.95 M. Schl^^?agl, M. Stockinger and D. Gro^^Ye, "A RISC-V \V" VP: Un-lock-ing Vec-
  []
 
-[83]
+[82]
 Underfull \hbox (badness 1184) in paragraph at lines 76--77
 []\OT1/cmr/m/n/10.95 N. Brown, "Is RISC-V ready for High Per-for-mance Com-put-ing? An eval-u-a-tion
  []
 
-) [84] (./sections/code_listings.tex) [85] (out_dir/Thesis.aux)
+) [83] (./sections/code_listings.tex) [84] (out_dir/Thesis.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 51D0F50C9CC5BF8CDE6918469CDB8A76;20514.
+(rerunfilecheck)             Checksum: 17158FCB45B869338A49492B86FA3984;19684.
  ) 
 Here is how much of TeX's memory you used:
- 35541 strings out of 476182
- 796507 string characters out of 5795595
+ 35530 strings out of 476182
+ 796310 string characters out of 5795595
  2250975 words of memory out of 5000000
- 56025 multiletter control sequences out of 15000+600000
+ 56020 multiletter control sequences out of 15000+600000
  569373 words of font info for 79 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  84i,11n,87p,3227b,2070s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/ffroct/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on out_dir/Thesis.pdf (86 pages, 3027269 bytes).
+Output written on out_dir/Thesis.pdf (85 pages, 3026164 bytes).
 PDF statistics:
- 2063 PDF objects out of 2073 (max. 8388607)
- 1885 compressed objects within 19 object streams
- 953 named destinations out of 1000 (max. 500000)
- 904 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2033 PDF objects out of 2073 (max. 8388607)
+ 1856 compressed objects within 19 object streams
+ 947 named destinations out of 1000 (max. 500000)
+ 864 words of extra memory for PDF output out of 10000 (max. 10000000)
 
