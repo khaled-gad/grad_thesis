@@ -84,53 +84,41 @@ output = relu(input_tensor, variant="M8")
 
 This approach provides NumPy compatibility, automatic memory management, and variant selection for performance tuning.
 
-\subsection{Results Verification}
+% \subsection{Results Verification}
 
-To ensure correctness of the RVV implementations, the library includes comprehensive verification frameworks:
+% The correctness of the RVV kernel implementations is assessed by referencing
+% the benchmark results documented in the repository. The main summary of
+% benchmarks is provided in
+% \href{https://github.com/OmarAly03/RaiVeX/blob/main/BENCHMARKS.md}{BENCHMARKS.md}.
 
-\subsubsection{Correctness Testing}
+% For each kernel, verification results and performance summaries are located in
+% the respective kernel directories:
 
-Each kernel implementation is verified against reference implementations using:
-\begin{itemize}
-    \item NumPy-based scalar reference implementations
-    \item PyTorch/TensorFlow operations for complex kernels
-    \item Statistical comparison metrics (mean absolute error, relative error)
-    \item Edge case testing (zero inputs, overflow conditions, etc.)
-\end{itemize}
+% \begin{itemize}
+%     \item \texttt{RaiVeX/kernels/<kernel\_name>/benchmarks.md} – contains
+%           the detailed results for the corresponding kernel
+%     \item Representative kernels include GEMM, convolution, and other
+%           vectorized operations
+% \end{itemize}
 
-\subsubsection{Automated Testing}
-
-The verification suite includes:
-\begin{itemize}
-    \item Unit tests for individual kernel functions
-    \item Integration tests for end-to-end neural network layers
-    \item Cross-validation between different LMUL variants
-    \item Regression tests to prevent performance regressions
-\end{itemize}
+% This approach provides a central reference for all correctness and benchmark
+% results without requiring additional test frameworks.
 
 \subsection{Performance Results}
 
-The library provides extensive performance benchmarking capabilities to quantify the benefits of RVV acceleration:
+Performance measurements of the best performing RVV kernels are documented in the RaiVeX/BENCHMARKS.md
+file, with detailed results available within the kernel-specific subdirectories.
 
-\subsubsection{Benchmarking Framework}
-
-The performance analysis includes:
 \begin{itemize}
-    \item Microbenchmarks for individual kernel operations
-    \item End-to-end model performance measurements
-    \item Memory bandwidth utilization analysis
-    \item Scalability testing across different tensor sizes
+    \item Benchmarks and execution time comparisons for each kernel
+          are located at \newline
+          \texttt{RaiVeX/kernels/<kernel\_name>/benchmarks.md}
+    \item Relative speedups against scalar baselines and other relevant metrics
+          are summarized in the main \texttt{BENCHMARKS.md} file
 \end{itemize}
 
-\subsubsection{Performance Metrics}
-
-Key performance indicators tracked:
-\begin{itemize}
-    \item Operations per second (OPS)
-    \item Memory throughput (GB/s)
-    \item Energy efficiency (OPS/W)
-    \item Speedup ratios compared to scalar implementations
-\end{itemize}
+This organization allows readers to locate and verify all performance results
+directly from the repository.
 
 \subsection{Wrapper Interfaces}
 
