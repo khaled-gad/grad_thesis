@@ -1,4 +1,152 @@
-% !TEX root = ../Thesis.tex
+\appendix
 \section{Code Listings}
 
-\textit{[Placeholder]}
+The following implementations are provided as a sample of the vectorized C++ codebase. The complete source code, including the automated verification suite and benchmarking scripts, is available at:
+
+\begin{center}
+    \textbf{Repository Link:} \url{https://github.com/YourRepo/RaiVeX}
+\end{center}
+
+% Local override for long kernel implementations
+\lstset{
+    basicstyle=\ttfamily\scriptsize, % Smaller font for long kernel lines
+    breaklines=true,
+    breakatwhitespace=false,         % Forced break to prevent horizontal overflow
+    xleftmargin=10pt,
+    tabsize=4
+}
+
+\subsection{Sample 1: Matrix Multiplication (GEMM)}
+\begin{lstlisting}[language=C++, caption={Vectorized Matrix Multiplication (RVV E32M1)}]
+void matmul_e32m1(float *A, float *B, float *C, size_t M, size_t N, size_t K){
+	for (size_t i = 0; i < M; i++){
+		for (size_t j_cnt = N; j_cnt > 0;){
+			size_t vl = SET_VECTOR_LENGTH<float, M1>(j_cnt);
+			size_t j = N - j_cnt;
+
+			auto acc = VECTOR_MOVE<float, M1>(0.0f, vl);
+
+			for (size_t k = 0; k < K; k++){
+				auto a_elem = VECTOR_MOVE<float, M1>(A[i * K + k], vl);
+				auto b_vec = VECTOR_LOAD<float, M1>(&B[k * N + j], vl);
+				acc = VECTOR_FMACC<float, M1>(acc, a_elem, b_vec, vl);
+			}
+
+			VECTOR_STORE<float, M1>(&C[i * N + j], acc, vl);
+
+			j_cnt -= vl;
+		}
+	}
+}
+\end{lstlisting}
+
+\subsection{Sample 2: 2D Convolution}
+\begin{lstlisting}[language=C++, caption={Vectorized 2D Convolution (RVV E32M8)}]
+void conv2d_e32m8(
+	const float* input, const float* kernel, float* output,
+	int batch_size, int in_channels, int out_channels,
+	int input_h, int input_w, int kernel_h, int kernel_w,
+	int stride_h, int stride_w, int pad_h, int pad_w) {
+	
+	int out_h = (input_h + 2 * pad_h - kernel_h) / stride_h + 1;
+	int out_w = (input_w + 2 * pad_w - kernel_w) / stride_w + 1;
+	int out_area = out_h * out_w;
+	int in_area = input_h * input_w;
+	int kernel_spatial = kernel_h * kernel_w;
+
+	// Weight packing logic...
+	for (int ic = 0; ic < in_channels; ++ic) {
+		for (int k = 0; k < kernel_spatial; ++k) {
+			for (int oc = 0; oc < out_channels; ++oc) {
+				packed_w[(ic * kernel_spatial + k) * out_channels + oc] = 
+					kernel[oc * (in_channels * kernel_spatial) + ic * kernel_spatial + k];
+			}
+		}
+	}
+
+	std::memset(output, 0, batch_size * out_channels * out_area * sizeof(float));
+
+	for (int b = 0; b < batch_size; ++b) {
+		for (int oc = 0; oc < out_channels; ) {
+			size_t vl = SET_VECTOR_LENGTH<float, M8>(out_channels - oc);
+			for (int oh = 0; oh < out_h; ++oh) {
+				int ih_base = oh * stride_h - pad_h;
+				for (int ow = 0; ow < out_w; ++ow) {
+					int iw_base = ow * stride_w - pad_w;
+					float* out_ptr = &output[b * out_channels * out_area + oc * out_area + oh * out_w + ow];
+					
+					vfloat32m8_t v_acc = VECTOR_STRIDED_LOAD<float, M8>(out_ptr, out_area * sizeof(float), vl);
+
+					for (int ic = 0; ic < in_channels; ++ic) {
+						const float* w_ic_base = &packed_w[(ic * kernel_spatial) * out_channels + oc];
+						for (int kh = 0; kh < kernel_h; ++kh) {
+							int ih = ih_base + kh;
+							if (ih < 0 || ih >= input_h) continue;
+							for (int kw = 0; kw < kernel_w; ++kw) {
+								int iw = iw_base + kw;
+								if (iw < 0 || iw >= input_w) continue;
+								float scalar_in = input[b * in_channels * in_area + ic * in_area + ih * input_w + iw];
+								vfloat32m8_t v_w = VECTOR_LOAD<float, M8>(w_ic_base + (kh * kernel_w + kw) * out_channels, vl);
+								v_acc = VECTOR_FMACC_VF<float, M8>(v_acc, scalar_in, v_w, vl);
+							}
+						}
+					}
+					VECTOR_STRIDED_STORE<float, M8>(out_ptr, out_area * sizeof(float), v_acc, vl);
+				}
+			}
+			oc += vl;
+		}
+	}
+}
+\end{lstlisting}
+
+\subsection{Sample 3: Max Pooling}
+\begin{lstlisting}[language=C++, caption={Vectorized Max Pooling (RVV E32M4)}]
+void maxpool_e32m4(const float* input, float* output,
+						   int batch, int channels,
+						   int in_h, int in_w,
+						   int k_h, int k_w,
+						   int stride_h, int stride_w,
+						   int pad_h, int pad_w) {
+
+	int out_h = (in_h + 2 * pad_h - k_h) / stride_h + 1;
+	int out_w = (in_w + 2 * pad_w - k_w) / stride_w + 1;
+
+	for (int b = 0; b < batch; ++b) {
+		for (int c = 0; c < channels; ++c) {
+			const float* in_ptr_base = input + (b * channels + c) * in_h * in_w;
+			float* out_ptr_base = output + (b * channels + c) * out_h * out_w;
+
+			for (int oh = 0; oh < out_h; ++oh) {
+				int ih_start = oh * stride_h - pad_h;
+
+				for (int ow = 0; ow < out_w; ) {
+					size_t vl = SET_VECTOR_LENGTH<float, M4>(out_w - ow);
+					vfloat32m4_t v_max = VECTOR_BROADCAST<float, M4>(-FLT_MAX, vl);
+
+					for (int kh = 0; kh < k_h; ++kh) {
+						int ih = ih_start + kh;
+						if (ih < 0 || ih >= in_h) continue;
+
+						for (int kw = 0; kw < k_w; ++kw) {
+							int iw_base = ow * stride_w - pad_w + kw;
+							
+							const float* load_addr = in_ptr_base + ih * in_w + iw_base;
+
+							vfloat32m4_t v_in;
+							if (stride_w == 1) {
+								v_in = VECTOR_LOAD<float, M4>(load_addr, vl);
+							} else {
+								v_in = VECTOR_STRIDED_LOAD<float, M4>(load_addr, stride_w * sizeof(float), vl);
+							}
+							v_max = VECTOR_MAX<float, M4>(v_max, v_in, vl);
+						}
+					}
+					VECTOR_STORE<float, M4>(out_ptr_base + oh * out_w + ow, v_max, vl);
+					ow += vl;
+				}
+			}
+		}
+	}
+}
+\end{lstlisting}
