@@ -63,11 +63,11 @@
     \end{center}
     \centering
     \vspace{0.6cm}
-    \textbf{\Large Mentored by:}\\[0.4cm]
+    \textbf{\Large Mentored by}\\[0.4cm]
     \includegraphics[clip, width=0.4\textwidth]{figures/logo_si-vision_v3.png}
     
     \vspace{0.8cm}
-    \Large Supervised by:\\[0.6cm]
+    \Large Supervised by\\[0.6cm]
     \textbf{\Large Dr. Rami Zewail}\\[0.3cm]
     \textbf{\Large Prof. Mohammed S. Sayed}
 
@@ -116,6 +116,8 @@
 \newpage
 \section{Methodology: Architecture \& Implementations}
 
+This chapter describes the architectural and software methodology used to build the RaiVeX Library. It first motivates and details the selection of machine learning kernels, then presents the development toolchain and execution environment used for RVV-based implementation and verification. The chapter then explains the design of the vectorized kernels themselves, followed by the functional verification strategy and kernel-level correctness results, before concluding with model-level validation using complete LeNet-5 and Tiny-YOLOv2 inference pipelines.
+
 % Deep Learning Kernel Selection and Justification (from methodology.tex)
 \input{sections/kernel_selection.tex}
 
@@ -134,14 +136,16 @@
 % Models (from presentation)
 \input{sections/models_results.tex}
 
-
+This chapter has detailed the end-to-end methodology for developing the RaiVeX Library. It motivated the selection of representative ML kernels, described the RISC-V toolchain, QEMU-based execution environment, and ONNX-based verification framework, and presented the RVV vectorization strategies applied across compute-bound, sliding-window, pointwise, indexing, normalization, and post-processing kernels. Functional verification at both discrete-kernel and full-model levels confirmed numerical correctness and composability, establishing a solid foundation for the performance analysis presented in the next chapter.
 
 
 % =============================================================================
 % Methodology: Performance Validation
 % =============================================================================
 \newpage
-\section{Methodology: Performance Validation}
+\section{Performance Analysis}
+
+This chapter evaluates the performance of the RVV-accelerated kernels implemented in the RaiVeX Library. It first introduces the RTL-based hardware platforms and simulation environment used for benchmarking, then details the validation strategy for measuring cycle-accurate execution time on the Ara vector coprocessor. The chapter then presents quantitative performance results for representative compute-bound, memory-bound, and pointwise kernels, highlighting the impact of vector length configuration, tiling, and vectorization strategies on overall speedup.
 
 % Hardware (RTL Cores) (from hardware.tex)
 \input{sections/hardware_rtl.tex}
@@ -151,6 +155,8 @@
 
 % Validation Results (from Omar)
 \input{sections/validation_results.tex}
+
+This chapter has presented a cycle-accurate performance evaluation of the RaiVeX Library on the Ara vector coprocessor. By comparing RVV-based kernels and models against optimized scalar baselines, we quantified speedups across matrix multiplication, convolution, pooling, activation, normalization, and additive operations, and analyzed the sensitivity of performance to LMUL, problem size, and data layout. The results demonstrate that, for sufficiently large and compute-intensive workloads, RVV 1.0 on Ara sustains substantial acceleration—often exceeding an order of magnitude—while memory-bound kernels approach a bandwidth-limited regime around $20\times$ speedup. These findings confirm that the methodology and kernel designs introduced in the previous chapter translate into practical throughput gains on realistic RISC-V vector hardware, supporting the case for RVV-based acceleration of embedded ML inference.
 
 % =============================================================================
 % Open Source Library Architecture

@@ -5,7 +5,7 @@ In the rigorous domain of computer architecture research, particularly within th
 
 \subsubsection{Role of RTL Cores in Architectural Research}
 
-For a graduation thesis focused on the benchmarking of RISC-V vector architectures, relying solely on functional simulation would obscure critical bottlenecks such as pipeline hazards, register file banking conflicts, memory interconnect contention, and the latency costs associated with control flow divergence. Register Transfer Level (RTL) cores, therefore, play an indispensable role. They offer a bit-accurate and cycle-accurate representation of the hardware, synthesized from languages such as System Verilog.
+For a project focused on the benchmarking of RISC-V vector architectures, relying solely on functional simulation would obscure critical bottlenecks such as pipeline hazards, register file banking conflicts, memory interconnect contention, and the latency costs associated with control flow divergence. Register Transfer Level (RTL) cores, therefore, play an indispensable role. They offer a bit-accurate and cycle-accurate representation of the hardware, synthesized from languages such as System Verilog.
 
 Simulation at this level allows the researcher to observe the precise interaction between the scalar host processor and the vector accelerator, capturing the ``handshake'' overheads that are often idealized in abstract models. Furthermore, RTL simulation is the only methodology capable of generating credible Power, Performance, and Area (PPA) metrics. By simulating the actual hardware description that would eventually be mapped to silicon or Field-Programmable Gate Arrays (FPGAs), researchers can derive energy efficiency numbers (e.g., FLOPS/Watt) and area utilization statistics (e.g., gate counts or Look-Up Table (LUT) usage) that are grounded in physical reality rather than theoretical estimation.
 
@@ -17,7 +17,7 @@ Cycle-accurate simulation is paramount for evaluating these kernels because it e
 
 \subsubsection{Evolution of Core Selection: From Vicuna to Ara}
 
-The selection of RTL cores for this research followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight FPGA implementation. However, as the research progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
+The selection of RTL cores for this project followed an iterative process driven by the increasing complexity of the targeted machine learning (ML) workloads. Initially, \textbf{Vicuna} \cite{vicuna} was selected as the primary benchmarking vehicle due to its focus on the \textbf{Zve32x} integer extension and its suitability for lightweight FPGA implementation. However, as the project progressed into high-fidelity ML acceleration—specifically requiring IEEE-754 floating-point support and the full range of \textbf{RVV 1.0} instructions—the limitations of an embedded-class core became apparent.
 
 While Vicuna served as a robust baseline for integer-only quantized kernels, it lacked the Vector Floating-Point Units ($VFPU$) necessary for modern inference and training benchmarks. This necessitated a transition to \textbf{Ara} \cite{ara}, a significantly more powerful and flexible architecture. Unlike the embedded constraints of Vicuna, Ara supports the full $64$-bit floating-point spectrum and provides a much more sophisticated RTL simulation environment, offering higher temporal fidelity and parametric scalability.
 
@@ -27,7 +27,7 @@ Due to these architectural requirements, the methodology for the performance val
 % Vicuna Vector Processor
 % ------------------------------------------------------------
 
-\subsection{Vicuna RISC-V Vector Coprocessor}
+\subsection{Vicuna Vector Coprocessor}
 
 \subsubsection{Overview and Design Motivation}
 
@@ -78,7 +78,7 @@ Vicuna represents the \textit{predictable-efficiency} design point in the benchm
 % Ara Vector Processor
 % ------------------------------------------------------------
 
-\subsection{Ara Vector Processor}
+\subsection{Ara Vector Coprocessor}
 
 \subsubsection{Overview and Design Motivation}
 
@@ -86,7 +86,7 @@ Ara \cite{ara} is a 64-bit vector processor designed for high-throughput, energy
 
 Ara operates as a coprocessor tightly coupled with a scalar host core, specifically the \textbf{CVA6} (formerly Ariane) \cite{cva6}. Its primary architectural goal is to amortize the instruction fetch and decode costs of the scalar core across long vector sequences, achieving a high ratio of FLOPS per Watt. The design explicitly draws inspiration from classical vector supercomputers such as the Cray-1, positioning Ara as a leading open-source RISC-V vector architecture.
 
-The version of Ara utilized in this research represents the second generation of the architecture (often referred to in literature as \textbf{Ara2}). This iteration was specifically re-engineered for strict compliance with the ratified \textbf{RISC-V Vector Extension version 1.0}, introducing substantial microarchitectural changes to support dynamic vector length configuration, masking semantics, and mixed element widths.
+The version of Ara utilized in this project represents the second generation of the architecture (often referred to in literature as \textbf{Ara2}). This iteration was specifically re-engineered for strict compliance with the ratified \textbf{RISC-V Vector Extension version 1.0}, introducing substantial microarchitectural changes to support dynamic vector length configuration, masking semantics, and mixed element widths.
 
 \subsubsection{Architectural Organization}
 

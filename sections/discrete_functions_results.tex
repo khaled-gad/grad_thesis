@@ -17,20 +17,20 @@ All implementations were validated against ONNX Runtime golden references using 
 \toprule
 \textbf{Kernel Type}  & \textbf{Max Abs Error} & \textbf{SNR (dB)} & \textbf{Status} \\ 
 \midrule
-Conv2D                   & $6.48 \times 10^{-5}$ & 123.9 -- 139.9 & \textcolor{green}{ PASSED} \\
-Conv2D Transposed       & $1.19 \times 10^{-7}$ & 143.2 -- 146.7 & \textcolor{green}{ PASSED} \\
-Conv2D $3\times3$ Specialized  & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Matrix Multiplication   & $2.86 \times 10^{-6}$ & 135.8 -- $\infty$ & \textcolor{green}{ PASSED} \\
-Dense Layer              & $4.29 \times 10^{-6}$ & 132.7 -- 132.9 & \textcolor{green}{ PASSED} \\
-ReLU                    & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Leaky ReLU              & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Max Pooling             & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Batch Normalization     & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Tensor Addition          & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Bias Addition            & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Gather Elements         & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-Scatter Elements        & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
-NMS                      & 0                     & $\infty$        & \textcolor{green}{ PASSED} \\
+Conv2D                   & $6.48 \times 10^{-5}$ & 123.9 -- 139.9 & \textcolor{blue}{ PASSED} \\
+Conv2D Transposed       & $1.19 \times 10^{-7}$ & 143.2 -- 146.7 & \textcolor{blue}{ PASSED} \\
+Conv2D $3\times3$ Specialized  & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Matrix Multiplication   & $2.86 \times 10^{-6}$ & 135.8 -- $\infty$ & \textcolor{blue}{ PASSED} \\
+Dense Layer              & $4.29 \times 10^{-6}$ & 132.7 -- 132.9 & \textcolor{blue}{ PASSED} \\
+ReLU                    & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Leaky ReLU              & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Max Pooling             & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Batch Normalization     & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Tensor Addition          & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Bias Addition            & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Gather Elements         & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+Scatter Elements        & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
+NMS                      & 0                     & $\infty$        & \textcolor{blue}{ PASSED} \\
 \midrule
 \textbf{}          & & & \textbf{100\% Pass Rate} \\
 \bottomrule
@@ -163,9 +163,6 @@ The verification results demonstrate exceptional numerical accuracy across all R
 
 \paragraph{Excellent Accuracy (Tier 2):} Matrix multiplication achieved zero error for all RVV implementations while scalar implementations showed errors up to $2.86 \times 10^{-6}$ (SNR = 135.8 dB). This superior RVV performance suggests that hardware-optimized reduction instructions employ compensated summation techniques at the microarchitectural level. Dense layers achieved SNR values of 132.7--132.9 dB with errors on the order of $10^{-6}$. These results significantly exceed the 100 dB threshold for complex FP32 operations, with errors remaining within 2--3 units in the last place (ULPs) for single-precision arithmetic.
 
-<<<<<<< HEAD
-\textbf{Very High Accuracy (Tier 3):} Convolution operations, the most computationally complex kernels, achieved SNR values between 123.9 and 146.7 dB. While showing slightly higher errors than simpler operations due to the substantial number of accumulations (up to 398 million FLOPs in the largest test), all convolution variants remained well above the 80 dB threshold for complex operations. The specialized $3\times3$ convolution implementation achieved perfect accuracy, demonstrating the effectiveness of kernel-specific optimizations.
-=======
 \paragraph{Very High Accuracy (Tier 3):} Convolution operations, the most computationally complex kernels, achieved SNR values between 123.9 and 146.7 dB. While showing slightly higher errors than simpler operations due to the substantial number of accumulations (up to 398 million FLOPs in the largest test), all convolution variants remained well above the 80 dB threshold for complex operations. The im2col+GEMM approach produced slightly higher errors than direct convolution but remained well within acceptable bounds; whereas the specialized $3\times3$ convolution implementation achieved perfect accuracy, demonstrating the effectiveness of kernel-specific optimizations.
 
 A critical finding is the \textbf{LMUL-independent accuracy}: all LMUL configurations (m1, m2, m4, m8) produced numerically identical results within each kernel. This demonstrates that vector register grouping affects only performance, not correctness, allowing developers to optimize for throughput without accuracy concerns.
@@ -174,4 +171,3 @@ A critical finding is the \textbf{LMUL-independent accuracy}: all LMUL configura
 % \textbf{Comparison with ONNX Runtime}
 
 % The selection of ONNX Runtime as the golden reference was based on several considerations. ONNX Runtime is widely recognized as a high-performance, production-grade inference engine that implements the ONNX specification accurately and is extensively tested across various platforms, hardware accelerators (CPU, GPU, NPU), and deployment scenarios. It serves as a de facto standard for cross-platform ML inference. By comparing against ONNX Runtime, we ensure that our implementations conform to industry-standard ML operator semantics and produce results compatible with models trained using popular frameworks (PyTorch, TensorFlow, etc.).
->>>>>>> 36729cf39c271108fc4ed8511120044d8bdc153f

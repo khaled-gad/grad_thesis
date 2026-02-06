@@ -1,5 +1,7 @@
 \section{Background \& Related Work}
 
+This chapter provides the foundational context necessary to understand the architectural innovations explored in this project. It begins by introducing the RISC-V ISA, highlighting the design philosophies—such as modularity and open-source extensibility—that make it a disruptive force in the processor industry. The discussion then narrows to the specific technical specifications of the RISC-V Vector (RVV) extension, detailing the mechanisms of Vector-Length Agnosticism and programming through intrinsics. Finally, a review of related work establishes the current state of the art in system-level simulation, hardware acceleration, and performance benchmarking within the RISC-V ecosystem.
+
 \subsection{RISC-V Architecture Overview}
 
 RISC-V (pronounced ``risk-five'') is an open-source ISA that has revolutionized processor design by providing a free, extensible alternative to proprietary architectures. Developed at the University of California, Berkeley, beginning in 2010 \cite{riscv-v-spec}, RISC-V was created to address fundamental limitations in the processor industry, particularly the dominance of proprietary ISAs that created barriers to innovation and increased costs for processor development.
@@ -36,7 +38,7 @@ The modular nature of RISC-V allows the base integer ISA to be supplemented with
     
     \item \textbf{D Extension (Double-Precision Floating-Point):} Adds 64-bit floating-point support, necessary for AI training phases requiring high numerical stability and DSP applications with extended dynamic range requirements.
     
-    \item \textbf{V Extension (Vector Operations):} The primary focus of this research, providing comprehensive support for data-parallel operations through a vector-length agnostic architecture. It enables high-throughput execution for the tensor and matrix operations found in modern AI workloads.
+    \item \textbf{V Extension (Vector Operations):} The primary focus of this project, providing comprehensive support for data-parallel operations through a vector-length agnostic architecture. It enables high-throughput execution for the tensor and matrix operations found in modern AI workloads.
 \end{itemize}
 
 \subsection{The RISC-V Vector Extension}
@@ -160,4 +162,6 @@ Volokitin et al. \cite{volokitin2023case} evaluate memory-bound kernels on RISC-
 
 \subsubsection*{Brown: Evaluating the Sophon SG2044 for High Performance Computing}
 
-Brown \cite{brown2025riscv} evaluates RISC-V’s suitability for \textbf{High Performance Computing} through an analysis of the \textbf{Sophon SG2044}. With mainline RVV 1.0 support and a 32-channel DDR5 memory subsystem, the SG2044 achieves up to a \textbf{4.91$\times$} speedup over its predecessor.
+Brown \cite{brown2025riscv} evaluates RISC-V’s suitability for \textbf{High Performance Computing} through an analysis of the \textbf{Sophon SG2044}. With mainline RVV 1.0 support and a 32-channel DDR5 memory subsystem, the SG2044 achieves up to a \textbf{4.91$\times$} speedup over its predecessor.\\[2pt]
+
+In summary, this chapter has established the architectural and scholarly framework for the thesis. By reviewing the modular nature of RISC-V and the unique "vector-length agnostic" capabilities of the RVV extension, we have identified how this ISA overcomes the rigid limitations of traditional SIMD architectures. The exploration of related work highlights a robust and growing ecosystem of simulation tools and specialized accelerators, yet it also underscores the ongoing need for optimization in machine learning and DSP kernels. These insights provide the necessary baseline for the implementation and evaluation phases that follow in this project.

@@ -1,5 +1,5 @@
 % !TEX root = ../Thesis.tex
-\section{Open Source Library Architecture}
+\section{The Developed Open Source Library}
 
 This section describes the architecture of the open-source RaiVeX library, developed to provide accessible interfaces to RISC-V Vector Extension (RVV) accelerated neural network kernels. The library bridges the gap between low-level RVV intrinsics and high-level programming languages, enabling researchers and developers to leverage hardware acceleration without requiring expertise in assembly programming.
 
@@ -26,8 +26,8 @@ RaiVeX/
 |   +-- softmax/
 |   +-- tensor_add/
 +-- lib/
-|   +-- rvv.h
-|   +-- rvv_math.h
+|   +-- rvv_defs.h
+|   +-- rvv_arithmetic.h
 |   +-- ...
 +-- libso/
 +-- models/
@@ -35,7 +35,7 @@ RaiVeX/
 |   +-- tiny-yolov2/
 +-- pyv/
 |   +-- kernels.py
-|   +-- __init__.py
+|   +-- backend.py
 |   +-- ...
 +-- scripts/
 +-- README.md
@@ -53,9 +53,25 @@ The library implements kernels categorized according to the six computational pa
     \item \textbf{Sliding-window kernels}: Convolution (\texttt{kernels/conv/}), transposed convolution \newline(\texttt{kernels/conv\_transpose/}), and max pooling (\texttt{kernels/maxpool/}).
     \item \textbf{Pointwise activations and elementwise arithmetic}: ReLU (\texttt{kernels/relu/}), Leaky ReLU (\texttt{kernels/leaky\_relu/}), tensor addition (\texttt{kernels/tensor\_add/}), and bias addition (\texttt{kernels/bias\_add/}).
     \item \textbf{Tensor indexing and data movement}: Gather (\texttt{kernels/gather/}), gather elements (\texttt{kernels/gather\_elements/}), and scatter elements (\texttt{kernels/scatter\_elements/}).
-    \item \textbf{Statistical and normalization layers}: Batch normalization (\texttt{kernels/batch\_norm/}).
+    \item \textbf{Statistical and normalization layers}: Batch normalization (\texttt{kernels/batch\_norm/}), and Softmax (\texttt{kernels/softmax/}).
     \item \textbf{Postprocessing (NMS)}: Non-maximum suppression (\texttt{kernels/nms/}).
 \end{enumerate}
+
+\subsection{Performance Results}
+
+Performance measurements of the best performing RVV kernels are documented in the RaiVeX/BENCHMARKS.md
+file, with detailed results available within the kernel-specific subdirectories.
+
+\begin{itemize}
+    \item Benchmarks and execution time comparisons for each kernel
+          are located at \newline
+          \texttt{RaiVeX/kernels/<kernel\_name>/benchmarks.md}
+    \item Relative speedups against scalar baselines and other relevant metrics
+          are summarized in the main \texttt{BENCHMARKS.md} file
+\end{itemize}
+
+This organization allows readers to locate and verify all performance results
+directly from the repository.
 
 \subsection{Wrappers Overview}
 
@@ -63,7 +79,7 @@ The library employs two types of wrappers to abstract RVV intrinsics for differe
 
 \subsubsection{Intrinsic Wrappers}
 
-Intrinsic wrappers are implemented in C/C++ functions that abstract RVV intrinsics to improve readability and maintainability. These wrappers are defined in the \texttt{lib/} directory, such as \texttt{lib/RVV.HPP} and \texttt{lib/rvv\_ARTHEMETIC.hpp}. For example, a wrapper for vector addition might be implemented as:
+Intrinsic wrappers are implemented in C/C++ functions that abstract RVV intrinsics to improve readability and maintainability. These wrappers are defined in the \texttt{lib/} directory, such as \texttt{lib/rvv\_defs.hpp} and \texttt{lib/rvv\_arithmetic.hpp}. For example, a wrapper for vector addition might be implemented as:
 
 \begin{lstlisting}[language=C++]
 inline vfloat32m1_t VECTOR_ADD_VV(vfloat32m1_t a, vfloat32m1_t b, size_t vl) {
@@ -103,22 +119,6 @@ This approach provides NumPy compatibility, automatic memory management, and var
 
 % This approach provides a central reference for all correctness and benchmark
 % results without requiring additional test frameworks.
-
-\subsection{Performance Results}
-
-Performance measurements of the best performing RVV kernels are documented in the RaiVeX/BENCHMARKS.md
-file, with detailed results available within the kernel-specific subdirectories.
-
-\begin{itemize}
-    \item Benchmarks and execution time comparisons for each kernel
-          are located at \newline
-          \texttt{RaiVeX/kernels/<kernel\_name>/benchmarks.md}
-    \item Relative speedups against scalar baselines and other relevant metrics
-          are summarized in the main \texttt{BENCHMARKS.md} file
-\end{itemize}
-
-This organization allows readers to locate and verify all performance results
-directly from the repository.
 
 \subsection{Wrapper Interfaces}
 
@@ -182,4 +182,6 @@ def relu(x: np.ndarray, variant: str = "M8") -> np.ndarray:
     """
 \end{lstlisting}
 
-This signature demonstrates the consistent interface design across all kernel wrappers, with optional variant selection for performance tuning.
+This signature demonstrates the consistent interface design across all kernel wrappers, with optional variant selection for performance tuning.\\[2pt]
+
+This chapter has described the architecture and implementation of the RaiVeX open-source library. It detailed the repository organization, the categorization of kernels by computational pattern, and the design of intrinsic and Python wrappers that abstract RVV intrinsics into reusable interfaces. By coupling low-level vector primitives with NumPy-compatible Python bindings and clearly documented benchmarks, the library enables practical adoption of RVV-accelerated kernels in real-world machine learning workloads and provides a solid foundation for future extensions on emerging RISC-V vector platforms.
